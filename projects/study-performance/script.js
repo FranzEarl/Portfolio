@@ -9,6 +9,7 @@ const sampleCourses = [
 
 const elements = {
     file: document.querySelector("#csv-file"),
+    exportButton: document.querySelector("#export-button"),
     sampleButton: document.querySelector("#sample-button"),
     status: document.querySelector("#data-status"),
     badge: document.querySelector("#data-badge"),
@@ -22,8 +23,28 @@ const elements = {
     courseCount: document.querySelector("#course-count")
 };
 
+let currentCourses = sampleCourses;
+
 function formatNumber(value, maximumFractionDigits = 0) {
     return new Intl.NumberFormat("en", { maximumFractionDigits }).format(value);
+}
+
+function escapeCsvField(value) {
+    const text = String(value);
+    return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function serializeCourses(courses) {
+    const rows = [
+        ["course", "grade", "attendance", "study_hours"],
+        ...courses.map((course) => [
+            course.name,
+            course.grade,
+            course.attendance,
+            course.studyHours
+        ])
+    ];
+    return `${rows.map((row) => row.map(escapeCsvField).join(",")).join("\r\n")}\r\n`;
 }
 
 function parseCsv(text) {
@@ -228,6 +249,7 @@ function renderCourseTable(courses) {
 }
 
 function renderDashboard(courses) {
+    currentCourses = courses;
     renderSummary(courses);
     renderBarChart(
         elements.courseChart,
@@ -256,6 +278,28 @@ function showSampleData() {
     elements.badge.textContent = "FICTIONAL SAMPLE DATA";
     setStatus("Showing fictional sample data.");
 }
+
+elements.exportButton.addEventListener("click", () => {
+    const filename = "study-performance.csv";
+
+    try {
+        const blob = new Blob([serializeCourses(currentCourses)], {
+            type: "text/csv;charset=utf-8"
+        });
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = filename;
+        try {
+            link.click();
+        } finally {
+            setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
+        }
+        setStatus(`Downloaded ${filename}.`);
+    } catch (error) {
+        setStatus(`Unable to export CSV: ${error.message}`, true);
+    }
+});
 
 elements.file.addEventListener("change", async (event) => {
     const [file] = event.target.files;
