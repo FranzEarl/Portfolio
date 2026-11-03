@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define SIZE 3
 #define N (SIZE * SIZE)
@@ -74,16 +76,36 @@ void solve()
 
 int main()
 {
+    char input[128];
     buildMatrix();
 
-    printf("Enter current board (9 values: 0 or 1)\n");
+    printf("Enter current board (9 values: 0 or 1, separated by spaces):\n");
+    if (fgets(input, sizeof(input), stdin) == NULL ||
+        strchr(input, '\n') == NULL) {
+        fprintf(stderr, "Enter all 9 board values on one line.\n");
+        return 1;
+    }
 
-    for (int i = 0; i < N; i++)
-    {
-        int value;
-        scanf("%d", &value);
+    char *token = strtok(input, " \t\r\n");
+    for (int i = 0; i < N; i++) {
+        char *end;
+        long value;
 
+        if (token == NULL) {
+            fprintf(stderr, "Enter exactly 9 values, each either 0 or 1.\n");
+            return 1;
+        }
+        value = strtol(token, &end, 10);
+        if (end == token || *end != '\0' || (value != 0 && value != 1)) {
+            fprintf(stderr, "Each board value must be either 0 or 1.\n");
+            return 1;
+        }
         A[i][N] = value ^ 1;
+        token = strtok(NULL, " \t\r\n");
+    }
+    if (token != NULL) {
+        fprintf(stderr, "Enter exactly 9 values, each either 0 or 1.\n");
+        return 1;
     }
 
     solve();

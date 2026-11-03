@@ -1,158 +1,199 @@
+#include <errno.h>
+#include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define MAX_C 11
+#define MAX_CANDIDATES 10
+#define MAX_NAME_LENGTH 50
+#define INPUT_SIZE 128
 
-typedef struct Candidate {
-    char name[50];
+typedef struct {
+    char name[MAX_NAME_LENGTH];
     int votes;
     char symbol;
 } Candidate;
 
-Candidate allCandidates[MAX_C];
+static Candidate candidates[MAX_CANDIDATES];
+static const char symbols[MAX_CANDIDATES] = {
+    '!', '@', '#', '$', '%', '^', '&', '*', '~', '+'
+};
 
-int candidateCount = 0;
+static int readLine(const char *prompt, char *input, size_t size) {
+    size_t length;
 
-char symbols[10]
-    = { '!', '@', '#', '$', '%', '^', '&', '*', '~', '+' };
-
-int symbolTaken[11];
-
-void fillCandidate(int);
-void displayAllCandidates();
-void getVotes(int);
-void getResults();
-
-
-int main()
-{
-    
-    for (int i = 0; i < 11; i++) {
-        symbolTaken[i] = 0;
+    printf("%s", prompt);
+    if (fgets(input, size, stdin) == NULL) {
+        return 0;
     }
 
-    
-    printf("Enter the number of candidates: ");
-    scanf("%d", &candidateCount);
-    if (candidateCount >= MAX_C) {
-        printf("Number of candidates cannot be greater "
-               "than 10.\n Terminating the program\n\n");
+    length = strcspn(input, "\n");
+    if (input[length] == '\n') {
+        input[length] = '\0';
+    } else {
+        int character;
+        while ((character = getchar()) != '\n' && character != EOF) {
+        }
+        printf("Input is too long. Please try again.\n");
+        return -1;
+    }
+    return 1;
+}
+
+static int readInteger(const char *prompt, int minimum, int maximum, int *value) {
+    char input[INPUT_SIZE];
+
+    for (;;) {
+        char *end;
+        long parsed;
+        int result = readLine(prompt, input, sizeof(input));
+        if (result == 0) {
+            return 0;
+        }
+        if (result < 0) {
+            continue;
+        }
+
+        errno = 0;
+        parsed = strtol(input, &end, 10);
+        while (*end == ' ' || *end == '\t' || *end == '\r') {
+            end++;
+        }
+        if (errno != ERANGE && end != input && *end == '\0' &&
+            parsed >= minimum && parsed <= maximum) {
+            *value = (int)parsed;
+            return 1;
+        }
+        printf("Enter a whole number from %d to %d.\n", minimum, maximum);
+    }
+}
+
+static int readCandidateName(int candidateNumber, char name[MAX_NAME_LENGTH]) {
+    char prompt[64];
+
+    snprintf(prompt, sizeof(prompt), "Enter the name of candidate %d: ",
+             candidateNumber);
+    for (;;) {
+        int result = readLine(prompt, name, MAX_NAME_LENGTH);
+        if (result == 0) {
+            return 0;
+        }
+        if (result < 0) {
+            continue;
+        }
+        if (name[0] == '\0') {
+            printf("Candidate name cannot be empty.\n");
+            continue;
+        }
+        return 1;
+    }
+}
+
+static int chooseCandidateSymbol(int candidateNumber, int taken[MAX_CANDIDATES],
+                                 int *symbolIndex) {
+    char prompt[80];
+    int choice;
+
+    for (;;) {
+        printf("Available symbols:\n");
+        for (int i = 0; i < MAX_CANDIDATES; i++) {
+            if (!taken[i]) {
+                printf("%d  %c\n", i + 1, symbols[i]);
+            }
+        }
+        snprintf(prompt, sizeof(prompt),
+                 "Choose a symbol number for candidate %d: ", candidateNumber);
+        if (!readInteger(prompt, 1, MAX_CANDIDATES, &choice)) {
+            return 0;
+        }
+        if (!taken[choice - 1]) {
+            *symbolIndex = choice - 1;
+            return 1;
+        }
+        printf("That symbol is already taken. Choose an available one.\n");
+    }
+}
+
+static void displayCandidates(int candidateCount) {
+    printf("\n");
+    for (int i = 0; i < candidateCount; i++) {
+        printf("%d. %s (%c)\n", i + 1, candidates[i].name,
+               candidates[i].symbol);
+    }
+}
+
+static int getVotes(int candidateCount, int voterCount) {
+    char prompt[96];
+    int choice;
+
+    for (int voter = 0; voter < voterCount; voter++) {
+        displayCandidates(candidateCount);
+        snprintf(prompt, sizeof(prompt), "Voter %d, enter your choice (1-%d): ",
+                 voter + 1, candidateCount);
+        if (!readInteger(prompt, 1, candidateCount, &choice)) {
+            return 0;
+        }
+        candidates[choice - 1].votes++;
+    }
+    return 1;
+}
+
+static void displayResults(int candidateCount) {
+    int highestVotes = -1;
+    int winnerIndex = -1;
+    int tiedCandidates = 0;
+
+    for (int i = 0; i < candidateCount; i++) {
+        if (candidates[i].votes > highestVotes) {
+            highestVotes = candidates[i].votes;
+            winnerIndex = i;
+            tiedCandidates = 1;
+        } else if (candidates[i].votes == highestVotes) {
+            tiedCandidates++;
+        }
+    }
+
+    printf("\n----- Results -----\n");
+    if (tiedCandidates > 1) {
+        printf("The election is tied.\n");
+    } else {
+        printf("Winner: %s (%c) with %d vote%s.\n",
+               candidates[winnerIndex].name, candidates[winnerIndex].symbol,
+               highestVotes, highestVotes == 1 ? "" : "s");
+    }
+}
+
+int main(void) {
+    int candidateCount;
+    int voterCount;
+    int taken[MAX_CANDIDATES] = {0};
+
+    if (!readInteger("Enter the number of candidates (1-10): ",
+                     1, MAX_CANDIDATES, &candidateCount)) {
         return 0;
     }
 
     for (int i = 0; i < candidateCount; i++) {
-        fillCandidate(i);
+        int symbolIndex;
+        if (!chooseCandidateSymbol(i + 1, taken, &symbolIndex)) {
+            return 0;
+        }
+        taken[symbolIndex] = 1;
+        candidates[i].symbol = symbols[symbolIndex];
+        candidates[i].votes = 0;
+        if (!readCandidateName(i + 1, candidates[i].name)) {
+            return 0;
+        }
     }
 
-    int numVoters;
-    printf("Enter the number of voters: ");
-    scanf("%d", &numVoters);
-
-    for (int i = 0; i < numVoters; i++) {
-        getVotes(i);
+    if (!readInteger("Enter the number of voters (0 or more): ",
+                     0, INT_MAX, &voterCount)) {
+        return 0;
+    }
+    if (!getVotes(candidateCount, voterCount)) {
+        return 0;
     }
 
-    getResults();
-
+    displayResults(candidateCount);
     return 0;
-}
-
-void fillCandidate(int cNum)
-{
-    printf("Available Symbols: \n");
-    for (int j = 0; j < 10; j++) {
-        if (symbolTaken[j] == 1)
-            continue;
-        printf("%d  %c\n", j + 1, symbols[j]);
-    }
-
-    int num = 0;
-
-    printf("\nEnter the symbol number of candidate %d: ",
-           cNum + 1);
-    scanf("%d", &num);
-
-    if (num <= 0 || num > 10 || symbolTaken[num - 1] == 1) {
-        printf("This Symbol is not available. Please "
-               "choose from the available symbols\n");
-        num = 0;
-        fillCandidate(cNum);
-    }
-    else {
-        symbolTaken[num - 1] = 1;
-        allCandidates[cNum].symbol = symbols[num - 1];
-        printf("Enter the name of candidate %d: ",
-               cNum + 1);
-        scanf("%s", allCandidates[cNum].name);
-
-        allCandidates[cNum].votes = 0;
-    }
-}
-
-void displayAllCandidates()
-{
-    if (!allCandidates || !candidateCount) {
-        perror("Invalid Candidate Array\n");
-        return;
-    }
-
-    for (int j = 0; j < candidateCount; j++) {
-        printf("%s\t\t", allCandidates[j].name);
-    }
-    printf("\n");
-    for (int j = 0; j < candidateCount; j++) {
-        printf("%3c\t\t\t", allCandidates[j].symbol);
-    }
-    printf("\n");
-}
-
-void getVotes(int voterCount)
-{
-    displayAllCandidates();
-    printf("Voter %d, please enter your choice (1-%d): ",
-           voterCount + 1, candidateCount);
-    int choice;
-    scanf("%d", &choice);
-
-    if (choice >= 1 && choice <= candidateCount) {
-        allCandidates[choice - 1].votes++;
-    }
-    else {
-        printf("Invalid choice! Please vote again.\n");
-        getVotes(voterCount);
-    }
-}
-
-void getResults()
-{
-    int maxVotes = 0;
-    int winnerIndex = -1;
-    int winnerFrequency = 0;
-    for (int i = 0; i < candidateCount; i++) {
-        if (allCandidates[i].votes > maxVotes) {
-            maxVotes = allCandidates[i].votes;
-            winnerIndex = i;
-        }
-    }
-
-    for (int i = 0; i < candidateCount; i++) {
-        if (allCandidates[i].votes == maxVotes) {
-            winnerFrequency++;
-        }
-    }
-
-    printf("\n-----RESULT-----\n");
-
-    if (winnerFrequency > 1) {
-        printf("No candidate has majority votes\n");
-    }
-    else if (winnerIndex != -1) {
-        printf("The winner is: %s\nCandidate Symbol: "
-               "%c\nwith %d votes!\n",
-               allCandidates[winnerIndex].name,
-               allCandidates[winnerIndex].symbol, maxVotes);
-    }
-    else {
-        printf("No winner\n");
-    }
 }
