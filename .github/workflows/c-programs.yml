@@ -42,3 +42,6 @@ jobs:
 
       - name: Run C regression tests
         run: node --test projects/tests/c-programs.test.js
+
+      - name: Run study dashboard tests
+        run: node --test projects/tests/study-performance.test.js

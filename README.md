@@ -39,6 +39,8 @@ to see the data format: one course per row, with `course`, `grade`,
 `attendance`, and `study_hours` columns. Grade and attendance are percentages;
 study hours are totals over four weeks. Import a CSV to update the dashboard
 with any number of courses; the file is read in the browser and not uploaded.
+Run its import and rendering regression tests with
+`node --test projects/tests/study-performance.test.js`.
 
 ## C Programs
 
