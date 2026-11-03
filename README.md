@@ -28,6 +28,13 @@ CSV files need a header row with `date`, `category`, and `amount` columns.
 Dates use `YYYY-MM-DD`; an optional `description` column is ignored by the
 summary charts.
 
+## C Programs
+
+The C source files are in `projects/c-programs/`, with a browsable listing at
+`projects/c-programs.html`. To refresh that listing after adding or removing a
+program, run `python projects/generate.py`. To regenerate it automatically
+while editing the C files, run `python projects/watch.py`.
+
 ## About
 
 This portfolio serves as a collection of my projects and a place to showcase what I've learned while exploring programming and web development.

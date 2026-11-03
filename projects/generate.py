@@ -2,14 +2,14 @@ from pathlib import Path
 from html import escape
 from urllib.parse import quote
 
-folder = Path(__file__).parent.parent / "c-programs"
+folder = Path(__file__).parent / "c-programs"
 files = sorted(folder.glob("*.c"), key=lambda f: f.name.lower())
 
 links = ""
 
 for file in files:
     name = escape(file.name)
-    url = "../c-programs/" + quote(file.name, safe="")
+    url = "c-programs/" + quote(file.name, safe="")
     links += f'                    <a href="{url}">{name}</a>\n'
 
 html = f"""<!DOCTYPE html>
@@ -24,7 +24,7 @@ html = f"""<!DOCTYPE html>
 
     <header>
         <nav class="navbar">
-            <a href="../index.html" class="logo">YOUR NAME</a>
+            <a href="../index.html" class="logo">Franz Earl</a>
             <a href="../index.html" class="back-link">← Back to Portfolio</a>
         </nav>
     </header>
