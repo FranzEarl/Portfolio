@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A private, browser-based dashboard for exploring expenses by month and category.">
+    <title>Personal Expense Insights | Franz Earl</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="../../index.html" class="logo">Franz Earl</a>
+            <a href="../../index.html#projects" class="back-link">Back to Portfolio</a>
+        </nav>
+    </header>
+
+    <main class="expense-dashboard">
+        <div class="dashboard-container">
+            <section class="dashboard-heading" aria-labelledby="dashboard-title">
+                <p class="dashboard-eyebrow">PROJECT / DATA EXPLORATION</p>
+                <h1 id="dashboard-title">Personal Expense <span>Insights</span></h1>
+                <p class="dashboard-intro">
+                    See where your money goes. Load a CSV to explore your own expenses,
+                    or start with the included example.
+                </p>
+            </section>
+
+            <section class="dashboard-toolbar" aria-label="Expense data">
+                <div class="data-actions">
+                    <input id="csv-file" type="file" accept=".csv,text/csv">
+                    <label class="upload-button" for="csv-file">Import CSV</label>
+                    <button id="sample-button" class="secondary-button" type="button">Use sample data</button>
+                    <a id="download-sample" class="secondary-button" download="sample-expenses.csv">Download sample CSV</a>
+                </div>
+                <p class="privacy-note">Your file stays in this browser; it is not uploaded.</p>
+                <p id="data-status" class="data-status" role="status" aria-live="polite"></p>
+            </section>
+
+            <section class="summary-grid" aria-label="Expense summary">
+                <article class="summary-card">
+                    <p class="summary-label">TOTAL SPENDING</p>
+                    <p id="total-spending" class="summary-value">—</p>
+                </article>
+                <article class="summary-card">
+                    <p class="summary-label">TRANSACTIONS</p>
+                    <p id="transaction-count" class="summary-value">—</p>
+                </article>
+                <article class="summary-card">
+                    <p class="summary-label">AVERAGE TRANSACTION</p>
+                    <p id="average-transaction" class="summary-value">—</p>
+                </article>
+            </section>
+
+            <section class="charts-grid" aria-label="Spending charts">
+                <article class="chart-card">
+                    <div class="chart-heading">
+                        <div>
+                            <p class="chart-eyebrow">BREAKDOWN</p>
+                            <h2>By category</h2>
+                        </div>
+                    </div>
+                    <div id="category-chart" class="chart-list"></div>
+                </article>
+
+                <article class="chart-card">
+                    <div class="chart-heading">
+                        <div>
+                            <p class="chart-eyebrow">OVER TIME</p>
+                            <h2>Monthly spending</h2>
+                        </div>
+                    </div>
+                    <div id="monthly-chart" class="chart-list"></div>
+                </article>
+            </section>
+
+            <p class="dashboard-footnote">
+                Example values are fictional. CSV files must include <code>date</code>,
+                <code>category</code>, and <code>amount</code> columns.
+            </p>
+        </div>
+    </main>
+</body>
+</html>

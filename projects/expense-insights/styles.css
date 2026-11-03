@@ -1,0 +1,270 @@
+.expense-dashboard {
+    min-height: 100vh;
+    padding: 120px 40px 72px;
+}
+
+.dashboard-container {
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.dashboard-heading {
+    max-width: 760px;
+    margin-bottom: 32px;
+}
+
+.dashboard-eyebrow,
+.chart-eyebrow {
+    color: var(--accent-hover);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.dashboard-heading h1 {
+    margin: 10px 0 12px;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    line-height: 1.15;
+}
+
+.dashboard-heading h1 span {
+    color: var(--accent-hover);
+}
+
+.dashboard-intro,
+.privacy-note,
+.dashboard-footnote {
+    color: var(--text-secondary);
+}
+
+.dashboard-intro {
+    max-width: 620px;
+}
+
+.dashboard-toolbar {
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+}
+
+.data-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-button,
+.secondary-button {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 15px;
+    border: 1px solid rgba(146, 153, 168, 0.3);
+    border-radius: 6px;
+    color: var(--text-primary);
+    background: transparent;
+    font: inherit;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.upload-button {
+    border-color: var(--accent);
+    background: var(--accent);
+    font-weight: 600;
+}
+
+.upload-button:hover {
+    background: var(--accent-hover);
+}
+
+.secondary-button:hover {
+    border-color: var(--accent-hover);
+    color: var(--accent-hover);
+}
+
+#csv-file {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+#csv-file:focus-visible + .upload-button {
+    outline: 2px solid var(--accent-hover);
+    outline-offset: 3px;
+}
+
+.privacy-note {
+    margin-top: 12px;
+    font-size: 0.82rem;
+}
+
+.data-status {
+    min-height: 1.4em;
+    margin-top: 4px;
+    color: var(--accent-hover);
+    font-size: 0.88rem;
+}
+
+.data-status[data-error="true"] {
+    color: #ff9a9a;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 22px 0;
+}
+
+.summary-card,
+.chart-card {
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+}
+
+.summary-card {
+    padding: 22px;
+}
+
+.summary-label {
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.summary-value {
+    margin-top: 10px;
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-weight: 700;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.chart-card {
+    min-width: 0;
+    padding: 22px;
+}
+
+.chart-heading {
+    margin-bottom: 22px;
+}
+
+.chart-heading h2 {
+    margin-top: 4px;
+    font-size: 1.2rem;
+}
+
+.chart-list {
+    display: grid;
+    gap: 17px;
+}
+
+.chart-row {
+    min-width: 0;
+}
+
+.chart-row-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 7px;
+    font-size: 0.88rem;
+}
+
+.chart-row-labels span:first-child {
+    overflow: hidden;
+    color: var(--text-secondary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chart-row-labels span:last-child {
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.chart-track {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(146, 153, 168, 0.16);
+}
+
+.chart-bar {
+    height: 100%;
+    min-width: 2px;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+}
+
+.chart-empty {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.dashboard-footnote {
+    margin-top: 18px;
+    font-size: 0.82rem;
+}
+
+.dashboard-footnote code {
+    color: var(--text-primary);
+}
+
+@media (max-width: 700px) {
+    .expense-dashboard {
+        padding: 105px 20px 50px;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .summary-card {
+        padding: 17px 20px;
+    }
+
+    .summary-value {
+        margin-top: 4px;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+    .data-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .data-actions > * {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
