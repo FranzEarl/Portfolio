@@ -63,9 +63,23 @@
                     <input id="csv-file" type="file" accept=".csv,text/csv">
                     <label class="upload-button" for="csv-file">Import CSV</label>
                     <button id="sample-button" class="secondary-button" type="button">Use sample data</button>
+                    <button id="export-button" class="secondary-button" type="button">Export CSV</button>
                     <a id="download-sample" class="secondary-button" download="sample-expenses.csv">Download sample CSV</a>
                 </div>
-                <p class="privacy-note">Your file stays in this browser; it is not uploaded.</p>
+                <div class="saved-data-actions">
+                    <label class="remember-data-option">
+                        <input id="remember-data" type="checkbox">
+                        Remember data on this device
+                    </label>
+                    <button id="clear-saved-data" class="secondary-button" type="button">
+                        Clear saved data
+                    </button>
+                </div>
+                <p class="privacy-note">
+                    CSV files are processed in this browser and never uploaded. Remembered
+                    data is stored in this browser on this device; anyone with access to
+                    this browser profile may see it.
+                </p>
                 <p id="data-status" class="data-status" role="status" aria-live="polite"></p>
             </section>
 

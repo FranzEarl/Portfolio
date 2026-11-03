@@ -22,6 +22,7 @@ function createElement() {
         style: {},
         textContent: "",
         value: "",
+        checked: false,
         addEventListener(type, listener) {
             this.listeners[type] = listener;
         },
@@ -37,11 +38,29 @@ function createElement() {
     };
 }
 
-function createDashboard() {
+function createStorage() {
+    const data = new Map();
+    return {
+        data,
+        getItem(key) {
+            return data.has(key) ? data.get(key) : null;
+        },
+        setItem(key, value) {
+            data.set(key, String(value));
+        },
+        removeItem(key) {
+            data.delete(key);
+        }
+    };
+}
+
+function createDashboard(storage = createStorage()) {
     const selectors = [
         "#csv-file",
         "#export-button",
         "#sample-button",
+        "#remember-data",
+        "#clear-saved-data",
         "#data-status",
         "#data-badge",
         "#average-grade",
@@ -87,12 +106,14 @@ function createDashboard() {
         },
         setTimeout(callback) {
             callback();
-        }
+        },
+        localStorage: storage
     });
 
     vm.runInContext(dashboardScript, context, { filename: "study-performance/script.js" });
     return {
         elements,
+        storage,
         downloads,
         get exportedCsv() {
             return exportedBlob.text;
@@ -123,6 +144,47 @@ test("study dashboard starts with the built-in sample courses", () => {
     assert.equal(element(dashboard, "#study-hours").textContent, "66 hrs");
     assert.equal(element(dashboard, "#attendance-rate").textContent, "93.7%");
     assert.equal(element(dashboard, "#data-badge").textContent, "FICTIONAL SAMPLE DATA");
+});
+
+test("study dashboard remembers data only after opting in and restores it on return", async () => {
+    const storage = createStorage();
+    const dashboard = createDashboard(storage);
+    await dashboard.importCsv("course,grade,attendance,study_hours\nMath,90,95,6\n");
+
+    const rememberCheckbox = element(dashboard, "#remember-data");
+    assert.equal(rememberCheckbox.checked, false);
+    assert.equal(storage.data.size, 0);
+
+    rememberCheckbox.checked = true;
+    rememberCheckbox.listeners.change();
+
+    assert.match(storage.getItem("franzearl.study-performance.saved-data.v1"), /Math,90,95,6/);
+    assert.equal(element(dashboard, "#data-status").textContent, "Current data remembered on this device.");
+
+    const returnedDashboard = createDashboard(storage);
+    assert.equal(element(returnedDashboard, "#remember-data").checked, true);
+    assert.equal(element(returnedDashboard, "#course-count").textContent, "1 course");
+    assert.equal(element(returnedDashboard, "#course-rows").children[0].children[0].textContent, "Math");
+    assert.equal(element(returnedDashboard, "#data-status").textContent, "Restored 1 saved course from this device.");
+});
+
+test("study dashboard autosaves imported data when enabled and clears saved data", async () => {
+    const storage = createStorage();
+    const dashboard = createDashboard(storage);
+    const rememberCheckbox = element(dashboard, "#remember-data");
+    rememberCheckbox.checked = true;
+    rememberCheckbox.listeners.change();
+
+    await dashboard.importCsv("course,grade,attendance,study_hours\nPhysics,88,92,9\n");
+
+    assert.match(storage.getItem("franzearl.study-performance.saved-data.v1"), /Physics,88,92,9/);
+    element(dashboard, "#clear-saved-data").listeners.click();
+
+    assert.equal(storage.getItem("franzearl.study-performance.saved-data.v1"), null);
+    assert.equal(rememberCheckbox.checked, false);
+    assert.equal(element(dashboard, "#course-count").textContent, "1 course");
+    assert.match(element(dashboard, "#data-status").textContent, /current dashboard remains/);
+    assert.equal(element(createDashboard(storage), "#course-count").textContent, "6 courses");
 });
 
 test("downloadable sample CSV imports successfully", async () => {
