@@ -14,7 +14,16 @@
         <nav class="navbar">
             <a href="#home" class="logo">Franz Earl</a>
 
-            <ul class="nav-links">
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">
+                <span class="nav-toggle-label">Menu</span>
+                <span class="nav-toggle-icon" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+
+            <ul class="nav-links" id="nav-links">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#projects">Projects</a></li>
