@@ -45,7 +45,9 @@ const elements = {
     count: document.querySelector("#transaction-count"),
     average: document.querySelector("#average-transaction"),
     categories: document.querySelector("#category-chart"),
-    months: document.querySelector("#monthly-chart")
+    months: document.querySelector("#monthly-chart"),
+    transactionRows: document.querySelector("#transaction-rows"),
+    transactionCount: document.querySelector("#transaction-list-count")
 };
 
 const savedDataKey = "franzearl.expense-insights.saved-data.v1";
@@ -112,6 +114,7 @@ function parseExpenses(text) {
     const dateColumn = headers.indexOf("date");
     const categoryColumn = headers.indexOf("category");
     const amountColumn = headers.indexOf("amount");
+    const descriptionColumn = headers.indexOf("description");
 
     if (dateColumn === -1 || categoryColumn === -1 || amountColumn === -1) {
         throw new Error("Required CSV columns: date, category, amount.");
@@ -134,7 +137,10 @@ function parseExpenses(text) {
             throw new Error(`Row ${rowIndex + 2}: amount must be a non-negative number.`);
         }
 
-        return { date, category, amount };
+        const description = descriptionColumn === -1
+            ? ""
+            : (record[descriptionColumn] || "").trim();
+        return { date, category, amount, description };
     });
 
     return expenses;
@@ -229,6 +235,45 @@ function renderDashboard(expenses) {
 
     renderChart(elements.categories, categoryEntries, "No expense categories to show.");
     renderChart(elements.months, monthEntries, "No monthly spending to show.");
+    renderTransactions(expenses);
+}
+
+function renderTransactions(expenses) {
+    elements.transactionCount.textContent =
+        `${expenses.length} ${expenses.length === 1 ? "transaction" : "transactions"}`;
+
+    if (expenses.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 4;
+        cell.className = "transaction-empty";
+        cell.textContent = "No transactions match these filters.";
+        row.append(cell);
+        elements.transactionRows.replaceChildren(row);
+        return;
+    }
+
+    const rows = expenses.map((expense) => {
+        const row = document.createElement("tr");
+        const values = [
+            expense.date,
+            expense.category,
+            expense.description || "—",
+            currency.format(expense.amount)
+        ];
+
+        values.forEach((value, index) => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            if (index === 3) {
+                cell.className = "transaction-amount";
+            }
+            row.append(cell);
+        });
+        return row;
+    });
+
+    elements.transactionRows.replaceChildren(...rows);
 }
 
 function filterExpenses() {
@@ -319,9 +364,11 @@ const sampleCsv = [
 ].join("\r\n");
 function serializeExpenses(expenses) {
     return [
-        "date,category,amount",
+        "date,category,amount,description",
         ...expenses.map((expense) =>
-            [expense.date, expense.category, expense.amount].map(csvEscape).join(",")
+            [expense.date, expense.category, expense.amount, expense.description || ""]
+                .map(csvEscape)
+                .join(",")
         )
     ].join("\r\n") + "\r\n";
 }

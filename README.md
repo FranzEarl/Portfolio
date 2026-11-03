@@ -33,8 +33,9 @@ until you leave or reload. Run dashboard tests with
 `node --test projects/tests/expense-insights.test.js`.
 
 CSV files need a header row with `date`, `category`, and `amount` columns.
-Dates use `YYYY-MM-DD`; an optional `description` column is ignored by the
-summary charts.
+Dates use `YYYY-MM-DD`; an optional `description` column appears in the
+transaction list and is included in exports, but not in summary charts.
+The transaction list follows the month and category filters.
 
 ## Study Performance Dashboard
 

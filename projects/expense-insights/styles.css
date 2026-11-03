@@ -185,7 +185,8 @@
 }
 
 .summary-card,
-.chart-card {
+.chart-card,
+.transaction-section {
     background: var(--surface);
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 10px;
@@ -219,13 +220,70 @@
     padding: 22px;
 }
 
+.transaction-section {
+    margin-top: 16px;
+    padding: 22px;
+}
+
 .chart-heading {
     margin-bottom: 22px;
+}
+
+.transaction-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
 }
 
 .chart-heading h2 {
     margin-top: 4px;
     font-size: 1.2rem;
+}
+
+.transaction-list-count {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.transaction-table-wrap {
+    overflow-x: auto;
+}
+
+.transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.transaction-table th,
+.transaction-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid rgba(146, 153, 168, 0.13);
+    font-size: 0.84rem;
+}
+
+.transaction-table th {
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+}
+
+.transaction-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.transaction-amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.transaction-empty {
+    color: var(--text-secondary);
+    text-align: center;
 }
 
 .chart-list {
@@ -297,6 +355,15 @@
 
     .summary-card {
         padding: 17px 20px;
+    }
+
+    .transaction-section {
+        padding: 18px 14px;
+    }
+
+    .transaction-table th,
+    .transaction-table td {
+        padding: 10px 8px;
     }
 
     .summary-value {
