@@ -4,7 +4,7 @@ import sys
 import time
 
 homepage = Path(__file__).parent
-folder = homepage.parent / "c-programs"
+folder = homepage / "c-programs"
 generator = homepage / "generate.py"
 
 def get_c_files():
