@@ -40,6 +40,9 @@ const elements = {
     clearSavedData: document.querySelector("#clear-saved-data"),
     monthFilter: document.querySelector("#month-filter"),
     categoryFilter: document.querySelector("#category-filter"),
+    budgetTarget: document.querySelector("#budget-target"),
+    budgetProgress: document.querySelector("#budget-progress"),
+    budgetStatus: document.querySelector("#budget-status"),
     status: document.querySelector("#data-status"),
     total: document.querySelector("#total-spending"),
     count: document.querySelector("#transaction-count"),
@@ -288,10 +291,52 @@ function filterExpenses() {
 function renderFilteredExpenses(statusMessage) {
     const filteredExpenses = filterExpenses();
     renderDashboard(filteredExpenses);
+    renderBudget();
     if (statusMessage) {
         setStatus(statusMessage);
     } else {
         setStatus(`Showing ${filteredExpenses.length} of ${currentExpenses.length} transactions.`);
+    }
+}
+
+function renderBudget() {
+    const month = elements.monthFilter.value;
+    const rawBudget = elements.budgetTarget.value.trim();
+
+    elements.budgetProgress.hidden = true;
+    if (!month) {
+        elements.budgetStatus.textContent = "Choose a month to view monthly budget progress.";
+        return;
+    }
+    if (rawBudget === "") {
+        elements.budgetStatus.textContent = "Enter a monthly budget to track spending.";
+        return;
+    }
+
+    const budget = Number(rawBudget);
+    if (!Number.isFinite(budget) || budget <= 0) {
+        elements.budgetStatus.textContent = "Enter a budget greater than zero.";
+        return;
+    }
+
+    const spent = currentExpenses
+        .filter((expense) => expense.date.slice(0, 7) === month)
+        .reduce((total, expense) => total + expense.amount, 0);
+    const remaining = budget - spent;
+    elements.budgetProgress.hidden = false;
+    elements.budgetProgress.value = Math.min((spent / budget) * 100, 100);
+
+    if (remaining > 0) {
+        elements.budgetStatus.textContent =
+            `${currency.format(remaining)} remaining of ${currency.format(budget)} ` +
+            `(${currency.format(spent)} spent this month).`;
+    } else if (remaining === 0) {
+        elements.budgetStatus.textContent =
+            `Monthly budget reached: ${currency.format(spent)} of ${currency.format(budget)} spent.`;
+    } else {
+        elements.budgetStatus.textContent =
+            `Over budget by ${currency.format(Math.abs(remaining))} ` +
+            `(${currency.format(spent)} spent of ${currency.format(budget)}).`;
     }
 }
 
@@ -341,11 +386,9 @@ function updateFilterOptions(reset = false) {
 function loadExpenses(expenses, sourceMessage, resetFilters = false) {
     currentExpenses = expenses;
     updateFilterOptions(resetFilters);
-    renderDashboard(filterExpenses());
+    renderFilteredExpenses(sourceMessage);
     if (elements.rememberData.checked) {
         saveCurrentExpenses(`${sourceMessage} Remembered on this device.`);
-    } else {
-        setStatus(sourceMessage);
     }
 }
 
@@ -391,7 +434,7 @@ function restoreSavedExpenses() {
         elements.rememberData.checked = true;
         currentExpenses = expenses;
         updateFilterOptions();
-        renderDashboard(filterExpenses());
+        renderFilteredExpenses();
         const label = expenses.length === 1 ? "transaction" : "transactions";
         setStatus(`Restored ${expenses.length} saved ${label} from this device.`);
     } catch (error) {
@@ -435,6 +478,7 @@ elements.clearSavedData.addEventListener("click", clearSavedExpenses);
 
 elements.monthFilter.addEventListener("change", () => renderFilteredExpenses());
 elements.categoryFilter.addEventListener("change", () => renderFilteredExpenses());
+elements.budgetTarget.addEventListener("input", renderBudget);
 
 elements.exportButton.addEventListener("click", () => {
     const filename = "expenses.csv";

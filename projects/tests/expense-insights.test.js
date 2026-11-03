@@ -59,6 +59,9 @@ function createDashboard(storage = createStorage()) {
         "#clear-saved-data",
         "#month-filter",
         "#category-filter",
+        "#budget-target",
+        "#budget-progress",
+        "#budget-status",
         "#data-status",
         "#total-spending",
         "#transaction-count",
@@ -232,6 +235,82 @@ test("month and category filters update summary cards and charts together", () =
     assert.equal(element(dashboard, "#monthly-chart").children.length, 1);
     assert.equal(element(dashboard, "#transaction-rows").children.length, 2);
     assert.equal(element(dashboard, "#data-status").textContent, "Showing 2 of 24 transactions.");
+});
+
+test("monthly budget reports remaining and over-budget amounts independent of category filter", () => {
+    const dashboard = createDashboard();
+    const monthFilter = element(dashboard, "#month-filter");
+    const categoryFilter = element(dashboard, "#category-filter");
+    const budgetTarget = element(dashboard, "#budget-target");
+    const budgetProgress = element(dashboard, "#budget-progress");
+
+    monthFilter.value = "2026-01";
+    monthFilter.listeners.change();
+    assert.equal(
+        element(dashboard, "#budget-status").textContent,
+        "Enter a monthly budget to track spending."
+    );
+
+    budgetTarget.value = "3000";
+    budgetTarget.listeners.input();
+    assert.equal(budgetProgress.hidden, false);
+    assert.equal(budgetProgress.value, 76.16666666666667);
+    assert.equal(
+        element(dashboard, "#budget-status").textContent,
+        "₱715.00 remaining of ₱3,000.00 (₱2,285.00 spent this month)."
+    );
+
+    categoryFilter.value = "Food";
+    categoryFilter.listeners.change();
+    assert.equal(element(dashboard, "#transaction-count").textContent, "2");
+    assert.equal(
+        element(dashboard, "#budget-status").textContent,
+        "₱715.00 remaining of ₱3,000.00 (₱2,285.00 spent this month)."
+    );
+
+    budgetTarget.value = "2000";
+    budgetTarget.listeners.input();
+    assert.equal(budgetProgress.value, 100);
+    assert.equal(
+        element(dashboard, "#budget-status").textContent,
+        "Over budget by ₱285.00 (₱2,285.00 spent of ₱2,000.00)."
+    );
+
+    budgetTarget.value = "2285";
+    budgetTarget.listeners.input();
+    assert.equal(
+        element(dashboard, "#budget-status").textContent,
+        "Monthly budget reached: ₱2,285.00 of ₱2,285.00 spent."
+    );
+});
+
+test("monthly budget asks for a month and rejects invalid targets", () => {
+    const dashboard = createDashboard();
+    const budgetTarget = element(dashboard, "#budget-target");
+
+    budgetTarget.value = "500";
+    budgetTarget.listeners.input();
+    assert.equal(
+        element(dashboard, "#budget-status").textContent,
+        "Choose a month to view monthly budget progress."
+    );
+
+    element(dashboard, "#month-filter").value = "2026-01";
+    element(dashboard, "#month-filter").listeners.change();
+    budgetTarget.value = "0";
+    budgetTarget.listeners.input();
+    assert.equal(
+        element(dashboard, "#budget-status").textContent,
+        "Enter a budget greater than zero."
+    );
+    assert.equal(element(dashboard, "#budget-progress").hidden, true);
+
+    budgetTarget.value = "";
+    budgetTarget.listeners.input();
+    assert.equal(
+        element(dashboard, "#budget-status").textContent,
+        "Enter a monthly budget to track spending."
+    );
 });
 
 test("filters with no matches show empty chart states and leave exports unfiltered", () => {
