@@ -64,7 +64,9 @@ function createDashboard(storage = createStorage()) {
         "#transaction-count",
         "#average-transaction",
         "#category-chart",
-        "#monthly-chart"
+        "#monthly-chart",
+        "#transaction-rows",
+        "#transaction-list-count"
     ];
     const elements = new Map(selectors.map((selector) => [selector, createElement()]));
     const downloads = [];
@@ -140,8 +142,8 @@ test("expense dashboard exports current transactions in its import format", asyn
 
     assert.equal(
         dashboard.exportedCsv,
-        "date,category,amount\r\n" +
-        '2026-07-01,"Food, ""takeout""\nnight",12.5\r\n'
+        "date,category,amount,description\r\n" +
+        '2026-07-01,"Food, ""takeout""\nnight",12.5,\r\n'
     );
     assert.deepEqual(dashboard.downloads, [{
         href: "blob:expense-insights-1",
@@ -152,6 +154,55 @@ test("expense dashboard exports current transactions in its import format", asyn
     await dashboard.importCsv(dashboard.exportedCsv, "expenses.csv");
     assert.equal(element(dashboard, "#transaction-count").textContent, "1");
     assert.equal(element(dashboard, "#total-spending").textContent, "₱12.50");
+});
+
+test("transaction list displays descriptions and updates to match filters", async () => {
+    const dashboard = createDashboard();
+    await dashboard.importCsv(
+        "date,category,amount,description\n" +
+        '2026-07-01,"Food, ""takeout""",12.5,"Lunch, with a friend"\n' +
+        "2026-08-03,Travel,34,Train\n"
+    );
+
+    const rows = element(dashboard, "#transaction-rows").children;
+    assert.equal(rows.length, 2);
+    assert.equal(rows[0].children[0].textContent, "2026-07-01");
+    assert.equal(rows[0].children[1].textContent, 'Food, "takeout"');
+    assert.equal(rows[0].children[2].textContent, "Lunch, with a friend");
+    assert.equal(rows[0].children[3].textContent, "₱12.50");
+    assert.equal(element(dashboard, "#transaction-list-count").textContent, "2 transactions");
+
+    dashboard.exportCsv();
+    assert.equal(
+        dashboard.exportedCsv,
+        "date,category,amount,description\r\n" +
+        '2026-07-01,"Food, ""takeout""",12.5,"Lunch, with a friend"\r\n' +
+        "2026-08-03,Travel,34,Train\r\n"
+    );
+
+    element(dashboard, "#month-filter").value = "2026-07";
+    element(dashboard, "#month-filter").listeners.change();
+
+    assert.equal(element(dashboard, "#transaction-rows").children.length, 1);
+    assert.equal(element(dashboard, "#transaction-rows").children[0].children[0].textContent, "2026-07-01");
+    assert.equal(element(dashboard, "#transaction-list-count").textContent, "1 transaction");
+
+    element(dashboard, "#category-filter").value = "Travel";
+    element(dashboard, "#category-filter").listeners.change();
+
+    assert.equal(element(dashboard, "#transaction-rows").children.length, 1);
+    assert.equal(
+        element(dashboard, "#transaction-rows").children[0].children[0].textContent,
+        "No transactions match these filters."
+    );
+    assert.equal(element(dashboard, "#transaction-list-count").textContent, "0 transactions");
+});
+
+test("transaction list provides a clear description placeholder when descriptions are omitted", async () => {
+    const dashboard = createDashboard();
+    await dashboard.importCsv("date,category,amount\n2026-07-01,Food,12.5\n");
+
+    assert.equal(element(dashboard, "#transaction-rows").children[0].children[2].textContent, "—");
 });
 
 test("month and category filters update summary cards and charts together", () => {
@@ -167,6 +218,8 @@ test("month and category filters update summary cards and charts together", () =
     assert.equal(element(dashboard, "#average-transaction").textContent, "₱571.25");
     assert.equal(element(dashboard, "#category-chart").children.length, 3);
     assert.equal(element(dashboard, "#monthly-chart").children.length, 1);
+    assert.equal(element(dashboard, "#transaction-rows").children.length, 4);
+    assert.equal(element(dashboard, "#transaction-list-count").textContent, "4 transactions");
     assert.equal(element(dashboard, "#data-status").textContent, "Showing 4 of 24 transactions.");
 
     categoryFilter.value = "Food";
@@ -177,6 +230,7 @@ test("month and category filters update summary cards and charts together", () =
     assert.equal(element(dashboard, "#average-transaction").textContent, "₱357.50");
     assert.equal(element(dashboard, "#category-chart").children.length, 1);
     assert.equal(element(dashboard, "#monthly-chart").children.length, 1);
+    assert.equal(element(dashboard, "#transaction-rows").children.length, 2);
     assert.equal(element(dashboard, "#data-status").textContent, "Showing 2 of 24 transactions.");
 });
 
@@ -193,6 +247,7 @@ test("filters with no matches show empty chart states and leave exports unfilter
     assert.equal(element(dashboard, "#average-transaction").textContent, "₱0.00");
     assert.equal(element(dashboard, "#category-chart").children[0].textContent, "No expense categories to show.");
     assert.equal(element(dashboard, "#monthly-chart").children[0].textContent, "No monthly spending to show.");
+    assert.equal(element(dashboard, "#transaction-rows").children[0].children[0].textContent, "No transactions match these filters.");
 
     dashboard.exportCsv();
     assert.equal(dashboard.exportedCsv.trim().split("\r\n").length, 25);
@@ -212,7 +267,7 @@ test("expense dashboard does not save imported data until the user opts in", asy
 
     assert.equal(
         storage.getItem("franzearl.expense-insights.saved-data.v1"),
-        "date,category,amount\r\n2026-07-01,Food,12.5\r\n"
+        "date,category,amount,description\r\n2026-07-01,Food,12.5,\r\n"
     );
 
     const returnedDashboard = createDashboard(storage);

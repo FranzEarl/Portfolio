@@ -134,9 +134,33 @@
                 </article>
             </section>
 
+            <section class="transaction-section" aria-labelledby="transaction-list-title">
+                <div class="chart-heading transaction-heading">
+                    <div>
+                        <p class="chart-eyebrow">TRANSACTIONS</p>
+                        <h2 id="transaction-list-title">Expense details</h2>
+                    </div>
+                    <span id="transaction-list-count" class="transaction-list-count"></span>
+                </div>
+                <div class="transaction-table-wrap">
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Category</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-rows"></tbody>
+                    </table>
+                </div>
+            </section>
+
             <p class="dashboard-footnote">
                 Example values are fictional. CSV files must include <code>date</code>,
-                <code>category</code>, and <code>amount</code> columns.
+                <code>category</code>, and <code>amount</code> columns. An optional
+                <code>description</code> column is shown in the transaction list.
             </p>
         </div>
     </main>
