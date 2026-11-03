@@ -1,7 +1,7 @@
-#include <errno.h>
 #if defined(__MINGW32__)
 #define __USE_MINGW_ANSI_STDIO 1
 #endif
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
