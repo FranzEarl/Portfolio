@@ -67,6 +67,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    min-height: 42px;
     color: var(--text-secondary);
     font-size: 0.88rem;
     cursor: pointer;
@@ -282,6 +283,16 @@
     }
 
     .data-actions > * {
+        width: 100%;
+    }
+
+    .saved-data-actions {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .saved-data-actions .secondary-button {
         width: 100%;
     }
 }

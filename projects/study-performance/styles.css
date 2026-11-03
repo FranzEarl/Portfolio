@@ -61,6 +61,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    min-height: 38px;
     color: var(--text-secondary);
     font-size: 0.84rem;
     cursor: pointer;
@@ -367,6 +368,16 @@
     .course-section th,
     .course-section td {
         padding: 10px 8px;
+    }
+
+    .saved-data-actions {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .saved-data-actions .sample-data-button {
+        width: 100%;
     }
 }
 
