@@ -153,7 +153,7 @@ function renderSummary(courses) {
     const coursesOnTrack = courses.filter((course) => course.grade >= 80).length;
 
     elements.averageGrade.textContent = `${formatNumber(averageGrade, 1)}%`;
-    elements.studyHours.textContent = `${formatNumber(studyHours)} hrs`;
+    elements.studyHours.textContent = `${formatNumber(studyHours, 1)} hrs`;
     elements.attendanceRate.textContent = `${formatNumber(attendanceRate, 1)}%`;
     elements.coursesOnTrack.textContent = `${coursesOnTrack} / ${courses.length}`;
 }
