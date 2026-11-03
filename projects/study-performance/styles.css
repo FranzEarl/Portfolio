@@ -49,6 +49,32 @@
     margin-top: 14px;
 }
 
+.saved-data-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.remember-data-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+    cursor: pointer;
+}
+
+.remember-data-option input {
+    accent-color: var(--accent);
+}
+
+.remember-data-option:focus-within {
+    outline: 2px solid var(--accent-hover);
+    outline-offset: 3px;
+}
+
 .import-csv-button,
 .sample-data-button {
     min-height: 38px;

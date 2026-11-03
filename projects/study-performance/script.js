@@ -11,6 +11,8 @@ const elements = {
     file: document.querySelector("#csv-file"),
     exportButton: document.querySelector("#export-button"),
     sampleButton: document.querySelector("#sample-button"),
+    rememberData: document.querySelector("#remember-data"),
+    clearSavedData: document.querySelector("#clear-saved-data"),
     status: document.querySelector("#data-status"),
     badge: document.querySelector("#data-badge"),
     averageGrade: document.querySelector("#average-grade"),
@@ -23,6 +25,7 @@ const elements = {
     courseCount: document.querySelector("#course-count")
 };
 
+const savedDataKey = "franzearl.study-performance.saved-data.v1";
 let currentCourses = sampleCourses;
 
 function formatNumber(value, maximumFractionDigits = 0) {
@@ -276,8 +279,67 @@ function setStatus(message, isError = false) {
 function showSampleData() {
     renderDashboard(sampleCourses);
     elements.badge.textContent = "FICTIONAL SAMPLE DATA";
-    setStatus("Showing fictional sample data.");
+    if (elements.rememberData.checked) {
+        saveCurrentCourses("Showing fictional sample data. Remembered on this device.");
+    } else {
+        setStatus("Showing fictional sample data.");
+    }
 }
+
+function saveCurrentCourses(successMessage = "Current data remembered on this device.") {
+    try {
+        localStorage.setItem(savedDataKey, serializeCourses(currentCourses));
+        setStatus(successMessage);
+    } catch (error) {
+        setStatus(`Unable to save data on this device: ${error.message}`, true);
+    }
+}
+
+function restoreSavedCourses() {
+    try {
+        const savedCsv = localStorage.getItem(savedDataKey);
+        if (savedCsv === null) return;
+
+        const courses = parseCourses(savedCsv);
+        elements.rememberData.checked = true;
+        renderDashboard(courses);
+        elements.badge.textContent = "LOCAL CSV DATA";
+        const label = courses.length === 1 ? "course" : "courses";
+        setStatus(`Restored ${courses.length} saved ${label} from this device.`);
+    } catch (error) {
+        setStatus(`Unable to restore saved data: ${error.message}`, true);
+    }
+}
+
+function clearSavedCourses() {
+    try {
+        localStorage.removeItem(savedDataKey);
+        elements.rememberData.checked = false;
+        setStatus("Saved data cleared. The current dashboard remains until you leave or reload.");
+    } catch (error) {
+        setStatus(`Unable to clear saved data: ${error.message}`, true);
+    }
+}
+
+elements.rememberData.addEventListener("change", () => {
+    if (elements.rememberData.checked) {
+        saveCurrentCourses();
+        if (elements.status.dataset.error === "true") {
+            elements.rememberData.checked = false;
+        }
+        return;
+    }
+
+    try {
+        localStorage.removeItem(savedDataKey);
+        setStatus("Remembering is off. Previously saved data was removed.");
+    } catch (error) {
+        elements.rememberData.checked = true;
+        setStatus(`Unable to remove saved data: ${error.message}`, true);
+    }
+});
+
+elements.clearSavedData.addEventListener("click", clearSavedCourses);
 
 elements.exportButton.addEventListener("click", () => {
     const filename = "study-performance.csv";
@@ -309,7 +371,12 @@ elements.file.addEventListener("change", async (event) => {
         const importedCourses = parseCourses(await file.text());
         renderDashboard(importedCourses);
         elements.badge.textContent = "LOCAL CSV DATA";
-        setStatus(`Loaded ${importedCourses.length} courses from ${file.name}.`);
+        const message = `Loaded ${importedCourses.length} courses from ${file.name}.`;
+        if (elements.rememberData.checked) {
+            saveCurrentCourses(`${message} Remembered on this device.`);
+        } else {
+            setStatus(message);
+        }
     } catch (error) {
         setStatus(error.message, true);
     } finally {
@@ -319,3 +386,4 @@ elements.file.addEventListener("change", async (event) => {
 
 elements.sampleButton.addEventListener("click", showSampleData);
 showSampleData();
+restoreSavedCourses();

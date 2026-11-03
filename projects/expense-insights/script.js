@@ -34,7 +34,10 @@ const currency = new Intl.NumberFormat("en-PH", {
 const elements = {
     file: document.querySelector("#csv-file"),
     sampleButton: document.querySelector("#sample-button"),
+    exportButton: document.querySelector("#export-button"),
     downloadSample: document.querySelector("#download-sample"),
+    rememberData: document.querySelector("#remember-data"),
+    clearSavedData: document.querySelector("#clear-saved-data"),
     status: document.querySelector("#data-status"),
     total: document.querySelector("#total-spending"),
     count: document.querySelector("#transaction-count"),
@@ -42,6 +45,9 @@ const elements = {
     categories: document.querySelector("#category-chart"),
     months: document.querySelector("#monthly-chart")
 };
+
+const savedDataKey = "franzearl.expense-insights.saved-data.v1";
+let currentExpenses = sampleExpenses;
 
 function parseCsv(text) {
     const records = [];
@@ -187,6 +193,7 @@ function renderChart(container, entries, emptyMessage) {
 }
 
 function renderDashboard(expenses) {
+    currentExpenses = expenses;
     const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
     elements.total.textContent = currency.format(total);
     elements.count.textContent = expenses.length.toLocaleString("en-PH");
@@ -225,7 +232,11 @@ function renderDashboard(expenses) {
 
 function loadExpenses(expenses, sourceMessage) {
     renderDashboard(expenses);
-    setStatus(sourceMessage);
+    if (elements.rememberData.checked) {
+        saveCurrentExpenses(sourceMessage);
+    } else {
+        setStatus(sourceMessage);
+    }
 }
 
 function csvEscape(value) {
@@ -241,9 +252,94 @@ const sampleCsv = [
             .join(",")
     )
 ].join("\r\n");
+function serializeExpenses(expenses) {
+    return [
+        "date,category,amount",
+        ...expenses.map((expense) =>
+            [expense.date, expense.category, expense.amount].map(csvEscape).join(",")
+        )
+    ].join("\r\n") + "\r\n";
+}
+
+function saveCurrentExpenses(successMessage = "Current data remembered on this device.") {
+    try {
+        localStorage.setItem(savedDataKey, serializeExpenses(currentExpenses));
+        setStatus(successMessage);
+    } catch (error) {
+        setStatus(`Unable to save data on this device: ${error.message}`, true);
+    }
+}
+
+function restoreSavedExpenses() {
+    try {
+        const savedCsv = localStorage.getItem(savedDataKey);
+        if (savedCsv === null) return;
+
+        const expenses = parseExpenses(savedCsv);
+        elements.rememberData.checked = true;
+        renderDashboard(expenses);
+        const label = expenses.length === 1 ? "transaction" : "transactions";
+        setStatus(`Restored ${expenses.length} saved ${label} from this device.`);
+    } catch (error) {
+        setStatus(`Unable to restore saved data: ${error.message}`, true);
+    }
+}
+
+function clearSavedExpenses() {
+    try {
+        localStorage.removeItem(savedDataKey);
+        elements.rememberData.checked = false;
+        setStatus("Saved data cleared. The current dashboard remains until you leave or reload.");
+    } catch (error) {
+        setStatus(`Unable to clear saved data: ${error.message}`, true);
+    }
+}
+
 elements.downloadSample.href = URL.createObjectURL(
     new Blob([sampleCsv], { type: "text/csv;charset=utf-8" })
 );
+
+elements.rememberData.addEventListener("change", () => {
+    if (elements.rememberData.checked) {
+        saveCurrentExpenses();
+        if (elements.status.dataset.error === "true") {
+            elements.rememberData.checked = false;
+        }
+        return;
+    }
+
+    try {
+        localStorage.removeItem(savedDataKey);
+        setStatus("Remembering is off. Previously saved data was removed.");
+    } catch (error) {
+        elements.rememberData.checked = true;
+        setStatus(`Unable to remove saved data: ${error.message}`, true);
+    }
+});
+
+elements.clearSavedData.addEventListener("click", clearSavedExpenses);
+
+elements.exportButton.addEventListener("click", () => {
+    const filename = "expenses.csv";
+
+    try {
+        const blob = new Blob([serializeExpenses(currentExpenses)], {
+            type: "text/csv;charset=utf-8"
+        });
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = filename;
+        try {
+            link.click();
+        } finally {
+            setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
+        }
+        setStatus(`Downloaded ${filename}.`);
+    } catch (error) {
+        setStatus(`Unable to export CSV: ${error.message}`, true);
+    }
+});
 
 elements.file.addEventListener("change", async (event) => {
     const [file] = event.target.files;
@@ -264,3 +360,4 @@ elements.sampleButton.addEventListener("click", () => {
 });
 
 loadExpenses(sampleExpenses, "Showing fictional sample data.");
+restoreSavedExpenses();

@@ -40,9 +40,19 @@
                                 Use sample data
                             </button>
                         </div>
+                        <div class="saved-data-actions">
+                            <label class="remember-data-option">
+                                <input id="remember-data" type="checkbox">
+                                Remember data on this device
+                            </label>
+                            <button id="clear-saved-data" class="sample-data-button" type="button">
+                                Clear saved data
+                            </button>
+                        </div>
                         <p class="privacy-note">
                             CSV files are processed in this browser and never uploaded.
-                            Imported data is not saved automatically; export it to keep a copy.
+                            Data is saved only when you opt in, and stays in this browser
+                            profile on this device. Anyone with access to the profile may see it.
                         </p>
                         <p id="data-status" class="data-status" role="status" aria-live="polite">
                             Showing fictional sample data.
@@ -155,8 +165,9 @@
 
             <p class="study-footnote">
                 Sample values are fictional. Imported CSV files are processed locally in your
-                browser and are not uploaded or saved automatically. Use Export CSV to save a
-                copy. The dashboard is not connected to a school system.
+                browser and are not uploaded. Data is saved locally only if you opt in; use
+                Clear saved data to remove it. Use Export CSV to keep a separate copy. The
+                dashboard is not connected to a school system.
                 The sample CSV has one course per row and columns for course, grade percentage,
                 attendance percentage, and study hours over four weeks. Add rows to include
                 more courses.
