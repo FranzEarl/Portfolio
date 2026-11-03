@@ -41,6 +41,90 @@
     color: var(--text-secondary);
 }
 
+.study-data-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    margin-top: 14px;
+}
+
+.import-csv-button,
+.sample-data-button {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 12px;
+    border: 1px solid rgba(146, 153, 168, 0.3);
+    border-radius: 6px;
+    color: var(--text-primary);
+    background: transparent;
+    font: inherit;
+    font-size: 0.84rem;
+    cursor: pointer;
+}
+
+.import-csv-button {
+    border-color: var(--accent);
+    background: var(--accent);
+    font-weight: 600;
+}
+
+.import-csv-button:hover {
+    background: var(--accent-hover);
+}
+
+.sample-data-button:hover {
+    border-color: var(--accent-hover);
+    color: var(--accent-hover);
+}
+
+#csv-file {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+#csv-file:focus-visible + .import-csv-button {
+    outline: 2px solid var(--accent-hover);
+    outline-offset: 3px;
+}
+
+.privacy-note {
+    margin-top: 10px;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.data-status {
+    min-height: 1.4em;
+    margin-top: 3px;
+    color: var(--accent-hover);
+    font-size: 0.82rem;
+}
+
+.data-status[data-error="true"] {
+    color: #ff9a9a;
+}
+
+.sample-csv-link {
+    display: inline-block;
+    margin-top: 14px;
+    color: var(--accent-hover);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.sample-csv-link:hover {
+    color: var(--text-primary);
+}
+
 .demo-badge {
     flex-shrink: 0;
     padding: 7px 10px;
@@ -164,51 +248,6 @@
     height: 100%;
     border-radius: inherit;
     background: linear-gradient(90deg, var(--accent), var(--accent-hover));
-}
-
-.weekly-chart {
-    min-height: 190px;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    align-items: end;
-    gap: 12px;
-    padding-top: 8px;
-}
-
-.week-column {
-    height: 100%;
-    display: grid;
-    grid-template-rows: 1fr auto;
-    align-items: end;
-    gap: 8px;
-    text-align: center;
-}
-
-.week-bar-area {
-    height: 100%;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-}
-
-.week-bar {
-    width: min(42px, 72%);
-    min-height: 8px;
-    border-radius: 6px 6px 2px 2px;
-    background: linear-gradient(180deg, var(--accent-hover), var(--accent));
-}
-
-.week-label {
-    color: var(--text-secondary);
-    font-size: 0.72rem;
-}
-
-.week-hours {
-    display: block;
-    margin-top: 2px;
-    color: var(--text-primary);
-    font-size: 0.75rem;
-    font-weight: 600;
 }
 
 .course-section {
