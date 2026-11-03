@@ -243,7 +243,8 @@ static int addExpense(Expense expenses[], int *count) {
         return 1;
     }
 
-    snprintf(expense.date, sizeof(expense.date), "%s", date);
+    memcpy(expense.date, date, DATE_SIZE - 1);
+    expense.date[DATE_SIZE - 1] = '\0';
     expenses[*count] = expense;
     (*count)++;
     if (!saveExpenses(expenses, *count)) {
