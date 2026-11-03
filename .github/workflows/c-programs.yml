@@ -1,0 +1,44 @@
+name: C program checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  c-programs:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up GCC
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: mingw-w64-x86_64-gcc
+
+      - name: Compile all C programs
+        shell: pwsh
+        run: |
+          $sources = Get-ChildItem projects/c-programs -Filter *.c
+          foreach ($source in $sources) {
+            $diagnostics = & gcc -std=c11 -Wall -Wextra -Wpedantic -fsyntax-only $source.FullName 2>&1
+            if ($LASTEXITCODE -ne 0 -or $diagnostics) {
+              Write-Error "Compiler check failed for $($source.Name):`n$diagnostics"
+              exit 1
+            }
+          }
+
+      - name: Run C regression tests
+        run: node --test projects/tests/c-programs.test.js
