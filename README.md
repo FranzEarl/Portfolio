@@ -34,7 +34,11 @@ The study dashboard is in `projects/study-performance/`. Open `index.html`
 directly or serve the repository with `python -m http.server` and visit
 `/projects/study-performance/`. It presents fictional grades, attendance, and
 study hours for demonstration; it does not connect to a school system or store
-academic records.
+academic records. Download `sample-study-performance.csv` from the dashboard
+to see the data format: one course per row, with `course`, `grade`,
+`attendance`, and `study_hours` columns. Grade and attendance are percentages;
+study hours are totals over four weeks. Import a CSV to update the dashboard
+with any number of courses; the file is read in the browser and not uploaded.
 
 ## C Programs
 

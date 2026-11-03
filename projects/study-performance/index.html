@@ -27,8 +27,22 @@
                         <p class="study-intro">
                             A sample overview of course results, study habits, and attendance.
                         </p>
+                        <a class="sample-csv-link" href="sample-study-performance.csv" download>
+                            Download sample CSV
+                        </a>
+                        <div class="study-data-actions">
+                            <input id="csv-file" type="file" accept=".csv,text/csv">
+                            <label class="import-csv-button" for="csv-file">Import CSV</label>
+                            <button id="sample-button" class="sample-data-button" type="button">
+                                Use sample data
+                            </button>
+                        </div>
+                        <p class="privacy-note">Your CSV is read in this browser and is not uploaded.</p>
+                        <p id="data-status" class="data-status" role="status" aria-live="polite">
+                            Showing fictional sample data.
+                        </p>
                     </div>
-                    <p class="demo-badge">FICTIONAL SAMPLE DATA</p>
+                    <p id="data-badge" class="demo-badge">FICTIONAL SAMPLE DATA</p>
                 </div>
             </section>
 
@@ -41,7 +55,7 @@
                 <article class="study-stat">
                     <p class="study-stat-label">STUDY HOURS</p>
                     <p id="study-hours" class="study-stat-value">—</p>
-                    <p class="study-stat-note">Over the last four weeks</p>
+                    <p class="study-stat-note">Course totals over four weeks</p>
                 </article>
                 <article class="study-stat">
                     <p class="study-stat-label">ATTENDANCE</p>
@@ -70,12 +84,12 @@
                 <article class="study-panel">
                     <div class="panel-heading">
                         <div>
-                            <p class="study-eyebrow">WEEKLY ROUTINE</p>
-                            <h2>Study hours</h2>
+                            <p class="study-eyebrow">STUDY TIME</p>
+                            <h2>Study hours by course</h2>
                         </div>
-                        <span class="panel-unit">Hours / week</span>
+                        <span class="panel-unit">Hours / course</span>
                     </div>
-                    <div id="weekly-chart" class="weekly-chart"></div>
+                    <div id="study-hours-chart" class="study-hours-chart"></div>
                 </article>
             </section>
 
@@ -104,8 +118,12 @@
             </section>
 
             <p class="study-footnote">
-                This dashboard uses fictional data for demonstration only. It is not connected
-                to a school system and does not store personal or academic records.
+                Sample values are fictional. Imported CSV files are processed locally in your
+                browser and are not uploaded or saved. The dashboard is not connected to a
+                school system.
+                The sample CSV has one course per row and columns for course, grade percentage,
+                attendance percentage, and study hours over four weeks. Add rows to include
+                more courses.
             </p>
         </div>
     </main>
