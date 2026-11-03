@@ -82,6 +82,38 @@
     outline-offset: 3px;
 }
 
+.expense-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.expense-filter {
+    display: grid;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.expense-filter select {
+    min-width: 180px;
+    min-height: 40px;
+    padding: 8px 32px 8px 11px;
+    border: 1px solid rgba(146, 153, 168, 0.3);
+    border-radius: 6px;
+    color: var(--text-primary);
+    background: var(--surface);
+    font: inherit;
+    font-weight: 400;
+}
+
+.expense-filter select:focus-visible {
+    outline: 2px solid var(--accent-hover);
+    outline-offset: 3px;
+}
+
 .upload-button,
 .secondary-button {
     min-height: 42px;
