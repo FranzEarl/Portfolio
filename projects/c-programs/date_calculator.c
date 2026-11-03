@@ -1,3 +1,7 @@
+#if defined(__MINGW32__)
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <time.h>

@@ -35,6 +35,9 @@ The C source files are in `projects/c-programs/`, with a browsable listing at
 program, run `python projects/generate.py`. To regenerate it automatically
 while editing the C files, run `python projects/watch.py`.
 
+The input-handling regression tests require Node.js and GCC. Run them with
+`node --test projects/tests/c-programs.test.js`.
+
 ## About
 
 This portfolio serves as a collection of my projects and a place to showcase what I've learned while exploring programming and web development.

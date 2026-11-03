@@ -1,95 +1,266 @@
+#include <ctype.h>
+#include <errno.h>
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define MAX_EXPENSES 100
+#define NAME_SIZE 50
+#define CATEGORY_SIZE 30
+#define DATE_SIZE 11
+#define INPUT_SIZE 128
+#define DATA_FILE "expenses.txt"
 
 typedef struct {
-    char name[50];
-    char category[30];
+    char name[NAME_SIZE];
+    char category[CATEGORY_SIZE];
     double amount;
-    char date[11];
+    char date[DATE_SIZE];
 } Expense;
 
-void saveExpenses(Expense expenses[], int count) {
-    FILE *file = fopen("expenses.txt", "w");
+static int readLine(const char *prompt, char *buffer, size_t size) {
+    size_t length;
 
-    if(file == NULL) {
-        printf("Error saving expenses!\n");
-        return;
+    printf("%s", prompt);
+    if (fgets(buffer, size, stdin) == NULL) {
+        return 0;
     }
-    
-    for (int i = 0; i < count; i++) {
-        fprintf(file, "%s|%s|%.2f|%s\n",
-                expenses[i].name,
-                expenses[i].category,
-                expenses[i].amount,
-                expenses[i].date);
+
+    length = strcspn(buffer, "\n");
+    if (buffer[length] == '\n') {
+        buffer[length] = '\0';
+    } else {
+        int character = getchar();
+        if (character != '\n' && character != EOF) {
+            while ((character = getchar()) != '\n' && character != EOF) {
+            }
+            printf("Input is too long. Please try again.\n");
+            return -1;
+        }
     }
-    fclose(file);
+
+    if (length > 0 && buffer[length - 1] == '\r') {
+        buffer[length - 1] = '\0';
+    }
+    return 1;
 }
 
-void loadExpenses(Expense expenses[], int *count) {
-    FILE *file = fopen("expenses.txt", "r");
+static int readInteger(const char *prompt, int minimum, int maximum, int *value) {
+    char input[INPUT_SIZE];
+
+    for (;;) {
+        char *end;
+        long parsed;
+        int result = readLine(prompt, input, sizeof(input));
+        if (result == 0) {
+            return 0;
+        }
+        if (result < 0) {
+            continue;
+        }
+
+        errno = 0;
+        parsed = strtol(input, &end, 10);
+        while (isspace((unsigned char)*end)) {
+            end++;
+        }
+        if (errno != ERANGE && end != input && *end == '\0' &&
+            parsed >= minimum && parsed <= maximum) {
+            *value = (int)parsed;
+            return 1;
+        }
+        printf("Enter a whole number from %d to %d.\n", minimum, maximum);
+    }
+}
+
+static int readAmount(double *amount) {
+    char input[INPUT_SIZE];
+
+    for (;;) {
+        char *end;
+        double parsed;
+        int result = readLine("Enter amount: ", input, sizeof(input));
+        if (result == 0) {
+            return 0;
+        }
+        if (result < 0) {
+            continue;
+        }
+
+        errno = 0;
+        parsed = strtod(input, &end);
+        while (isspace((unsigned char)*end)) {
+            end++;
+        }
+        if (errno != ERANGE && end != input && *end == '\0' &&
+            isfinite(parsed) && parsed >= 0.0) {
+            *amount = parsed;
+            return 1;
+        }
+        printf("Enter a valid non-negative amount.\n");
+    }
+}
+
+static int readField(const char *prompt, char *buffer, size_t size) {
+    for (;;) {
+        int result = readLine(prompt, buffer, size);
+        if (result == 0) {
+            return 0;
+        }
+        if (result < 0) {
+            continue;
+        }
+        if (buffer[0] == '\0') {
+            printf("This field cannot be empty.\n");
+            continue;
+        }
+        if (strchr(buffer, '|') != NULL) {
+            printf("The | character cannot be used in this field.\n");
+            continue;
+        }
+        return 1;
+    }
+}
+
+static int isLeapYear(int year) {
+    return year % 400 == 0 || (year % 4 == 0 && year % 100 != 0);
+}
+
+static int isValidDate(const char *date) {
+    int year;
+    int month;
+    int day;
+    int daysInMonth;
+
+    if (strlen(date) != 10 || date[4] != '-' || date[7] != '-') {
+        return 0;
+    }
+    for (int i = 0; i < 10; i++) {
+        if (i != 4 && i != 7 && !isdigit((unsigned char)date[i])) {
+            return 0;
+        }
+    }
+
+    year = (date[0] - '0') * 1000 + (date[1] - '0') * 100 +
+           (date[2] - '0') * 10 + (date[3] - '0');
+    month = (date[5] - '0') * 10 + (date[6] - '0');
+    day = (date[8] - '0') * 10 + (date[9] - '0');
+
+    if (year < 1 || month < 1 || month > 12 || day < 1) {
+        return 0;
+    }
+    switch (month) {
+        case 2:
+            daysInMonth = isLeapYear(year) ? 29 : 28;
+            break;
+        case 4: case 6: case 9: case 11:
+            daysInMonth = 30;
+            break;
+        default:
+            daysInMonth = 31;
+            break;
+    }
+    return day <= daysInMonth;
+}
+
+static int saveExpenses(const Expense expenses[], int count) {
+    FILE *file = fopen(DATA_FILE, "w");
+
+    if (file == NULL) {
+        perror("Could not save expenses");
+        return 0;
+    }
+
+    for (int i = 0; i < count; i++) {
+        if (fprintf(file, "%s|%s|%.2f|%s\n",
+                    expenses[i].name,
+                    expenses[i].category,
+                    expenses[i].amount,
+                    expenses[i].date) < 0) {
+            perror("Could not write expenses");
+            fclose(file);
+            return 0;
+        }
+    }
+    if (fclose(file) != 0) {
+        perror("Could not finish saving expenses");
+        return 0;
+    }
+    return 1;
+}
+
+static void loadExpenses(Expense expenses[], int *count) {
+    FILE *file = fopen(DATA_FILE, "r");
 
     if (file == NULL) {
         return;
     }
 
-    char name[50];
-    char category[30];
-    char date[11];
+    char name[NAME_SIZE];
+    char category[CATEGORY_SIZE];
+    char date[DATE_SIZE];
     double amount;
-
     while (*count < MAX_EXPENSES &&
            fscanf(file, "%49[^|]|%29[^|]|%lf|%10s\n",
                   name, category, &amount, date) == 4) {
+        if (!isfinite(amount) || amount < 0.0 ||
+            strchr(name, '|') != NULL || strchr(category, '|') != NULL ||
+            !isValidDate(date)) {
+            fprintf(stderr, "Skipping an invalid record in %s.\n", DATA_FILE);
+            continue;
+        }
 
-        strcpy(expenses[*count].name, name);
-        strcpy(expenses[*count].category, category);
-        strcpy(expenses[*count].date, date);
+        snprintf(expenses[*count].name, NAME_SIZE, "%s", name);
+        snprintf(expenses[*count].category, CATEGORY_SIZE, "%s", category);
+        snprintf(expenses[*count].date, DATE_SIZE, "%s", date);
         expenses[*count].amount = amount;
-
         (*count)++;
     }
 
+    if (ferror(file)) {
+        perror("Could not read expenses");
+    }
     fclose(file);
 }
 
-void addExpenses(Expense expenses[], int *count) {
-    if(*count >= MAX_EXPENSES) {
+static int addExpense(Expense expenses[], int *count) {
+    Expense expense;
+    char date[DATE_SIZE + 1];
+
+    if (*count >= MAX_EXPENSES) {
         printf("Expense limit reached!\n");
-        return;
+        return 1;
+    }
+    if (!readField("Enter expense name: ", expense.name, sizeof(expense.name)) ||
+        !readField("Enter category: ", expense.category, sizeof(expense.category)) ||
+        !readAmount(&expense.amount) ||
+        !readField("Enter date (YYYY-MM-DD): ", date, sizeof(date))) {
+        return 0;
+    }
+    if (strlen(date) >= sizeof(expense.date) || !isValidDate(date)) {
+        printf("Enter a valid date in YYYY-MM-DD format.\n");
+        return 1;
     }
 
-    printf("Enter expense name: ");
-    fgets(expenses[*count].name, sizeof(expenses[*count].name), stdin);
-    expenses[*count].name[strcspn(expenses[*count].name, "\n")] = '\0';
-
-    printf("Enter category: ");
-    fgets(expenses[*count].category, sizeof(expenses[*count].category), stdin);
-    expenses[*count].category[strcspn(expenses[*count].category, "\n")] = '\0';
-
-    printf("Enter amount: ");
-    scanf("%lf", &expenses[*count].amount);
-    getchar();
-
-    printf("Enter date (YYYY-MM-DD): ");
-    fgets(expenses[*count].date,sizeof(expenses[*count].date), stdin);
-    expenses[*count].date[strcspn(expenses[*count].date, "\n")] = '\0';
-
+    snprintf(expense.date, sizeof(expense.date), "%s", date);
+    expenses[*count] = expense;
     (*count)++;
-    saveExpenses(expenses, *count);
+    if (!saveExpenses(expenses, *count)) {
+        (*count)--;
+        return 1;
+    }
     printf("Expense added successfully!\n");
+    return 1;
 }
 
-void viewExpenses(Expense expenses[], int count) {
-    if(count == 0) {
+static void viewExpenses(const Expense expenses[], int count) {
+    if (count == 0) {
         printf("\nNo expenses recorded yet.\n");
         return;
     }
 
     printf("\n========== ALL EXPENSES ==========\n");
-
     for (int i = 0; i < count; i++) {
         printf("\nExpense #%d\n", i + 1);
         printf("Name:     %s\n", expenses[i].name);
@@ -97,19 +268,18 @@ void viewExpenses(Expense expenses[], int count) {
         printf("Amount:   %.2f\n", expenses[i].amount);
         printf("Date:     %s\n", expenses[i].date);
     }
-
     printf("\n==================================\n");
 }
 
-void viewTotal(Expense expenses[], int count) {
-    if(count == 0) {
+static void viewTotal(const Expense expenses[], int count) {
+    double total = 0.0;
+
+    if (count == 0) {
         printf("\nNo expenses recorded yet.\n");
         return;
     }
 
-    double total = 0;
-
-    for(int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) {
         total += expenses[i].amount;
     }
 
@@ -119,7 +289,7 @@ void viewTotal(Expense expenses[], int count) {
     printf("====================================\n");
 }
 
-int main() {
+int main(void) {
     Expense expenses[MAX_EXPENSES];
     int count = 0;
     int choice;
@@ -127,21 +297,22 @@ int main() {
     loadExpenses(expenses, &count);
     printf("Loaded %d expenses.\n", count);
 
-    do {
+    for (;;) {
         printf("\n========== EXPENSE TRACKER ==========\n");
         printf("1. Add expense\n");
         printf("2. View all expenses\n");
         printf("3. View total spending\n");
         printf("4. Exit\n");
         printf("=====================================\n");
-        printf("Choose an option: ");
 
-        scanf("%d", &choice);
-        getchar();
-
+        if (!readInteger("Choose an option: ", 1, 4, &choice)) {
+            break;
+        }
         switch (choice) {
             case 1:
-                addExpenses(expenses, &count);
+                if (!addExpense(expenses, &count)) {
+                    return 0;
+                }
                 break;
             case 2:
                 viewExpenses(expenses, count);
@@ -151,11 +322,9 @@ int main() {
                 break;
             case 4:
                 printf("Exiting expense tracker...\n");
-                break;
-            default:
-                printf("Invalid option. Try again.\n");
-        } 
-    } while(choice != 4);
+                return 0;
+        }
+    }
 
     return 0;
 }
