@@ -40,6 +40,7 @@ function createElement() {
 function createDashboard() {
     const selectors = [
         "#csv-file",
+        "#export-button",
         "#sample-button",
         "#data-status",
         "#data-badge",
@@ -53,6 +54,8 @@ function createDashboard() {
         "#course-count"
     ];
     const elements = new Map(selectors.map((selector) => [selector, createElement()]));
+    const downloads = [];
+    let exportedBlob;
     const context = vm.createContext({
         document: {
             querySelector(selector) {
@@ -60,14 +63,43 @@ function createDashboard() {
                 return elements.get(selector);
             },
             createElement() {
-                return createElement();
+                const created = createElement();
+                created.click = function click() {
+                    if (this.download) {
+                        downloads.push({ href: this.href, filename: this.download });
+                    }
+                };
+                return created;
             }
+        },
+        Blob: class BlobMock {
+            constructor(parts, options) {
+                this.text = parts.join("");
+                this.type = options.type;
+            }
+        },
+        URL: {
+            createObjectURL(blob) {
+                exportedBlob = blob;
+                return "blob:study-performance";
+            },
+            revokeObjectURL() {}
+        },
+        setTimeout(callback) {
+            callback();
         }
     });
 
     vm.runInContext(dashboardScript, context, { filename: "study-performance/script.js" });
     return {
         elements,
+        downloads,
+        get exportedCsv() {
+            return exportedBlob.text;
+        },
+        exportCsv() {
+            elements.get("#export-button").listeners.click();
+        },
         async importCsv(text, name = "courses.csv") {
             await elements.get("#csv-file").listeners.change({
                 target: {
@@ -101,6 +133,53 @@ test("downloadable sample CSV imports successfully", async () => {
     assert.equal(element(dashboard, "#course-rows").children.length, 6);
     assert.equal(element(dashboard, "#study-hours").textContent, "66 hrs");
     assert.equal(element(dashboard, "#data-badge").textContent, "LOCAL CSV DATA");
+});
+
+test("Export CSV downloads the currently displayed sample courses", () => {
+    const dashboard = createDashboard();
+
+    dashboard.exportCsv();
+
+    assert.equal(
+        dashboard.exportedCsv,
+        "course,grade,attendance,study_hours\r\n" +
+        "Data Structures,91,96,10\r\n" +
+        "Statistics,87,93,12\r\n" +
+        "Database Systems,84,92,11\r\n" +
+        "Web Development,89,97,13\r\n" +
+        "Calculus,78,86,14\r\n" +
+        "Communication,93,98,6\r\n"
+    );
+    assert.deepEqual(dashboard.downloads, [{
+        href: "blob:study-performance",
+        filename: "study-performance.csv"
+    }]);
+    assert.equal(element(dashboard, "#data-status").textContent, "Downloaded study-performance.csv.");
+});
+
+test("Export CSV preserves imported course names and quotes CSV special characters", async () => {
+    const dashboard = createDashboard();
+    await dashboard.importCsv(
+        "course,grade,attendance,study_hours\n" +
+        '"Research ""Methods"", Part 2\nII",90.5,95,6.25\n'
+    );
+
+    dashboard.exportCsv();
+
+    assert.equal(
+        dashboard.exportedCsv,
+        "course,grade,attendance,study_hours\r\n" +
+        '"Research ""Methods"", Part 2\nII",90.5,95,6.25\r\n'
+    );
+    assert.equal(element(dashboard, "#data-status").textContent, "Downloaded study-performance.csv.");
+
+    await dashboard.importCsv(dashboard.exportedCsv, "study-performance.csv");
+
+    assert.equal(element(dashboard, "#course-count").textContent, "1 course");
+    assert.equal(
+        element(dashboard, "#course-rows").children[0].children[0].textContent,
+        'Research "Methods", Part 2\nII'
+    );
 });
 
 test("CSV import supports reordered columns, quoted names and any number of rows", async () => {

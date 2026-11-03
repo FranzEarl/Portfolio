@@ -33,11 +33,17 @@
                         <div class="study-data-actions">
                             <input id="csv-file" type="file" accept=".csv,text/csv">
                             <label class="import-csv-button" for="csv-file">Import CSV</label>
+                            <button id="export-button" class="sample-data-button" type="button">
+                                Export CSV
+                            </button>
                             <button id="sample-button" class="sample-data-button" type="button">
                                 Use sample data
                             </button>
                         </div>
-                        <p class="privacy-note">Your CSV is read in this browser and is not uploaded.</p>
+                        <p class="privacy-note">
+                            CSV files are processed in this browser and never uploaded.
+                            Imported data is not saved automatically; export it to keep a copy.
+                        </p>
                         <p id="data-status" class="data-status" role="status" aria-live="polite">
                             Showing fictional sample data.
                         </p>
@@ -149,8 +155,8 @@
 
             <p class="study-footnote">
                 Sample values are fictional. Imported CSV files are processed locally in your
-                browser and are not uploaded or saved. The dashboard is not connected to a
-                school system.
+                browser and are not uploaded or saved automatically. Use Export CSV to save a
+                copy. The dashboard is not connected to a school system.
                 The sample CSV has one course per row and columns for course, grade percentage,
                 attendance percentage, and study hours over four weeks. Add rows to include
                 more courses.
