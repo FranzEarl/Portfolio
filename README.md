@@ -26,6 +26,8 @@ imports are processed locally in your browser and are not uploaded.
 Export the current transactions as a CSV in the same format for a local copy.
 Filter the summary cards and charts by month and category; filters only affect
 the current browser view and do not modify the underlying transactions.
+Set a monthly budget to see spending progress for the selected month; it compares
+all categories and stays in the current page session.
 Opt in with "Remember data on this device" to save the current dashboard data
 in this browser profile; it is restored on return. Use "Clear saved data" to
 remove the saved copy and turn remembering off. The current view stays in place
