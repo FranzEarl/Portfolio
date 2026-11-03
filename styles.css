@@ -929,6 +929,53 @@ section {
     line-height: 1.7;
 }
 
+.program-overview {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 48px;
+}
+
+.program-overview-card {
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+}
+
+.program-overview-label {
+    color: var(--accent-hover);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.program-overview-card h2,
+.program-list-heading h2 {
+    margin-top: 7px;
+    font-size: 1.15rem;
+}
+
+.program-overview-card > p:last-child {
+    margin-top: 10px;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.75;
+}
+
+.program-list-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.program-list-heading > span {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
 .programs-page .file-list {
     display: flex;
     flex-direction: column;
@@ -987,6 +1034,28 @@ section {
 
     .programs-heading h1 {
         font-size: 34px;
+    }
+
+    .program-overview {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 36px;
+    }
+
+    .program-overview-card {
+        padding: 18px;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+    .program-overview {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .program-overview-card:last-child {
+        grid-column: 1 / -1;
+        width: min(100%, 420px);
+        justify-self: center;
     }
 }
 

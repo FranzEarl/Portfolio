@@ -17,7 +17,9 @@ html = f"""<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C Programs | Personal Portfolio</title>
+    <meta name="description" content="Browse {len(files)} small programs and experiments written in C by Franz Earl Padal.">
+    <meta name="theme-color" content="#17191F">
+    <title>C Programs | Franz Earl</title>
     <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
@@ -25,7 +27,7 @@ html = f"""<!DOCTYPE html>
     <header>
         <nav class="navbar">
             <a href="../index.html" class="logo">Franz Earl</a>
-            <a href="../index.html" class="back-link">← Back to Portfolio</a>
+            <a href="../index.html#projects" class="back-link">← Back to Projects</a>
         </nav>
     </header>
 
@@ -37,8 +39,46 @@ html = f"""<!DOCTYPE html>
                     <p class="section-label">PROJECTS / C PROGRAMMING</p>
                     <h1>C Programs<span>.</span></h1>
                     <p class="section-description">
-                        A collection of programs and experiments developed using C.
+                        A collection of small terminal programs built while learning and
+                        practicing C, from everyday utilities to interactive games.
                     </p>
+                </div>
+
+                <section class="program-overview" aria-label="About this project">
+                    <article class="program-overview-card">
+                        <p class="program-overview-label">THE PROJECT</p>
+                        <h2>What I built</h2>
+                        <p>
+                            This collection includes calculators, date and number tools,
+                            text utilities, simple trackers, and terminal games such as
+                            Hangman, Tic-Tac-Toe, and Rock Paper Scissors.
+                        </p>
+                    </article>
+                    <article class="program-overview-card">
+                        <p class="program-overview-label">THE TOOLKIT</p>
+                        <h2>Tools used</h2>
+                        <p>
+                            The programs are written in C using the standard library,
+                            compiled with GCC, and designed to run in a terminal.
+                        </p>
+                    </article>
+                    <article class="program-overview-card">
+                        <p class="program-overview-label">THE PRACTICE</p>
+                        <h2>What I practiced</h2>
+                        <p>
+                            Building them gave me practice with functions, loops,
+                            conditionals, arrays and strings, input validation, file
+                            handling, and working with dates and time.
+                        </p>
+                    </article>
+                </section>
+
+                <div class="program-list-heading">
+                    <div>
+                        <p class="program-overview-label">SOURCE CODE</p>
+                        <h2>Browse all programs</h2>
+                    </div>
+                    <span>{len(files)} files</span>
                 </div>
 
                 <div class="file-list">
