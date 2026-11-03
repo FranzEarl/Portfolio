@@ -57,6 +57,8 @@ function createDashboard(storage = createStorage()) {
         "#download-sample",
         "#remember-data",
         "#clear-saved-data",
+        "#month-filter",
+        "#category-filter",
         "#data-status",
         "#total-spending",
         "#transaction-count",
@@ -150,6 +152,50 @@ test("expense dashboard exports current transactions in its import format", asyn
     await dashboard.importCsv(dashboard.exportedCsv, "expenses.csv");
     assert.equal(element(dashboard, "#transaction-count").textContent, "1");
     assert.equal(element(dashboard, "#total-spending").textContent, "₱12.50");
+});
+
+test("month and category filters update summary cards and charts together", () => {
+    const dashboard = createDashboard();
+    const monthFilter = element(dashboard, "#month-filter");
+    const categoryFilter = element(dashboard, "#category-filter");
+
+    monthFilter.value = "2026-01";
+    monthFilter.listeners.change();
+
+    assert.equal(element(dashboard, "#transaction-count").textContent, "4");
+    assert.equal(element(dashboard, "#total-spending").textContent, "₱2,285.00");
+    assert.equal(element(dashboard, "#average-transaction").textContent, "₱571.25");
+    assert.equal(element(dashboard, "#category-chart").children.length, 3);
+    assert.equal(element(dashboard, "#monthly-chart").children.length, 1);
+    assert.equal(element(dashboard, "#data-status").textContent, "Showing 4 of 24 transactions.");
+
+    categoryFilter.value = "Food";
+    categoryFilter.listeners.change();
+
+    assert.equal(element(dashboard, "#transaction-count").textContent, "2");
+    assert.equal(element(dashboard, "#total-spending").textContent, "₱715.00");
+    assert.equal(element(dashboard, "#average-transaction").textContent, "₱357.50");
+    assert.equal(element(dashboard, "#category-chart").children.length, 1);
+    assert.equal(element(dashboard, "#monthly-chart").children.length, 1);
+    assert.equal(element(dashboard, "#data-status").textContent, "Showing 2 of 24 transactions.");
+});
+
+test("filters with no matches show empty chart states and leave exports unfiltered", () => {
+    const dashboard = createDashboard();
+
+    element(dashboard, "#month-filter").value = "2026-01";
+    element(dashboard, "#category-filter").value = "Learning";
+    element(dashboard, "#month-filter").listeners.change();
+    element(dashboard, "#category-filter").listeners.change();
+
+    assert.equal(element(dashboard, "#transaction-count").textContent, "0");
+    assert.equal(element(dashboard, "#total-spending").textContent, "₱0.00");
+    assert.equal(element(dashboard, "#average-transaction").textContent, "₱0.00");
+    assert.equal(element(dashboard, "#category-chart").children[0].textContent, "No expense categories to show.");
+    assert.equal(element(dashboard, "#monthly-chart").children[0].textContent, "No monthly spending to show.");
+
+    dashboard.exportCsv();
+    assert.equal(dashboard.exportedCsv.trim().split("\r\n").length, 25);
 });
 
 test("expense dashboard does not save imported data until the user opts in", async () => {

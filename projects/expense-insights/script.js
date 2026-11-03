@@ -38,6 +38,8 @@ const elements = {
     downloadSample: document.querySelector("#download-sample"),
     rememberData: document.querySelector("#remember-data"),
     clearSavedData: document.querySelector("#clear-saved-data"),
+    monthFilter: document.querySelector("#month-filter"),
+    categoryFilter: document.querySelector("#category-filter"),
     status: document.querySelector("#data-status"),
     total: document.querySelector("#total-spending"),
     count: document.querySelector("#transaction-count"),
@@ -193,7 +195,6 @@ function renderChart(container, entries, emptyMessage) {
 }
 
 function renderDashboard(expenses) {
-    currentExpenses = expenses;
     const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
     elements.total.textContent = currency.format(total);
     elements.count.textContent = expenses.length.toLocaleString("en-PH");
@@ -230,10 +231,74 @@ function renderDashboard(expenses) {
     renderChart(elements.months, monthEntries, "No monthly spending to show.");
 }
 
-function loadExpenses(expenses, sourceMessage) {
-    renderDashboard(expenses);
+function filterExpenses() {
+    const month = elements.monthFilter.value;
+    const category = elements.categoryFilter.value;
+    return currentExpenses.filter((expense) =>
+        (!month || expense.date.slice(0, 7) === month) &&
+        (!category || expense.category === category)
+    );
+}
+
+function renderFilteredExpenses(statusMessage) {
+    const filteredExpenses = filterExpenses();
+    renderDashboard(filteredExpenses);
+    if (statusMessage) {
+        setStatus(statusMessage);
+    } else {
+        setStatus(`Showing ${filteredExpenses.length} of ${currentExpenses.length} transactions.`);
+    }
+}
+
+function updateFilterOptions(reset = false) {
+    const selections = [
+        {
+            element: elements.monthFilter,
+            placeholder: "All months",
+            values: [...new Set(currentExpenses.map((expense) => expense.date.slice(0, 7)))]
+                .sort((left, right) => right.localeCompare(left))
+                .map((month) => ({
+                    value: month,
+                    label: new Intl.DateTimeFormat("en", {
+                        month: "long",
+                        year: "numeric",
+                        timeZone: "UTC"
+                    }).format(new Date(`${month}-01T00:00:00Z`))
+                }))
+        },
+        {
+            element: elements.categoryFilter,
+            placeholder: "All categories",
+            values: [...new Set(currentExpenses.map((expense) => expense.category))]
+                .sort((left, right) => left.localeCompare(right))
+                .map((category) => ({ value: category, label: category }))
+        }
+    ];
+
+    selections.forEach(({ element, placeholder, values }) => {
+        const selectedValue = reset ? "" : element.value;
+        const options = [document.createElement("option"), ...values.map(() =>
+            document.createElement("option")
+        )];
+        options[0].value = "";
+        options[0].textContent = placeholder;
+        values.forEach((option, index) => {
+            options[index + 1].value = option.value;
+            options[index + 1].textContent = option.label;
+        });
+        element.replaceChildren(...options);
+        element.value = values.some((option) => option.value === selectedValue)
+            ? selectedValue
+            : "";
+    });
+}
+
+function loadExpenses(expenses, sourceMessage, resetFilters = false) {
+    currentExpenses = expenses;
+    updateFilterOptions(resetFilters);
+    renderDashboard(filterExpenses());
     if (elements.rememberData.checked) {
-        saveCurrentExpenses(sourceMessage);
+        saveCurrentExpenses(`${sourceMessage} Remembered on this device.`);
     } else {
         setStatus(sourceMessage);
     }
@@ -277,7 +342,9 @@ function restoreSavedExpenses() {
 
         const expenses = parseExpenses(savedCsv);
         elements.rememberData.checked = true;
-        renderDashboard(expenses);
+        currentExpenses = expenses;
+        updateFilterOptions();
+        renderDashboard(filterExpenses());
         const label = expenses.length === 1 ? "transaction" : "transactions";
         setStatus(`Restored ${expenses.length} saved ${label} from this device.`);
     } catch (error) {
@@ -319,6 +386,9 @@ elements.rememberData.addEventListener("change", () => {
 
 elements.clearSavedData.addEventListener("click", clearSavedExpenses);
 
+elements.monthFilter.addEventListener("change", () => renderFilteredExpenses());
+elements.categoryFilter.addEventListener("change", () => renderFilteredExpenses());
+
 elements.exportButton.addEventListener("click", () => {
     const filename = "expenses.csv";
 
@@ -356,7 +426,7 @@ elements.file.addEventListener("change", async (event) => {
 });
 
 elements.sampleButton.addEventListener("click", () => {
-    loadExpenses(sampleExpenses, "Showing fictional sample data.");
+    loadExpenses(sampleExpenses, "Showing fictional sample data.", true);
 });
 
 loadExpenses(sampleExpenses, "Showing fictional sample data.");
