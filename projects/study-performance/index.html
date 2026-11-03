@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore fictional course grades, study hours, and attendance in a sample student performance dashboard.">
+    <title>Study Performance Dashboard | Franz Earl</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="../../index.html" class="logo">Franz Earl</a>
+            <a href="../../index.html#projects" class="back-link">Back to Portfolio</a>
+        </nav>
+    </header>
+
+    <main class="study-dashboard">
+        <div class="study-container">
+            <section class="study-heading" aria-labelledby="study-title">
+                <p class="study-eyebrow">PROJECT / DATA EXPLORATION</p>
+                <div class="study-title-row">
+                    <div>
+                        <h1 id="study-title">Study Performance <span>Dashboard</span></h1>
+                        <p class="study-intro">
+                            A sample overview of course results, study habits, and attendance.
+                        </p>
+                    </div>
+                    <p class="demo-badge">FICTIONAL SAMPLE DATA</p>
+                </div>
+            </section>
+
+            <section class="study-summary" aria-label="Semester summary">
+                <article class="study-stat">
+                    <p class="study-stat-label">AVERAGE GRADE</p>
+                    <p id="average-grade" class="study-stat-value">—</p>
+                    <p class="study-stat-note">Across all sample courses</p>
+                </article>
+                <article class="study-stat">
+                    <p class="study-stat-label">STUDY HOURS</p>
+                    <p id="study-hours" class="study-stat-value">—</p>
+                    <p class="study-stat-note">Over the last four weeks</p>
+                </article>
+                <article class="study-stat">
+                    <p class="study-stat-label">ATTENDANCE</p>
+                    <p id="attendance-rate" class="study-stat-value">—</p>
+                    <p class="study-stat-note">Average across courses</p>
+                </article>
+                <article class="study-stat">
+                    <p class="study-stat-label">COURSES ON TRACK</p>
+                    <p id="courses-on-track" class="study-stat-value">—</p>
+                    <p class="study-stat-note">Current grade of 80% or higher</p>
+                </article>
+            </section>
+
+            <section class="study-panels" aria-label="Study performance details">
+                <article class="study-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="study-eyebrow">COURSE OVERVIEW</p>
+                            <h2>Grades by course</h2>
+                        </div>
+                        <span class="panel-unit">Current grade</span>
+                    </div>
+                    <div id="course-chart" class="course-chart"></div>
+                </article>
+
+                <article class="study-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="study-eyebrow">WEEKLY ROUTINE</p>
+                            <h2>Study hours</h2>
+                        </div>
+                        <span class="panel-unit">Hours / week</span>
+                    </div>
+                    <div id="weekly-chart" class="weekly-chart"></div>
+                </article>
+            </section>
+
+            <section class="course-section" aria-labelledby="course-list-title">
+                <div class="panel-heading">
+                    <div>
+                        <p class="study-eyebrow">DETAILS</p>
+                        <h2 id="course-list-title">Course snapshot</h2>
+                    </div>
+                    <p class="course-count" id="course-count"></p>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Course</th>
+                                <th scope="col">Grade</th>
+                                <th scope="col">Attendance</th>
+                                <th scope="col">Study hours (4 weeks)</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="course-rows"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <p class="study-footnote">
+                This dashboard uses fictional data for demonstration only. It is not connected
+                to a school system and does not store personal or academic records.
+            </p>
+        </div>
+    </main>
+</body>
+</html>
