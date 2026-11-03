@@ -28,6 +28,14 @@ CSV files need a header row with `date`, `category`, and `amount` columns.
 Dates use `YYYY-MM-DD`; an optional `description` column is ignored by the
 summary charts.
 
+## Study Performance Dashboard
+
+The study dashboard is in `projects/study-performance/`. Open `index.html`
+directly or serve the repository with `python -m http.server` and visit
+`/projects/study-performance/`. It presents fictional grades, attendance, and
+study hours for demonstration; it does not connect to a school system or store
+academic records.
+
 ## C Programs
 
 The C source files are in `projects/c-programs/`, with a browsable listing at
