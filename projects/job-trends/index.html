@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore in-demand data skills in job listings with a private, browser-based CSV analyzer.">
+    <title>Job Skills &amp; Hiring Trends | Franz Earl</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="../../index.html" class="logo">Franz Earl</a>
+            <a href="../../index.html#projects" class="back-link">← Back to Projects</a>
+        </nav>
+    </header>
+
+    <main class="job-trends-dashboard">
+        <div class="job-trends-container">
+            <section class="job-trends-heading" aria-labelledby="job-trends-title">
+                <p class="job-trends-eyebrow">PROJECT / LABOR MARKET EXPLORATION</p>
+                <h1 id="job-trends-title">Job Skills &amp; Hiring <span>Trends</span></h1>
+                <p class="job-trends-intro">
+                    Find the data skills appearing in job listings. Import a current
+                    CSV to explore demand by skill, location, and posting date.
+                </p>
+            </section>
+
+            <section class="job-methodology" aria-label="How the analysis works">
+                <article>
+                    <p class="job-trends-eyebrow">THE QUESTION</p>
+                    <h2>What skills do employers ask for?</h2>
+                    <p>Job titles and descriptions can reveal patterns that are easy to miss one listing at a time.</p>
+                </article>
+                <article>
+                    <p class="job-trends-eyebrow">THE METHOD</p>
+                    <h2>Normalize, match, and compare</h2>
+                    <p>A transparent skill dictionary groups common names and aliases, then counts each skill once per listing.</p>
+                </article>
+                <article>
+                    <p class="job-trends-eyebrow">THE LIMIT</p>
+                    <h2>Counts describe your file</h2>
+                    <p>Results are not a complete labor-market census. Source coverage and CSV quality affect every comparison.</p>
+                </article>
+            </section>
+
+            <section class="job-data-panel" aria-labelledby="job-data-title">
+                <div class="job-data-heading">
+                    <div>
+                        <p class="job-trends-eyebrow">YOUR DATA</p>
+                        <h2 id="job-data-title">Analyze job listings</h2>
+                    </div>
+                    <a class="job-template-link" href="job-postings-template.csv" download>
+                        Download CSV template
+                    </a>
+                </div>
+                <div class="job-data-actions">
+                    <input id="job-csv-file" type="file" accept=".csv,text/csv">
+                    <label class="job-upload-button" for="job-csv-file">Import job listings CSV</label>
+                    <button id="clear-data" class="job-secondary-button" type="button" disabled>
+                        Clear data
+                    </button>
+                </div>
+                <p class="job-csv-help">
+                    Required columns: <code>title</code> and <code>description</code>.
+                    Optional: <code>company</code>, <code>location</code>,
+                    <code>date</code>, <code>work_type</code>, and <code>source_url</code>.
+                    The file is analyzed in this browser; it is never uploaded or saved.
+                </p>
+                <p id="job-data-status" class="job-data-status" role="status" aria-live="polite">
+                    Import a current listings CSV to start exploring.
+                </p>
+            </section>
+
+            <section class="job-filters" aria-label="Filter analyzed listings">
+                <label>
+                    <span>Search listings</span>
+                    <input id="job-search" type="search" placeholder="Skill, title, or company" disabled>
+                </label>
+                <label>
+                    <span>Location</span>
+                    <select id="location-filter" disabled>
+                        <option value="">All locations</option>
+                    </select>
+                </label>
+            </section>
+
+            <section class="job-summary" aria-label="Job listing summary">
+                <article class="job-stat">
+                    <p>LISTINGS</p>
+                    <strong id="listing-count">0</strong>
+                    <span>in current view</span>
+                </article>
+                <article class="job-stat">
+                    <p>SKILLS FOUND</p>
+                    <strong id="skill-count">0</strong>
+                    <span>unique skills detected</span>
+                </article>
+                <article class="job-stat">
+                    <p>TOP SKILL</p>
+                    <strong id="top-skill">—</strong>
+                    <span id="top-skill-share">Import listings to compare</span>
+                </article>
+                <article class="job-stat">
+                    <p>LOCATIONS</p>
+                    <strong id="location-count">0</strong>
+                    <span>represented in current view</span>
+                </article>
+            </section>
+
+            <section class="job-analysis-grid" aria-label="Job market analysis">
+                <article class="job-analysis-card">
+                    <div class="job-card-heading">
+                        <div>
+                            <p class="job-trends-eyebrow">SKILL DEMAND</p>
+                            <h2>Most requested skills</h2>
+                        </div>
+                        <span id="skill-chart-note" class="job-card-note">Share of listings</span>
+                    </div>
+                    <div id="skill-chart" class="job-bar-chart">
+                        <p class="job-empty-state">Your skill analysis will appear here after import.</p>
+                    </div>
+                </article>
+                <article class="job-analysis-card">
+                    <div class="job-card-heading">
+                        <div>
+                            <p class="job-trends-eyebrow">SKILL GROUPS</p>
+                            <h2>Demand by category</h2>
+                        </div>
+                        <span class="job-card-note">Listings per group</span>
+                    </div>
+                    <div id="category-chart" class="job-bar-chart">
+                        <p class="job-empty-state">Category patterns will appear after import.</p>
+                    </div>
+                </article>
+                <article class="job-analysis-card job-timeline-card">
+                    <div class="job-card-heading">
+                        <div>
+                            <p class="job-trends-eyebrow">POSTING ACTIVITY</p>
+                            <h2>Listings over time</h2>
+                        </div>
+                        <span class="job-card-note">By month</span>
+                    </div>
+                    <div id="timeline-chart" class="job-timeline-chart">
+                        <p class="job-empty-state">Add a <code>date</code> column to see posting activity.</p>
+                    </div>
+                </article>
+            </section>
+
+            <section class="job-listings-panel" aria-labelledby="job-listings-title">
+                <div class="job-card-heading">
+                    <div>
+                        <p class="job-trends-eyebrow">LISTINGS</p>
+                        <h2 id="job-listings-title">Explore the source postings</h2>
+                    </div>
+                    <span id="job-results-count" class="job-card-note"></span>
+                </div>
+                <div class="job-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Role</th>
+                                <th scope="col">Location</th>
+                                <th scope="col">Work type</th>
+                                <th scope="col">Posted</th>
+                                <th scope="col">Detected skills</th>
+                                <th scope="col"><span class="visually-hidden">Source</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="job-listing-rows">
+                            <tr><td class="job-table-empty" colspan="6">Import a listings CSV to review its postings.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button id="show-more-jobs" class="job-secondary-button job-show-more" type="button" hidden>
+                    Show more listings
+                </button>
+            </section>
+
+            <p class="job-analysis-note">
+                Skill counts are based on recognized names and aliases in each title and description.
+                One listing can mention several skills, so category totals may overlap. Your results
+                represent only the listings in the imported file, not the entire Philippine job market.
+            </p>
+        </div>
+    </main>
+</body>
+</html>

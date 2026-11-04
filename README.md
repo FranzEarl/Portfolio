@@ -68,6 +68,19 @@ and turn remembering off. The current view stays in place until you leave or
 reload. Run its import, export, storage, and rendering regression tests with
 `node --test projects/tests/study-performance.test.js`.
 
+## Job Skills & Hiring Trends Explorer
+
+The job-postings analyzer is in `projects/job-trends/`. It analyzes listings
+from a CSV you provide and extracts normalized data skills from each title and
+description. The file is processed in your browser and is not uploaded or saved.
+Download `job-postings-template.csv` from the dashboard for the supported
+columns. `title` (or `job_title`) and `description` (or `job_description`) are
+required; `company`, `location`, `date` (or `posted_date`), `work_type`, and
+`source_url` are optional. The skill taxonomy and CSV fields are independent of
+any job board or country so an approved feed can be added later without changing
+the analysis model. Run its CSV parsing, analysis, filtering, and safety tests
+with `node --test projects/tests/job-trends.test.js`.
+
 ## C Programs
 
 The C source files are in `projects/c-programs/`, with a browsable listing at

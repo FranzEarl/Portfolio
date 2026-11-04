@@ -539,6 +539,36 @@ section {
     height: 340px;
 }
 
+.job-trends-preview {
+    position: relative;
+    z-index: 1;
+    width: min(78%, 330px);
+    padding: 14px;
+    border: 1px solid rgba(146, 153, 168, 0.24);
+    border-radius: 8px;
+    background: rgba(23, 25, 31, 0.94);
+    box-shadow: 0 16px 35px rgba(0, 0, 0, 0.32);
+    color: var(--text-primary);
+    text-align: left;
+}
+
+.job-preview-row {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+}
+
+.job-preview-row i {
+    height: 7px;
+    width: var(--skill-width);
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+}
+
 .code-preview,
 .dashboard-preview {
     position: relative;
