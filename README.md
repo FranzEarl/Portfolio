@@ -23,7 +23,9 @@ The browser-based expense dashboard is in `projects/expense-insights/`. Open
 `index.html` directly or serve the repository with `python -m http.server` and
 visit `/projects/expense-insights/`. It starts with fictional sample data; CSV
 imports are processed locally in your browser and are not uploaded.
-Export the current transactions as a CSV in the same format for a local copy.
+CSV imports show a review preview and warn about repeated rows before replacing
+the current dashboard; cancel to keep the current data. Export the current
+transactions as a CSV in the same format for a local copy.
 Filter the summary cards and charts by month and category; filters only affect
 the current browser view and do not modify the underlying transactions.
 Set a monthly budget to see spending progress for the selected month; it compares

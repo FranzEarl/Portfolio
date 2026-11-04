@@ -66,6 +66,21 @@
                     <button id="export-button" class="secondary-button" type="button">Export CSV</button>
                     <a id="download-sample" class="secondary-button" download="sample-expenses.csv">Download sample CSV</a>
                 </div>
+                <section id="import-preview" class="import-preview" aria-labelledby="import-preview-title" hidden>
+                    <h2 id="import-preview-title">Review CSV import</h2>
+                    <p id="import-preview-summary" role="status" aria-live="polite"></p>
+                    <p id="import-preview-warning" class="import-preview-warning" hidden></p>
+                    <ul id="import-preview-rows" class="import-preview-rows"></ul>
+                    <p id="import-preview-more" class="import-preview-more" hidden></p>
+                    <div class="import-preview-actions">
+                        <button id="confirm-import" class="upload-button" type="button">
+                            Replace dashboard data
+                        </button>
+                        <button id="cancel-import" class="secondary-button" type="button">
+                            Cancel import
+                        </button>
+                    </div>
+                </section>
                 <div class="saved-data-actions">
                     <label class="remember-data-option">
                         <input id="remember-data" type="checkbox">
