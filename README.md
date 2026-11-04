@@ -38,6 +38,11 @@ CSV files need a header row with `date`, `category`, and `amount` columns.
 Dates use `YYYY-MM-DD`; an optional `description` column appears in the
 transaction list and is included in exports, but not in summary charts.
 The transaction list follows the month and category filters.
+Search its visible rows by date, category, or description, and sort them by date
+or amount. Search and sorting do not change the summary totals.
+Search the visible transactions by date, category, or description, and sort by
+date or amount. Search and sorting only change the transaction list, not the
+summary totals.
 
 ## Study Performance Dashboard
 

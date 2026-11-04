@@ -49,6 +49,8 @@ const elements = {
     average: document.querySelector("#average-transaction"),
     categories: document.querySelector("#category-chart"),
     months: document.querySelector("#monthly-chart"),
+    transactionSearch: document.querySelector("#transaction-search"),
+    transactionSort: document.querySelector("#transaction-sort"),
     transactionRows: document.querySelector("#transaction-rows"),
     transactionCount: document.querySelector("#transaction-list-count")
 };
@@ -238,7 +240,6 @@ function renderDashboard(expenses) {
 
     renderChart(elements.categories, categoryEntries, "No expense categories to show.");
     renderChart(elements.months, monthEntries, "No monthly spending to show.");
-    renderTransactions(expenses);
 }
 
 function renderTransactions(expenses) {
@@ -250,7 +251,7 @@ function renderTransactions(expenses) {
         const cell = document.createElement("td");
         cell.colSpan = 4;
         cell.className = "transaction-empty";
-        cell.textContent = "No transactions match these filters.";
+        cell.textContent = "No transactions match the search or selected filters.";
         row.append(cell);
         elements.transactionRows.replaceChildren(row);
         return;
@@ -290,13 +291,47 @@ function filterExpenses() {
 
 function renderFilteredExpenses(statusMessage) {
     const filteredExpenses = filterExpenses();
+    const matchingExpenses = filterTransactions(filteredExpenses);
     renderDashboard(filteredExpenses);
+    renderTransactions(matchingExpenses);
     renderBudget();
     if (statusMessage) {
         setStatus(statusMessage);
+    } else if (elements.transactionSearch.value.trim()) {
+        setStatus(
+            `Showing ${matchingExpenses.length} of ${filteredExpenses.length} transactions ` +
+            "matching the search."
+        );
     } else {
         setStatus(`Showing ${filteredExpenses.length} of ${currentExpenses.length} transactions.`);
     }
+}
+
+function filterTransactions(expenses) {
+    const query = elements.transactionSearch.value.trim().toLocaleLowerCase();
+    const matchingExpenses = query
+        ? expenses.filter((expense) =>
+            [expense.date, expense.category, expense.description]
+                .some((value) => value.toLocaleLowerCase().includes(query))
+        )
+        : [...expenses];
+
+    switch (elements.transactionSort.value) {
+        case "date-desc":
+            matchingExpenses.sort((left, right) => right.date.localeCompare(left.date));
+            break;
+        case "date-asc":
+            matchingExpenses.sort((left, right) => left.date.localeCompare(right.date));
+            break;
+        case "amount-desc":
+            matchingExpenses.sort((left, right) => right.amount - left.amount);
+            break;
+        case "amount-asc":
+            matchingExpenses.sort((left, right) => left.amount - right.amount);
+            break;
+    }
+
+    return matchingExpenses;
 }
 
 function renderBudget() {
@@ -479,6 +514,18 @@ elements.clearSavedData.addEventListener("click", clearSavedExpenses);
 elements.monthFilter.addEventListener("change", () => renderFilteredExpenses());
 elements.categoryFilter.addEventListener("change", () => renderFilteredExpenses());
 elements.budgetTarget.addEventListener("input", renderBudget);
+elements.transactionSearch.addEventListener("input", () => {
+    const filteredExpenses = filterExpenses();
+    const matchingExpenses = filterTransactions(filteredExpenses);
+    renderTransactions(matchingExpenses);
+    setStatus(
+        `Showing ${matchingExpenses.length} of ${filteredExpenses.length} transactions ` +
+        "matching the search."
+    );
+});
+elements.transactionSort.addEventListener("change", () => {
+    renderTransactions(filterTransactions(filterExpenses()));
+});
 
 elements.exportButton.addEventListener("click", () => {
     const filename = "expenses.csv";
