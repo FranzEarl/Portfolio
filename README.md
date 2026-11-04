@@ -83,6 +83,15 @@ independent of any job board or country so an approved feed can be added later
 without changing the analysis model. Run its CSV parsing, analysis, filtering,
 and safety tests with `node --test projects/tests/job-trends.test.js`.
 
+## Philippines Labor Market Explorer
+
+The public-statistics dashboard is in `projects/ph-labor-market/`. It fetches
+annual Philippines indicators from the free World Bank API without an account,
+subscription, or API key. It visualizes modeled unemployment and labor-force
+estimates alongside employment shares by sector. These are broad annual labor
+statistics, not current job listings or a measure of skills demand. Run its
+response-validation tests with `node --test projects/tests/ph-labor-market.test.js`.
+
 ## C Programs
 
 The C source files are in `projects/c-programs/`, with a browsable listing at
