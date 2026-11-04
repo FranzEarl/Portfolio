@@ -62,37 +62,35 @@
                 </div>
             </section>
 
-            <section class="program-overview" aria-label="About this project">
+            <section class="program-overview" aria-label="Study Performance case study">
                 <article class="program-overview-card">
-                    <p class="program-overview-label">THE PROJECT</p>
-                    <h2>What I built</h2>
+                    <p class="program-overview-label">THE CHALLENGE</p>
+                    <h2>Compare course signals together</h2>
                     <p>
-                        A student performance dashboard that imports course data from
-                        CSV and summarizes grades, attendance, and study hours across
-                        any number of courses.
+                        Grades, attendance, and time spent studying are useful together,
+                        but separate course records are hard to compare at a glance.
                     </p>
                 </article>
                 <article class="program-overview-card">
-                    <p class="program-overview-label">THE TOOLKIT</p>
-                    <h2>Tools used</h2>
+                    <p class="program-overview-label">THE APPROACH</p>
+                    <h2>Turn course data into a snapshot</h2>
                     <p>
-                        Built with HTML, CSS, and JavaScript. CSV files are processed
-                        locally in the browser, with native DOM and CSS visualizations
-                        and no charting dependencies.
+                        I built a CSV-driven dashboard that calculates course averages
+                        and shows grade and study-hour comparisons alongside a detailed
+                        course table.
                     </p>
                 </article>
                 <article class="program-overview-card">
-                    <p class="program-overview-label">THE PRACTICE</p>
-                    <h2>What I practiced</h2>
+                    <p class="program-overview-label">KEY DECISION</p>
+                    <h2>Use fictional, local sample data</h2>
                     <p>
-                        I practiced parsing and validating CSV data, calculating summary
-                        metrics, rendering accessible charts and tables, and testing
-                        invalid input without losing the current dashboard.
+                        The example avoids real student records. Imports stay in the
+                        browser, and invalid files are rejected without replacing the
+                        current dashboard.
                     </p>
                 </article>
             </section>
-
-            <section class="study-summary" aria-label="Semester summary">
+            <section id="dashboard-summary" class="study-summary" aria-label="Semester summary">
                 <article class="study-stat">
                     <p class="study-stat-label">AVERAGE GRADE</p>
                     <p id="average-grade" class="study-stat-value">—</p>
