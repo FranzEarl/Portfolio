@@ -56,7 +56,9 @@ const elements = {
 };
 
 const savedDataKey = "franzearl.expense-insights.saved-data.v1";
+const savedBudgetsKey = "franzearl.expense-insights.saved-budgets.v1";
 let currentExpenses = sampleExpenses;
+const budgetTargets = new Map();
 
 function parseCsv(text) {
     const records = [];
@@ -375,6 +377,62 @@ function renderBudget() {
     }
 }
 
+function saveBudgetTargets() {
+    if (!elements.rememberData.checked) return;
+
+    if (budgetTargets.size === 0) {
+        localStorage.removeItem(savedBudgetsKey);
+        return;
+    }
+
+    localStorage.setItem(savedBudgetsKey, JSON.stringify(Object.fromEntries(budgetTargets)));
+}
+
+function restoreBudgetTargets() {
+    const savedBudgets = localStorage.getItem(savedBudgetsKey);
+    if (savedBudgets === null) return;
+
+    const parsedBudgets = JSON.parse(savedBudgets);
+    if (!parsedBudgets || typeof parsedBudgets !== "object" || Array.isArray(parsedBudgets)) {
+        throw new Error("Saved monthly budgets have an invalid format.");
+    }
+
+    const targets = Object.entries(parsedBudgets);
+    targets.forEach(([month, budget]) => {
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month) ||
+            typeof budget !== "number" || !Number.isFinite(budget) || budget <= 0) {
+            throw new Error("Saved monthly budgets contain an invalid target.");
+        }
+    });
+    targets.forEach(([month, budget]) => {
+        budgetTargets.set(month, budget);
+    });
+}
+
+function syncBudgetTargetToMonth() {
+    const target = budgetTargets.get(elements.monthFilter.value);
+    elements.budgetTarget.value = target === undefined ? "" : String(target);
+    renderBudget();
+}
+
+function updateBudgetTarget() {
+    const month = elements.monthFilter.value;
+    const rawBudget = elements.budgetTarget.value.trim();
+
+    if (month && rawBudget === "") {
+        budgetTargets.delete(month);
+    } else if (month && Number.isFinite(Number(rawBudget)) && Number(rawBudget) > 0) {
+        budgetTargets.set(month, Number(rawBudget));
+    }
+
+    try {
+        saveBudgetTargets();
+    } catch (error) {
+        setStatus(`Unable to save monthly budget on this device: ${error.message}`, true);
+    }
+    renderBudget();
+}
+
 function updateFilterOptions(reset = false) {
     const selections = [
         {
@@ -421,6 +479,7 @@ function updateFilterOptions(reset = false) {
 function loadExpenses(expenses, sourceMessage, resetFilters = false) {
     currentExpenses = expenses;
     updateFilterOptions(resetFilters);
+    syncBudgetTargetToMonth();
     renderFilteredExpenses(sourceMessage);
     if (elements.rememberData.checked) {
         saveCurrentExpenses(`${sourceMessage} Remembered on this device.`);
@@ -454,6 +513,7 @@ function serializeExpenses(expenses) {
 function saveCurrentExpenses(successMessage = "Current data remembered on this device.") {
     try {
         localStorage.setItem(savedDataKey, serializeExpenses(currentExpenses));
+        saveBudgetTargets();
         setStatus(successMessage);
     } catch (error) {
         setStatus(`Unable to save data on this device: ${error.message}`, true);
@@ -467,11 +527,24 @@ function restoreSavedExpenses() {
 
         const expenses = parseExpenses(savedCsv);
         elements.rememberData.checked = true;
+        let budgetRestoreError = null;
+        try {
+            restoreBudgetTargets();
+        } catch (error) {
+            budgetRestoreError = error;
+        }
         currentExpenses = expenses;
         updateFilterOptions();
+        syncBudgetTargetToMonth();
         renderFilteredExpenses();
         const label = expenses.length === 1 ? "transaction" : "transactions";
-        setStatus(`Restored ${expenses.length} saved ${label} from this device.`);
+        const status = `Restored ${expenses.length} saved ${label} from this device.`;
+        setStatus(
+            budgetRestoreError
+                ? `${status} Monthly budgets could not be restored: ${budgetRestoreError.message}`
+                : status,
+            Boolean(budgetRestoreError)
+        );
     } catch (error) {
         setStatus(`Unable to restore saved data: ${error.message}`, true);
     }
@@ -480,6 +553,7 @@ function restoreSavedExpenses() {
 function clearSavedExpenses() {
     try {
         localStorage.removeItem(savedDataKey);
+        localStorage.removeItem(savedBudgetsKey);
         elements.rememberData.checked = false;
         setStatus("Saved data cleared. The current dashboard remains until you leave or reload.");
     } catch (error) {
@@ -502,6 +576,7 @@ elements.rememberData.addEventListener("change", () => {
 
     try {
         localStorage.removeItem(savedDataKey);
+        localStorage.removeItem(savedBudgetsKey);
         setStatus("Remembering is off. Previously saved data was removed.");
     } catch (error) {
         elements.rememberData.checked = true;
@@ -511,9 +586,12 @@ elements.rememberData.addEventListener("change", () => {
 
 elements.clearSavedData.addEventListener("click", clearSavedExpenses);
 
-elements.monthFilter.addEventListener("change", () => renderFilteredExpenses());
+elements.monthFilter.addEventListener("change", () => {
+    syncBudgetTargetToMonth();
+    renderFilteredExpenses();
+});
 elements.categoryFilter.addEventListener("change", () => renderFilteredExpenses());
-elements.budgetTarget.addEventListener("input", renderBudget);
+elements.budgetTarget.addEventListener("input", updateBudgetTarget);
 elements.transactionSearch.addEventListener("input", () => {
     const filteredExpenses = filterExpenses();
     const matchingExpenses = filterTransactions(filteredExpenses);
