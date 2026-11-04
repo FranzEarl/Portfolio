@@ -88,9 +88,12 @@ and safety tests with `node --test projects/tests/job-trends.test.js`.
 The public-statistics dashboard is in `projects/ph-labor-market/`. It fetches
 annual Philippines indicators from the free World Bank API without an account,
 subscription, or API key. It visualizes modeled unemployment and labor-force
-estimates alongside employment shares by sector. These are broad annual labor
+estimates alongside employment shares by sector, calculates a data-driven
+summary of long-run sector changes and the recent youth unemployment series,
+and can export the annual observations to CSV. These are broad annual labor
 statistics, not current job listings or a measure of skills demand. Run its
-response-validation tests with `node --test projects/tests/ph-labor-market.test.js`.
+analysis, export, and response-validation tests with
+`node --test projects/tests/ph-labor-market.test.js`.
 
 ## C Programs
 
