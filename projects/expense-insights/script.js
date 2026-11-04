@@ -52,13 +52,22 @@ const elements = {
     transactionSearch: document.querySelector("#transaction-search"),
     transactionSort: document.querySelector("#transaction-sort"),
     transactionRows: document.querySelector("#transaction-rows"),
-    transactionCount: document.querySelector("#transaction-list-count")
+    transactionCount: document.querySelector("#transaction-list-count"),
+    expenseForm: document.querySelector("#expense-form"),
+    expenseFormTitle: document.querySelector("#expense-form-title"),
+    expenseDate: document.querySelector("#expense-date"),
+    expenseCategory: document.querySelector("#expense-category"),
+    expenseDescription: document.querySelector("#expense-description"),
+    expenseAmount: document.querySelector("#expense-amount"),
+    expenseSubmit: document.querySelector("#expense-submit"),
+    expenseCancel: document.querySelector("#expense-cancel")
 };
 
 const savedDataKey = "franzearl.expense-insights.saved-data.v1";
 const savedBudgetsKey = "franzearl.expense-insights.saved-budgets.v1";
 let currentExpenses = sampleExpenses;
 const budgetTargets = new Map();
+let editingExpenseIndex = null;
 
 function parseCsv(text) {
     const records = [];
@@ -251,7 +260,7 @@ function renderTransactions(expenses) {
     if (expenses.length === 0) {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
-        cell.colSpan = 4;
+        cell.colSpan = 5;
         cell.className = "transaction-empty";
         cell.textContent = "No transactions match the search or selected filters.";
         row.append(cell);
@@ -267,6 +276,7 @@ function renderTransactions(expenses) {
             expense.description || "—",
             currency.format(expense.amount)
         ];
+        const expenseIndex = currentExpenses.indexOf(expense);
 
         values.forEach((value, index) => {
             const cell = document.createElement("td");
@@ -276,10 +286,101 @@ function renderTransactions(expenses) {
             }
             row.append(cell);
         });
+
+        const actions = document.createElement("td");
+        actions.className = "transaction-actions";
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.textContent = "Edit";
+        editButton.setAttribute("aria-label", `Edit ${expense.category} expense from ${expense.date}`);
+        editButton.addEventListener("click", () => editExpense(expenseIndex));
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Delete";
+        deleteButton.setAttribute("aria-label", `Delete ${expense.category} expense from ${expense.date}`);
+        deleteButton.addEventListener("click", () => deleteExpense(expenseIndex));
+        actions.append(editButton, deleteButton);
+        row.append(actions);
         return row;
     });
 
     elements.transactionRows.replaceChildren(...rows);
+}
+
+function resetExpenseForm() {
+    editingExpenseIndex = null;
+    elements.expenseFormTitle.textContent = "Add an expense";
+    elements.expenseSubmit.textContent = "Add expense";
+    elements.expenseCancel.hidden = true;
+    elements.expenseDate.value = "";
+    elements.expenseCategory.value = "";
+    elements.expenseDescription.value = "";
+    elements.expenseAmount.value = "";
+}
+
+function editExpense(index) {
+    const expense = currentExpenses[index];
+    if (!expense) return;
+
+    editingExpenseIndex = index;
+    elements.expenseFormTitle.textContent = "Edit an expense";
+    elements.expenseSubmit.textContent = "Save changes";
+    elements.expenseCancel.hidden = false;
+    elements.expenseDate.value = expense.date;
+    elements.expenseCategory.value = expense.category;
+    elements.expenseDescription.value = expense.description || "";
+    elements.expenseAmount.value = String(expense.amount);
+    setStatus(`Editing the ${expense.category} expense from ${expense.date}.`);
+}
+
+function deleteExpense(index) {
+    const expense = currentExpenses[index];
+    if (!expense) return;
+    if (!confirm(`Delete the ${expense.category} expense from ${expense.date}?`)) return;
+
+    const updatedExpenses = currentExpenses.filter((_, expenseIndex) => expenseIndex !== index);
+    loadExpenses(updatedExpenses, "Expense deleted.");
+}
+
+function saveExpense(event) {
+    event.preventDefault();
+
+    const date = elements.expenseDate.value.trim();
+    const category = elements.expenseCategory.value.trim();
+    const description = elements.expenseDescription.value.trim();
+    const amountText = elements.expenseAmount.value.trim();
+    const amount = Number(amountText);
+    const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+
+    if (!dateMatch || !isValidDate(dateMatch)) {
+        setStatus("Use a valid YYYY-MM-DD date.", true);
+        return;
+    }
+    if (!category || category.length > 80) {
+        setStatus("Enter a category with at most 80 characters.", true);
+        return;
+    }
+    if (description.length > 200) {
+        setStatus("Keep the description to 200 characters or fewer.", true);
+        return;
+    }
+    if (amountText === "" || !Number.isFinite(amount) || amount < 0) {
+        setStatus("Amount must be a non-negative number.", true);
+        return;
+    }
+
+    const expense = { date, category, amount, description };
+    const updatedExpenses = [...currentExpenses];
+    const isEditing = editingExpenseIndex !== null;
+    if (isEditing) {
+        if (!updatedExpenses[editingExpenseIndex]) return;
+        updatedExpenses[editingExpenseIndex] = expense;
+    } else {
+        updatedExpenses.push(expense);
+    }
+
+    resetExpenseForm();
+    loadExpenses(updatedExpenses, isEditing ? "Expense updated." : "Expense added.");
 }
 
 function filterExpenses() {
@@ -477,6 +578,7 @@ function updateFilterOptions(reset = false) {
 }
 
 function loadExpenses(expenses, sourceMessage, resetFilters = false) {
+    resetExpenseForm();
     currentExpenses = expenses;
     updateFilterOptions(resetFilters);
     syncBudgetTargetToMonth();
@@ -585,6 +687,11 @@ elements.rememberData.addEventListener("change", () => {
 });
 
 elements.clearSavedData.addEventListener("click", clearSavedExpenses);
+elements.expenseForm.addEventListener("submit", saveExpense);
+elements.expenseCancel.addEventListener("click", () => {
+    resetExpenseForm();
+    setStatus("Expense edit canceled.");
+});
 
 elements.monthFilter.addEventListener("change", () => {
     syncBudgetTargetToMonth();

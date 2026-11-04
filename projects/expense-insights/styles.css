@@ -336,6 +336,65 @@
     font-size: 0.82rem;
 }
 
+.expense-entry-form {
+    margin-bottom: 20px;
+    padding: 16px;
+    border: 1px solid rgba(146, 153, 168, 0.18);
+    border-radius: 8px;
+    background: rgba(146, 153, 168, 0.04);
+}
+
+.expense-entry-form h3 {
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.expense-entry-fields {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.expense-entry-fields label {
+    display: grid;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.expense-entry-fields input {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid rgba(146, 153, 168, 0.3);
+    border-radius: 6px;
+    color: var(--text-primary);
+    background: var(--surface);
+    font: inherit;
+    font-weight: 400;
+}
+
+.expense-entry-fields input:focus-visible {
+    outline: 2px solid var(--accent-hover);
+    outline-offset: 3px;
+}
+
+.optional-label {
+    font-weight: 400;
+}
+
+.expense-entry-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.expense-entry-actions [hidden] {
+    display: none;
+}
+
 .transaction-controls {
     display: flex;
     flex-wrap: wrap;
@@ -411,6 +470,30 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+}
+
+.transaction-actions {
+    white-space: nowrap;
+}
+
+.transaction-actions button {
+    padding: 5px 8px;
+    border: 1px solid rgba(146, 153, 168, 0.3);
+    border-radius: 5px;
+    color: var(--text-primary);
+    background: transparent;
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+.transaction-actions button:hover {
+    border-color: var(--accent-hover);
+    color: var(--accent-hover);
+}
+
+.transaction-actions button + button {
+    margin-left: 5px;
 }
 
 .transaction-empty {
@@ -498,6 +581,10 @@
         flex-direction: column;
     }
 
+    .expense-entry-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .transaction-search input,
     .transaction-sort select {
         width: 100%;
@@ -535,6 +622,10 @@
 
     .saved-data-actions .secondary-button {
         width: 100%;
+    }
+
+    .expense-entry-fields {
+        grid-template-columns: 1fr;
     }
 }
 
