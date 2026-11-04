@@ -71,7 +71,15 @@ function createDashboard(storage = createStorage()) {
         "#transaction-rows",
         "#transaction-list-count",
         "#transaction-search",
-        "#transaction-sort"
+        "#transaction-sort",
+        "#expense-form",
+        "#expense-form-title",
+        "#expense-date",
+        "#expense-category",
+        "#expense-description",
+        "#expense-amount",
+        "#expense-submit",
+        "#expense-cancel"
     ];
     const elements = new Map(selectors.map((selector) => [selector, createElement()]));
     const downloads = [];
@@ -107,6 +115,9 @@ function createDashboard(storage = createStorage()) {
         },
         setTimeout(callback) {
             callback();
+        },
+        confirm() {
+            return true;
         },
         localStorage: storage
     });
@@ -288,6 +299,78 @@ test("transaction sorting orders matching rows by date and amount", async () => 
     sort.value = "amount-asc";
     sort.listeners.change();
     assert.deepEqual(dates(), ["2026-07-02", "2026-07-01", "2026-07-03"]);
+});
+
+test("manual expenses can be added, edited, and deleted", () => {
+    const dashboard = createDashboard();
+    const elementFor = (selector) => element(dashboard, selector);
+    const submit = () => elementFor("#expense-form").listeners.submit({
+        preventDefault() {}
+    });
+    const rememberCheckbox = elementFor("#remember-data");
+    rememberCheckbox.checked = true;
+    rememberCheckbox.listeners.change();
+
+    elementFor("#expense-date").value = "2026-07-01";
+    elementFor("#expense-category").value = "Food";
+    elementFor("#expense-description").value = "Lunch";
+    elementFor("#expense-amount").value = "125.50";
+    submit();
+
+    assert.equal(elementFor("#transaction-count").textContent, "25");
+    assert.equal(elementFor("#total-spending").textContent, "₱13,085.50");
+    assert.equal(elementFor("#transaction-rows").children.length, 25);
+    assert.equal(elementFor("#transaction-rows").children[24].children[2].textContent, "Lunch");
+    assert.match(elementFor("#data-status").textContent, /^Expense added\./);
+    assert.match(
+        dashboard.storage.getItem("franzearl.expense-insights.saved-data.v1"),
+        /2026-07-01,Food,125\.5,Lunch/
+    );
+
+    const newRowActions = elementFor("#transaction-rows").children[24].children[4];
+    newRowActions.children[0].listeners.click();
+    assert.equal(elementFor("#expense-form-title").textContent, "Edit an expense");
+    assert.equal(elementFor("#expense-date").value, "2026-07-01");
+    assert.equal(elementFor("#expense-amount").value, "125.5");
+
+    elementFor("#expense-category").value = "Dining";
+    elementFor("#expense-description").value = "Dinner";
+    submit();
+    assert.equal(elementFor("#transaction-rows").children[24].children[1].textContent, "Dining");
+    assert.equal(elementFor("#transaction-rows").children[24].children[2].textContent, "Dinner");
+    assert.equal(elementFor("#expense-form-title").textContent, "Add an expense");
+    assert.match(
+        dashboard.storage.getItem("franzearl.expense-insights.saved-data.v1"),
+        /2026-07-01,Dining,125\.5,Dinner/
+    );
+
+    elementFor("#transaction-rows").children[24].children[4].children[1].listeners.click();
+    assert.equal(elementFor("#transaction-count").textContent, "24");
+    assert.equal(elementFor("#total-spending").textContent, "₱12,960.00");
+    assert.equal(elementFor("#transaction-list-count").textContent, "24 transactions");
+    assert.doesNotMatch(
+        dashboard.storage.getItem("franzearl.expense-insights.saved-data.v1"),
+        /2026-07-01,Dining,125\.5,Dinner/
+    );
+});
+
+test("manual expense validation rejects malformed values without changing data", () => {
+    const dashboard = createDashboard();
+    const elementFor = (selector) => element(dashboard, selector);
+
+    elementFor("#expense-date").value = "2026-02-30";
+    elementFor("#expense-category").value = "Food";
+    elementFor("#expense-amount").value = "10";
+    elementFor("#expense-form").listeners.submit({ preventDefault() {} });
+    assert.equal(elementFor("#transaction-count").textContent, "24");
+    assert.equal(elementFor("#data-status").textContent, "Use a valid YYYY-MM-DD date.");
+    assert.equal(elementFor("#data-status").dataset.error, "true");
+
+    elementFor("#expense-date").value = "2026-07-01";
+    elementFor("#expense-amount").value = "-1";
+    elementFor("#expense-form").listeners.submit({ preventDefault() {} });
+    assert.equal(elementFor("#transaction-count").textContent, "24");
+    assert.equal(elementFor("#data-status").textContent, "Amount must be a non-negative number.");
 });
 
 test("month and category filters update summary cards and charts together", () => {

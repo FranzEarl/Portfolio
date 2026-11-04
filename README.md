@@ -42,6 +42,9 @@ The transaction list follows the month and category filters.
 Search its visible rows by date, category, or description, and sort them by date
 or amount. Search and sorting only change the transaction list, not the summary
 totals.
+Add expenses directly in the dashboard or edit and delete individual entries
+from the transaction list. Manual changes follow the same opt-in device-saving
+setting as imported data.
 
 ## Study Performance Dashboard
 
