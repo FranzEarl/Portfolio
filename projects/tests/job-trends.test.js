@@ -148,6 +148,22 @@ test("accepts canonical column names, escaped quotes, and embedded newlines", as
     assert.equal(element(dashboard, "#timeline-chart").children[0].textContent, "Add a date or posted_date column to see posting activity.");
 });
 
+test("imports Techmap CSV dates, work types, and source URLs from JSON-LD", async () => {
+    const dashboard = createDashboard();
+    await dashboard.importCsv(
+        "title,description,company,city,dateCreated,workType,jsonLD\n" +
+        'Analyst,Analyze data with SQL,Example,Manila,2026-10-30T01:17:41.210125Z,"[""FlexTime""]","{""url"":""https://example.com/jobs/1""}"'
+    );
+
+    const row = element(dashboard, "#job-listing-rows").children[0];
+    assert.equal(element(dashboard, "#listing-count").textContent, "1");
+    assert.equal(row.children[1].textContent, "Manila");
+    assert.equal(row.children[2].textContent, "FlexTime");
+    assert.equal(row.children[3].textContent, "2026-10-30");
+    assert.equal(row.children[5].children[0].href, "https://example.com/jobs/1");
+    assert.equal(element(dashboard, "#timeline-chart").children[0].children[2].textContent, "2026-10");
+});
+
 test("rejects malformed or oversized CSV without replacing the current results", async () => {
     const dashboard = createDashboard();
     await dashboard.importCsv(listingsCsv);
