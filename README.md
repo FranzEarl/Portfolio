@@ -75,11 +75,13 @@ from a CSV you provide and extracts normalized data skills from each title and
 description. The file is processed in your browser and is not uploaded or saved.
 Download `job-postings-template.csv` from the dashboard for the supported
 columns. `title` (or `job_title`) and `description` (or `job_description`) are
-required; `company`, `location`, `date` (or `posted_date`), `work_type`, and
-`source_url` are optional. The skill taxonomy and CSV fields are independent of
-any job board or country so an approved feed can be added later without changing
-the analysis model. Run its CSV parsing, analysis, filtering, and safety tests
-with `node --test projects/tests/job-trends.test.js`.
+required; `company`, `location`/`city`, `date`/`posted_date`/`dateCreated`,
+`work_type`/`workType`, and `source_url` are optional. Techmap CSV exports are
+supported directly, including ISO timestamp dates, JSON-array work types, and
+source URLs nested in `jsonLD`. The skill taxonomy and CSV fields are
+independent of any job board or country so an approved feed can be added later
+without changing the analysis model. Run its CSV parsing, analysis, filtering,
+and safety tests with `node --test projects/tests/job-trends.test.js`.
 
 ## C Programs
 

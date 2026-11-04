@@ -150,7 +150,7 @@ function normalizeDate(value) {
     const text = value.trim();
     if (!text) return "";
 
-    const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(text);
+    const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:T.*)?$/.exec(text);
     const us = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(text);
     let year;
     let month;
@@ -175,6 +175,47 @@ function normalizeDate(value) {
     return `${String(parts[0]).padStart(4, "0")}-${String(parts[1]).padStart(2, "0")}-${String(parts[2]).padStart(2, "0")}`;
 }
 
+function normalizeListValue(value) {
+    const text = value.trim();
+    if (!text) return "";
+
+    let values = [text];
+    if (text.startsWith("[")) {
+        try {
+            const parsed = JSON.parse(text);
+            if (Array.isArray(parsed)) {
+                values = parsed.map(String);
+            }
+        } catch {
+            values = [text];
+        }
+    }
+
+    return values
+        .map((item) => item.trim())
+        .filter((item) => item && item.toLowerCase() !== "n/a")
+        .join(", ");
+}
+
+function normalizeSourceUrl(value, jsonLdValue) {
+    let rawUrl = value.trim();
+    if (!rawUrl && jsonLdValue) {
+        try {
+            rawUrl = JSON.parse(jsonLdValue).url || "";
+        } catch {
+            rawUrl = "";
+        }
+    }
+    if (!rawUrl) return "";
+
+    try {
+        const url = new URL(rawUrl);
+        return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+    } catch {
+        return "";
+    }
+}
+
 function parseJobListings(text) {
     const records = parseCsv(text);
     if (records.length < 2) {
@@ -192,9 +233,10 @@ function parseJobListings(text) {
         description: findColumn(headers, "description", "job_description"),
         company: findColumn(headers, "company", "company_name", "employer"),
         location: findColumn(headers, "location", "job_location", "city"),
-        date: findColumn(headers, "date", "posted_date", "posting_date"),
-        workType: findColumn(headers, "work_type", "work_arrangement", "workplace_type"),
-        sourceUrl: findColumn(headers, "source_url", "url", "job_url", "link")
+        date: findColumn(headers, "date", "posted_date", "posting_date", "datecreated", "dateposted"),
+        workType: findColumn(headers, "work_type", "worktype", "work_arrangement", "workplace", "workplace_type"),
+        sourceUrl: findColumn(headers, "source_url", "url", "job_url", "link"),
+        jsonLd: findColumn(headers, "jsonld")
     };
     if (columns.title === -1 || columns.description === -1) {
         throw new Error("Required CSV columns: title and description (or job_title and job_description).");
@@ -209,26 +251,16 @@ function parseJobListings(text) {
             skipped += 1;
             return;
         }
-        const rawUrl = columns.sourceUrl === -1 ? "" : (row[columns.sourceUrl] || "").trim();
-        let sourceUrl = "";
-        if (rawUrl) {
-            try {
-                const url = new URL(rawUrl);
-                if (url.protocol === "https:" || url.protocol === "http:") {
-                    sourceUrl = url.href;
-                }
-            } catch {
-                sourceUrl = "";
-            }
-        }
+        const rawUrl = columns.sourceUrl === -1 ? "" : row[columns.sourceUrl] || "";
+        const jsonLdValue = columns.jsonLd === -1 ? "" : row[columns.jsonLd] || "";
         parsed.push({
             title,
             description,
             company: columns.company === -1 ? "" : (row[columns.company] || "").trim(),
             location: columns.location === -1 ? "" : (row[columns.location] || "").trim(),
             date: columns.date === -1 ? "" : normalizeDate(row[columns.date] || ""),
-            workType: columns.workType === -1 ? "" : (row[columns.workType] || "").trim(),
-            sourceUrl
+            workType: columns.workType === -1 ? "" : normalizeListValue(row[columns.workType] || ""),
+            sourceUrl: normalizeSourceUrl(rawUrl, jsonLdValue)
         });
     });
 
