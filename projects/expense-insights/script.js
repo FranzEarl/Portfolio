@@ -33,6 +33,13 @@ const currency = new Intl.NumberFormat("en-PH", {
 
 const elements = {
     file: document.querySelector("#csv-file"),
+    importPreview: document.querySelector("#import-preview"),
+    importPreviewSummary: document.querySelector("#import-preview-summary"),
+    importPreviewWarning: document.querySelector("#import-preview-warning"),
+    importPreviewRows: document.querySelector("#import-preview-rows"),
+    importPreviewMore: document.querySelector("#import-preview-more"),
+    confirmImport: document.querySelector("#confirm-import"),
+    cancelImport: document.querySelector("#cancel-import"),
     sampleButton: document.querySelector("#sample-button"),
     exportButton: document.querySelector("#export-button"),
     downloadSample: document.querySelector("#download-sample"),
@@ -68,6 +75,7 @@ const savedBudgetsKey = "franzearl.expense-insights.saved-budgets.v1";
 let currentExpenses = sampleExpenses;
 const budgetTargets = new Map();
 let editingExpenseIndex = null;
+let pendingImport = null;
 
 function parseCsv(text) {
     const records = [];
@@ -305,6 +313,72 @@ function renderTransactions(expenses) {
     });
 
     elements.transactionRows.replaceChildren(...rows);
+}
+
+function getExpenseDuplicateKey(expense) {
+    return JSON.stringify([
+        expense.date,
+        expense.category.toLocaleLowerCase(),
+        expense.amount,
+        (expense.description || "").toLocaleLowerCase()
+    ]);
+}
+
+function showImportPreview(expenses, fileName) {
+    const seen = new Set();
+    let duplicateCount = 0;
+    expenses.forEach((expense) => {
+        const key = getExpenseDuplicateKey(expense);
+        if (seen.has(key)) {
+            duplicateCount += 1;
+        } else {
+            seen.add(key);
+        }
+    });
+
+    pendingImport = { expenses, fileName };
+    elements.importPreview.hidden = false;
+    elements.importPreviewSummary.textContent =
+        `${fileName}: ${expenses.length} ${expenses.length === 1 ? "transaction" : "transactions"} ready to import.`;
+    elements.importPreviewWarning.hidden = duplicateCount === 0;
+    elements.importPreviewWarning.textContent = duplicateCount
+        ? `${duplicateCount} possible duplicate ${duplicateCount === 1 ? "transaction" : "transactions"} found in this file. Identical purchases may be intentional.`
+        : "";
+
+    const previewLimit = 8;
+    const rows = expenses.slice(0, previewLimit).map((expense) => {
+        const row = document.createElement("li");
+        row.textContent =
+            `${expense.date} | ${expense.category} | ${expense.description || "No description"} | ` +
+            currency.format(expense.amount);
+        return row;
+    });
+    elements.importPreviewRows.replaceChildren(...rows);
+    const remainingCount = expenses.length - rows.length;
+    elements.importPreviewMore.hidden = remainingCount === 0;
+    elements.importPreviewMore.textContent = remainingCount > 0
+        ? `And ${remainingCount} more ${remainingCount === 1 ? "transaction" : "transactions"}.`
+        : "";
+    setStatus(
+        duplicateCount
+            ? `Review the import preview. ${duplicateCount} possible duplicates were found.`
+            : "Review the CSV import preview before replacing the dashboard data."
+    );
+}
+
+function cancelImport() {
+    pendingImport = null;
+    elements.importPreview.hidden = true;
+    elements.importPreviewRows.replaceChildren();
+    setStatus("CSV import canceled. Current dashboard data was not changed.");
+}
+
+function confirmImport() {
+    if (!pendingImport) return;
+    const { expenses, fileName } = pendingImport;
+    pendingImport = null;
+    elements.importPreview.hidden = true;
+    loadExpenses(expenses, `Loaded ${expenses.length} transactions from ${fileName}.`);
 }
 
 function resetExpenseForm() {
@@ -578,6 +652,8 @@ function updateFilterOptions(reset = false) {
 }
 
 function loadExpenses(expenses, sourceMessage, resetFilters = false) {
+    pendingImport = null;
+    elements.importPreview.hidden = true;
     resetExpenseForm();
     currentExpenses = expenses;
     updateFilterOptions(resetFilters);
@@ -687,6 +763,8 @@ elements.rememberData.addEventListener("change", () => {
 });
 
 elements.clearSavedData.addEventListener("click", clearSavedExpenses);
+elements.confirmImport.addEventListener("click", confirmImport);
+elements.cancelImport.addEventListener("click", cancelImport);
 elements.expenseForm.addEventListener("submit", saveExpense);
 elements.expenseCancel.addEventListener("click", () => {
     resetExpenseForm();
@@ -738,9 +816,11 @@ elements.file.addEventListener("change", async (event) => {
     const [file] = event.target.files;
     if (!file) return;
 
+    pendingImport = null;
+    elements.importPreview.hidden = true;
     try {
         const expenses = parseExpenses(await file.text());
-        loadExpenses(expenses, `Loaded ${expenses.length} transactions from ${file.name}.`);
+        showImportPreview(expenses, file.name);
     } catch (error) {
         setStatus(error.message, true);
     } finally {

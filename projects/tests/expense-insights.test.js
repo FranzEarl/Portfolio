@@ -52,6 +52,13 @@ function createStorage() {
 function createDashboard(storage = createStorage()) {
     const selectors = [
         "#csv-file",
+        "#import-preview",
+        "#import-preview-summary",
+        "#import-preview-warning",
+        "#import-preview-rows",
+        "#import-preview-more",
+        "#confirm-import",
+        "#cancel-import",
         "#sample-button",
         "#export-button",
         "#download-sample",
@@ -139,6 +146,14 @@ function createDashboard(storage = createStorage()) {
                     files: [{ name, text: async () => text }]
                 }
             });
+            elements.get("#confirm-import").listeners.click();
+        },
+        async previewCsv(text, name = "expenses.csv") {
+            await elements.get("#csv-file").listeners.change({
+                target: {
+                    files: [{ name, text: async () => text }]
+                }
+            });
         }
     };
 }
@@ -170,6 +185,55 @@ test("expense dashboard exports current transactions in its import format", asyn
     await dashboard.importCsv(dashboard.exportedCsv, "expenses.csv");
     assert.equal(element(dashboard, "#transaction-count").textContent, "1");
     assert.equal(element(dashboard, "#total-spending").textContent, "₱12.50");
+});
+
+test("CSV import previews transactions and warns about repeated rows before replacing data", async () => {
+    const dashboard = createDashboard();
+    const originalTotal = element(dashboard, "#total-spending").textContent;
+    await dashboard.previewCsv(
+        "date,category,amount,description\n" +
+        "2026-07-01,Food,12.5,Lunch\n" +
+        "2026-07-01,food,12.5,lunch\n" +
+        "2026-07-02,Travel,34,Train\n",
+        "new-expenses.csv"
+    );
+
+    assert.equal(element(dashboard, "#import-preview").hidden, false);
+    assert.equal(
+        element(dashboard, "#import-preview-summary").textContent,
+        "new-expenses.csv: 3 transactions ready to import."
+    );
+    assert.equal(element(dashboard, "#import-preview-warning").hidden, false);
+    assert.match(element(dashboard, "#import-preview-warning").textContent, /1 possible duplicate transaction/);
+    assert.equal(element(dashboard, "#import-preview-rows").children.length, 3);
+    assert.equal(element(dashboard, "#transaction-count").textContent, "24");
+    assert.equal(element(dashboard, "#total-spending").textContent, originalTotal);
+
+    element(dashboard, "#confirm-import").listeners.click();
+    assert.equal(element(dashboard, "#import-preview").hidden, true);
+    assert.equal(element(dashboard, "#transaction-count").textContent, "3");
+    assert.equal(element(dashboard, "#total-spending").textContent, "₱59.00");
+    assert.equal(
+        element(dashboard, "#data-status").textContent,
+        "Loaded 3 transactions from new-expenses.csv."
+    );
+});
+
+test("canceling or failing a CSV preview leaves the current dashboard unchanged", async () => {
+    const dashboard = createDashboard();
+    const originalTotal = element(dashboard, "#total-spending").textContent;
+
+    await dashboard.previewCsv("date,category,amount\n2026-07-01,Food,12\n");
+    element(dashboard, "#cancel-import").listeners.click();
+    assert.equal(element(dashboard, "#import-preview").hidden, true);
+    assert.equal(element(dashboard, "#transaction-count").textContent, "24");
+    assert.equal(element(dashboard, "#total-spending").textContent, originalTotal);
+
+    await dashboard.previewCsv("date,category,amount\nnot-a-date,Food,12\n");
+    assert.equal(element(dashboard, "#import-preview").hidden, true);
+    assert.equal(element(dashboard, "#transaction-count").textContent, "24");
+    assert.equal(element(dashboard, "#total-spending").textContent, originalTotal);
+    assert.equal(element(dashboard, "#data-status").dataset.error, "true");
 });
 
 test("transaction list displays descriptions and updates to match filters", async () => {
