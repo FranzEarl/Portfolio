@@ -44,3 +44,26 @@ const observer = new IntersectionObserver((entries) => {
 sections.forEach((section) => {
     observer.observe(section);
 });
+
+if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const revealTargets = document.querySelectorAll(
+        ".section-heading, .about-text, .detail-card, .project-card, .skill-card, .contact-content"
+    );
+    const revealObserver = new IntersectionObserver((entries, currentObserver) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                currentObserver.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.12,
+        rootMargin: "0px 0px -30px 0px"
+    });
+
+    revealTargets.forEach((element, index) => {
+        element.classList.add("reveal-on-scroll");
+        element.style.setProperty("--reveal-delay", `${(index % 4) * 70}ms`);
+        revealObserver.observe(element);
+    });
+}
