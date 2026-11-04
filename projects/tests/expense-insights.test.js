@@ -69,7 +69,9 @@ function createDashboard(storage = createStorage()) {
         "#category-chart",
         "#monthly-chart",
         "#transaction-rows",
-        "#transaction-list-count"
+        "#transaction-list-count",
+        "#transaction-search",
+        "#transaction-sort"
     ];
     const elements = new Map(selectors.map((selector) => [selector, createElement()]));
     const downloads = [];
@@ -196,7 +198,7 @@ test("transaction list displays descriptions and updates to match filters", asyn
     assert.equal(element(dashboard, "#transaction-rows").children.length, 1);
     assert.equal(
         element(dashboard, "#transaction-rows").children[0].children[0].textContent,
-        "No transactions match these filters."
+        "No transactions match the search or selected filters."
     );
     assert.equal(element(dashboard, "#transaction-list-count").textContent, "0 transactions");
 });
@@ -206,6 +208,86 @@ test("transaction list provides a clear description placeholder when description
     await dashboard.importCsv("date,category,amount\n2026-07-01,Food,12.5\n");
 
     assert.equal(element(dashboard, "#transaction-rows").children[0].children[2].textContent, "—");
+});
+
+test("transaction search matches date, category, and description without changing summaries", async () => {
+    const dashboard = createDashboard();
+    await dashboard.importCsv(
+        "date,category,amount,description\n" +
+        "2026-07-01,Food,12.5,Lunch at Cafe\n" +
+        "2026-07-02,Travel,34,Train ticket\n" +
+        "2026-08-03,Food,8.5,Evening meal\n"
+    );
+
+    const originalTotal = element(dashboard, "#total-spending").textContent;
+    const search = element(dashboard, "#transaction-search");
+    search.value = "cafe";
+    search.listeners.input();
+
+    assert.equal(element(dashboard, "#transaction-rows").children.length, 1);
+    assert.equal(
+        element(dashboard, "#transaction-rows").children[0].children[2].textContent,
+        "Lunch at Cafe"
+    );
+    assert.equal(element(dashboard, "#transaction-list-count").textContent, "1 transaction");
+    assert.equal(element(dashboard, "#total-spending").textContent, originalTotal);
+
+    search.value = "travel";
+    search.listeners.input();
+    assert.equal(element(dashboard, "#transaction-rows").children.length, 1);
+    assert.equal(element(dashboard, "#transaction-rows").children[0].children[1].textContent, "Travel");
+
+    search.value = "2026-08";
+    search.listeners.input();
+    assert.equal(element(dashboard, "#transaction-rows").children.length, 1);
+    assert.equal(element(dashboard, "#transaction-rows").children[0].children[0].textContent, "2026-08-03");
+
+    element(dashboard, "#month-filter").value = "2026-07";
+    element(dashboard, "#month-filter").listeners.change();
+    search.value = "food";
+    search.listeners.input();
+    assert.equal(element(dashboard, "#transaction-rows").children.length, 1);
+    assert.equal(element(dashboard, "#transaction-count").textContent, "2");
+    assert.equal(element(dashboard, "#total-spending").textContent, "₱46.50");
+    assert.equal(element(dashboard, "#transaction-list-count").textContent, "1 transaction");
+
+    search.value = "missing";
+    search.listeners.input();
+    assert.equal(
+        element(dashboard, "#transaction-rows").children[0].children[0].textContent,
+        "No transactions match the search or selected filters."
+    );
+    assert.equal(element(dashboard, "#transaction-list-count").textContent, "0 transactions");
+});
+
+test("transaction sorting orders matching rows by date and amount", async () => {
+    const dashboard = createDashboard();
+    await dashboard.importCsv(
+        "date,category,amount,description\n" +
+        "2026-07-01,Food,12.5,Lunch\n" +
+        "2026-07-03,Travel,34,Train\n" +
+        "2026-07-02,Books,8.5,Notebook\n"
+    );
+
+    const rows = element(dashboard, "#transaction-rows");
+    const sort = element(dashboard, "#transaction-sort");
+    const dates = () => rows.children.map((row) => row.children[0].textContent);
+
+    sort.value = "date-desc";
+    sort.listeners.change();
+    assert.deepEqual(dates(), ["2026-07-03", "2026-07-02", "2026-07-01"]);
+
+    sort.value = "date-asc";
+    sort.listeners.change();
+    assert.deepEqual(dates(), ["2026-07-01", "2026-07-02", "2026-07-03"]);
+
+    sort.value = "amount-desc";
+    sort.listeners.change();
+    assert.deepEqual(dates(), ["2026-07-03", "2026-07-01", "2026-07-02"]);
+
+    sort.value = "amount-asc";
+    sort.listeners.change();
+    assert.deepEqual(dates(), ["2026-07-02", "2026-07-01", "2026-07-03"]);
 });
 
 test("month and category filters update summary cards and charts together", () => {
@@ -326,7 +408,7 @@ test("filters with no matches show empty chart states and leave exports unfilter
     assert.equal(element(dashboard, "#average-transaction").textContent, "₱0.00");
     assert.equal(element(dashboard, "#category-chart").children[0].textContent, "No expense categories to show.");
     assert.equal(element(dashboard, "#monthly-chart").children[0].textContent, "No monthly spending to show.");
-    assert.equal(element(dashboard, "#transaction-rows").children[0].children[0].textContent, "No transactions match these filters.");
+    assert.equal(element(dashboard, "#transaction-rows").children[0].children[0].textContent, "No transactions match the search or selected filters.");
 
     dashboard.exportCsv();
     assert.equal(dashboard.exportedCsv.trim().split("\r\n").length, 25);

@@ -163,6 +163,23 @@
                     </div>
                     <span id="transaction-list-count" class="transaction-list-count"></span>
                 </div>
+                <div class="transaction-controls">
+                    <label class="transaction-search">
+                        <span>Search transactions</span>
+                        <input id="transaction-search" type="search"
+                            placeholder="Search date, category, or description">
+                    </label>
+                    <label class="transaction-sort">
+                        <span>Sort by</span>
+                        <select id="transaction-sort">
+                            <option value="as-imported">As imported</option>
+                            <option value="date-desc">Date: newest first</option>
+                            <option value="date-asc">Date: oldest first</option>
+                            <option value="amount-desc">Amount: highest first</option>
+                            <option value="amount-asc">Amount: lowest first</option>
+                        </select>
+                    </label>
+                </div>
                 <div class="transaction-table-wrap">
                     <table class="transaction-table">
                         <thead>
