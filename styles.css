@@ -207,56 +207,6 @@ section {
     margin-bottom: 35px;
 }
 
-/* ---------- Hero Decoration ---------- */
-
-.hero {
-    position: relative;
-    isolation: isolate;
-}
-
-.hero::before {
-    content: "";
-    position: absolute;
-    width: 450px;
-    aspect-ratio: 1;
-    right: 7%;
-    top: 50%;
-    transform: translateY(-50%);
-
-    background: radial-gradient(
-        circle,
-        rgba(57, 132, 214, 0.18) 0%,
-        rgba(57, 132, 214, 0.06) 45%,
-        transparent 70%
-    );
-
-    filter: blur(15px);
-    pointer-events: none;
-    z-index: -1;
-    animation: hero-glow 8s ease-in-out infinite alternate;
-}
-
-.hero::after {
-    content: "";
-    position: absolute;
-    width: 380px;
-    aspect-ratio: 1;
-    right: 3%;
-    top: 50%;
-    transform: translateY(-50%);
-
-    border-radius: 50%;
-    border: 1px solid rgba(101, 165, 243, 0.12);
-
-    box-shadow:
-        0 0 0 35px rgba(101, 165, 243, 0.025),
-        0 0 0 70px rgba(101, 165, 243, 0.02);
-
-    pointer-events: none;
-    z-index: -1;
-    animation: hero-rings 12s ease-in-out infinite alternate;
-}
-
 @keyframes hero-enter {
     from {
         opacity: 0;
@@ -266,30 +216,6 @@ section {
     to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-@keyframes hero-glow {
-    from {
-        opacity: 0.65;
-        transform: translateY(-50%) scale(0.94);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(-50%) scale(1.06);
-    }
-}
-
-@keyframes hero-rings {
-    from {
-        opacity: 0.55;
-        transform: translateY(-50%) scale(0.97);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(-50%) scale(1.04);
     }
 }
 
@@ -467,11 +393,6 @@ section {
         font-size: clamp(2rem, 10vw, 3.25rem);
     }
 
-    .hero::before,
-    .hero::after {
-        right: -180px;
-        opacity: 0.35;
-    }
 }
 
 
@@ -508,6 +429,10 @@ section {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.hero .project-carousel-controls {
+    max-width: none;
 }
 
 .project-carousel-arrow {
@@ -789,7 +714,7 @@ section {
 
 /* ---------- Projects Responsive ---------- */
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
     .hero {
         min-height: auto;
         padding: 120px 40px 90px;

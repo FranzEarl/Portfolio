@@ -51,7 +51,34 @@ if (projectCarousel) {
     const projectSlides = [...projectCarousel.querySelectorAll(".project-slide")];
     const projectDots = [...projectCarousel.querySelectorAll(".project-carousel-dot")];
     const projectCount = projectCarousel.querySelector(".project-carousel-count");
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let activeProject = 0;
+    let autoAdvanceTimer;
+    let isHovered = false;
+    let hasFocus = false;
+    let isInViewport = false;
+
+    function stopAutoAdvance() {
+        window.clearInterval(autoAdvanceTimer);
+        autoAdvanceTimer = undefined;
+    }
+
+    function updateAutoAdvance() {
+        stopAutoAdvance();
+        if (
+            prefersReducedMotion.matches
+            || isHovered
+            || hasFocus
+            || document.hidden
+            || !isInViewport
+        ) {
+            return;
+        }
+
+        autoAdvanceTimer = window.setInterval(() => {
+            showProject(activeProject + 1);
+        }, 6500);
+    }
 
     function showProject(index) {
         activeProject = (index + projectSlides.length) % projectSlides.length;
@@ -66,6 +93,7 @@ if (projectCarousel) {
             dot.setAttribute("aria-current", String(dotIndex === activeProject));
         });
         projectCount.textContent = `${String(activeProject + 1).padStart(2, "0")} / ${String(projectSlides.length).padStart(2, "0")}`;
+        updateAutoAdvance();
     }
 
     projectCarousel.querySelectorAll("[data-project-direction]").forEach((button) => {
@@ -77,6 +105,37 @@ if (projectCarousel) {
     projectDots.forEach((button) => {
         button.addEventListener("click", () => showProject(Number(button.dataset.projectIndex)));
     });
+
+    projectCarousel.addEventListener("mouseenter", () => {
+        isHovered = true;
+        updateAutoAdvance();
+    });
+
+    projectCarousel.addEventListener("mouseleave", () => {
+        isHovered = false;
+        updateAutoAdvance();
+    });
+
+    projectCarousel.addEventListener("focusin", () => {
+        hasFocus = true;
+        updateAutoAdvance();
+    });
+
+    projectCarousel.addEventListener("focusout", (event) => {
+        if (!projectCarousel.contains(event.relatedTarget)) {
+            hasFocus = false;
+            updateAutoAdvance();
+        }
+    });
+
+    document.addEventListener("visibilitychange", updateAutoAdvance);
+    prefersReducedMotion.addEventListener("change", updateAutoAdvance);
+
+    const carouselObserver = new IntersectionObserver(([entry]) => {
+        isInViewport = entry.isIntersecting;
+        updateAutoAdvance();
+    });
+    carouselObserver.observe(projectCarousel);
 
     projectCarousel.addEventListener("keydown", (event) => {
         if (event.key === "ArrowRight") showProject(activeProject + 1);
