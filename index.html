@@ -53,6 +53,60 @@
                     <a href="#about" class="btn-secondary">About Me</a>
                 </div>
             </div>
+            <div class="project-carousel" role="region" aria-label="Featured data projects" aria-roledescription="carousel">
+                <div class="project-grid">
+                    <article class="project-card project-slide" role="group" aria-roledescription="slide" aria-label="1 of 2: Personal Expense Insights">
+                        <a href="projects/expense-insights/index.html" class="project-card-link">
+                            <div class="project-image project-image-expenses" aria-hidden="true">
+                                <div class="dashboard-preview">
+                                    <div class="preview-heading"><span>Expense Insights</span><i></i></div>
+                                    <div class="preview-stats"><i></i><i></i><i></i></div>
+                                    <div class="preview-chart">
+                                        <span style="--bar-height: 42%"></span><span style="--bar-height: 72%"></span>
+                                        <span style="--bar-height: 55%"></span><span style="--bar-height: 90%"></span>
+                                        <span style="--bar-height: 62%"></span><span style="--bar-height: 78%"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-info">
+                                <h3>Personal Expense Insights</h3>
+                                <p>Explore monthly spending and category totals with a simple dashboard. Import a CSV or try the sample data.</p>
+                                <div class="project-tags"><span>JavaScript</span><span>Data Visualization</span></div>
+                                <div class="project-link">View Project <span>↗</span></div>
+                            </div>
+                        </a>
+                    </article>
+                    <article class="project-card project-slide" role="group" aria-roledescription="slide" aria-label="2 of 2: Study Performance Dashboard" hidden>
+                        <a href="projects/study-performance/index.html" class="project-card-link">
+                            <div class="project-image project-image-study" aria-hidden="true">
+                                <div class="dashboard-preview">
+                                    <div class="preview-heading"><span>Study Performance</span><i></i></div>
+                                    <div class="preview-stats"><i></i><i></i><i></i></div>
+                                    <div class="preview-grades">
+                                        <span style="--grade-width: 91%"></span><span style="--grade-width: 76%"></span>
+                                        <span style="--grade-width: 84%"></span><span style="--grade-width: 68%"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-info">
+                                <h3>Study Performance Dashboard</h3>
+                                <p>Explore fictional course grades, study hours, and attendance in a sample student dashboard.</p>
+                                <div class="project-tags"><span>JavaScript</span><span>Data Visualization</span></div>
+                                <div class="project-link">View Project <span>↗</span></div>
+                            </div>
+                        </a>
+                    </article>
+                </div>
+                <div class="project-carousel-controls" aria-label="Featured project controls">
+                    <button class="project-carousel-arrow" type="button" data-project-direction="-1" aria-label="Previous project">←</button>
+                    <div class="project-carousel-dots">
+                        <button class="project-carousel-dot" type="button" data-project-index="0" aria-label="Show Personal Expense Insights" aria-current="true"></button>
+                        <button class="project-carousel-dot" type="button" data-project-index="1" aria-label="Show Study Performance Dashboard" aria-current="false"></button>
+                    </div>
+                    <button class="project-carousel-arrow" type="button" data-project-direction="1" aria-label="Next project">→</button>
+                    <span class="project-carousel-count" aria-live="polite">01 / 02</span>
+                </div>
+            </div>
         </section>
         
         <!-- About Section -->
@@ -105,16 +159,13 @@
 
                 <div class="section-heading">
                     <p class="section-label">MY WORK</p>
-                    <h2>Featured Projects</h2>
+                    <h2>All Projects</h2>
                     <p class="section-description">
-                        A collection of projects I've worked on
-                        while learning and exploring new technologies.
+                        Browse the projects I've built while learning and exploring new technologies.
                     </p>
                 </div>
 
                 <div class="project-grid">
-
-                    <!--Project Card-->
                     <article class="project-card">
                         <a href="projects/c-programs.html" class="project-card-link">
                             <div class="project-image project-image-code" aria-hidden="true">
@@ -127,97 +178,55 @@
                                     <p><span>05</span> }</p>
                                 </div>
                             </div>
-                    
                             <div class="project-info">
                                 <h3>C Programs</h3>
                                 <p>A collection of small C programs.</p>
-                    
-                                <div class="project-tags">
-                                    <span>C</span>
-                                    <span>Programming</span>
-                                </div>
-                    
-                                <div class="project-link">
-                                    View Project <span>↗</span>
-                                </div>
+                                <div class="project-tags"><span>C</span><span>Programming</span></div>
+                                <div class="project-link">View Project <span>↗</span></div>
                             </div>
                         </a>
                     </article>
-
                     <article class="project-card">
                         <a href="projects/expense-insights/index.html" class="project-card-link">
                             <div class="project-image project-image-expenses" aria-hidden="true">
                                 <div class="dashboard-preview">
-                                    <div class="preview-heading">
-                                        <span>Expense Insights</span><i></i>
-                                    </div>
+                                    <div class="preview-heading"><span>Expense Insights</span><i></i></div>
                                     <div class="preview-stats"><i></i><i></i><i></i></div>
                                     <div class="preview-chart">
-                                        <span style="--bar-height: 42%"></span>
-                                        <span style="--bar-height: 72%"></span>
-                                        <span style="--bar-height: 55%"></span>
-                                        <span style="--bar-height: 90%"></span>
-                                        <span style="--bar-height: 62%"></span>
-                                        <span style="--bar-height: 78%"></span>
+                                        <span style="--bar-height: 42%"></span><span style="--bar-height: 72%"></span>
+                                        <span style="--bar-height: 55%"></span><span style="--bar-height: 90%"></span>
+                                        <span style="--bar-height: 62%"></span><span style="--bar-height: 78%"></span>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="project-info">
                                 <h3>Personal Expense Insights</h3>
-                                <p>
-                                    Explore monthly spending and category totals with a
-                                    simple dashboard. Import a CSV or try the sample data.
-                                </p>
-
-                                <div class="project-tags">
-                                    <span>JavaScript</span>
-                                    <span>Data Visualization</span>
-                                </div>
-
-                                <div class="project-link">
-                                    View Project <span>↗</span>
-                                </div>
+                                <p>Explore monthly spending and category totals with a simple dashboard. Import a CSV or try the sample data.</p>
+                                <div class="project-tags"><span>JavaScript</span><span>Data Visualization</span></div>
+                                <div class="project-link">View Project <span>↗</span></div>
                             </div>
                         </a>
                     </article>
-
                     <article class="project-card">
                         <a href="projects/study-performance/index.html" class="project-card-link">
                             <div class="project-image project-image-study" aria-hidden="true">
                                 <div class="dashboard-preview">
-                                    <div class="preview-heading">
-                                        <span>Study Performance</span><i></i>
-                                    </div>
+                                    <div class="preview-heading"><span>Study Performance</span><i></i></div>
                                     <div class="preview-stats"><i></i><i></i><i></i></div>
                                     <div class="preview-grades">
-                                        <span style="--grade-width: 91%"></span>
-                                        <span style="--grade-width: 76%"></span>
-                                        <span style="--grade-width: 84%"></span>
-                                        <span style="--grade-width: 68%"></span>
+                                        <span style="--grade-width: 91%"></span><span style="--grade-width: 76%"></span>
+                                        <span style="--grade-width: 84%"></span><span style="--grade-width: 68%"></span>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="project-info">
                                 <h3>Study Performance Dashboard</h3>
-                                <p>
-                                    Explore fictional course grades, study hours, and
-                                    attendance in a sample student dashboard.
-                                </p>
-
-                                <div class="project-tags">
-                                    <span>JavaScript</span>
-                                    <span>Data Visualization</span>
-                                </div>
-
-                                <div class="project-link">
-                                    View Project <span>↗</span>
-                                </div>
+                                <p>Explore fictional course grades, study hours, and attendance in a sample student dashboard.</p>
+                                <div class="project-tags"><span>JavaScript</span><span>Data Visualization</span></div>
+                                <div class="project-link">View Project <span>↗</span></div>
                             </div>
                         </a>
                     </article>
-
                 </div>
             </div>
         </section>
