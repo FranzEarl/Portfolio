@@ -27,11 +27,12 @@ Export the current transactions as a CSV in the same format for a local copy.
 Filter the summary cards and charts by month and category; filters only affect
 the current browser view and do not modify the underlying transactions.
 Set a monthly budget to see spending progress for the selected month; it compares
-all categories and stays in the current page session.
+all categories. Budget targets stay in the current page session by default.
 Opt in with "Remember data on this device" to save the current dashboard data
-in this browser profile; it is restored on return. Use "Clear saved data" to
-remove the saved copy and turn remembering off. The current view stays in place
-until you leave or reload. Run dashboard tests with
+and monthly budget targets in this browser profile; they are restored on return.
+Turning remembering off or using "Clear saved data" removes the saved copies,
+but targets already set remain available in the current page session. Run
+dashboard tests with
 `node --test projects/tests/expense-insights.test.js`.
 
 CSV files need a header row with `date`, `category`, and `amount` columns.
@@ -39,10 +40,8 @@ Dates use `YYYY-MM-DD`; an optional `description` column appears in the
 transaction list and is included in exports, but not in summary charts.
 The transaction list follows the month and category filters.
 Search its visible rows by date, category, or description, and sort them by date
-or amount. Search and sorting do not change the summary totals.
-Search the visible transactions by date, category, or description, and sort by
-date or amount. Search and sorting only change the transaction list, not the
-summary totals.
+or amount. Search and sorting only change the transaction list, not the summary
+totals.
 
 ## Study Performance Dashboard
 

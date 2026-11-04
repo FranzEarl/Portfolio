@@ -451,11 +451,69 @@ test("expense dashboard autosaves when enabled and clears saved data", async () 
     await dashboard.importCsv("date,category,amount\n2026-07-02,Travel,34\n");
 
     assert.match(storage.getItem("franzearl.expense-insights.saved-data.v1"), /Travel,34/);
+    const monthFilter = element(dashboard, "#month-filter");
+    monthFilter.value = "2026-07";
+    monthFilter.listeners.change();
+    const budgetTarget = element(dashboard, "#budget-target");
+    budgetTarget.value = "500";
+    budgetTarget.listeners.input();
+    assert.equal(
+        storage.getItem("franzearl.expense-insights.saved-budgets.v1"),
+        '{"2026-07":500}'
+    );
+
     element(dashboard, "#clear-saved-data").listeners.click();
 
     assert.equal(storage.getItem("franzearl.expense-insights.saved-data.v1"), null);
+    assert.equal(storage.getItem("franzearl.expense-insights.saved-budgets.v1"), null);
     assert.equal(rememberCheckbox.checked, false);
+    assert.equal(budgetTarget.value, "500");
     assert.equal(element(dashboard, "#transaction-count").textContent, "1");
     assert.match(element(dashboard, "#data-status").textContent, /current dashboard remains/);
     assert.equal(element(createDashboard(storage), "#transaction-count").textContent, "24");
+});
+
+test("monthly budgets persist per month only while remembering is enabled", async () => {
+    const storage = createStorage();
+    const dashboard = createDashboard(storage);
+    const monthFilter = element(dashboard, "#month-filter");
+    const budgetTarget = element(dashboard, "#budget-target");
+
+    monthFilter.value = "2026-01";
+    monthFilter.listeners.change();
+    budgetTarget.value = "3000";
+    budgetTarget.listeners.input();
+    assert.equal(storage.getItem("franzearl.expense-insights.saved-budgets.v1"), null);
+
+    const rememberCheckbox = element(dashboard, "#remember-data");
+    rememberCheckbox.checked = true;
+    rememberCheckbox.listeners.change();
+
+    monthFilter.value = "2026-02";
+    monthFilter.listeners.change();
+    budgetTarget.value = "800";
+    budgetTarget.listeners.input();
+    assert.equal(
+        storage.getItem("franzearl.expense-insights.saved-budgets.v1"),
+        '{"2026-01":3000,"2026-02":800}'
+    );
+
+    const returnedDashboard = createDashboard(storage);
+    const returnedMonthFilter = element(returnedDashboard, "#month-filter");
+    const returnedBudgetTarget = element(returnedDashboard, "#budget-target");
+    returnedMonthFilter.value = "2026-01";
+    returnedMonthFilter.listeners.change();
+    assert.equal(returnedBudgetTarget.value, "3000");
+    returnedMonthFilter.value = "2026-02";
+    returnedMonthFilter.listeners.change();
+    assert.equal(returnedBudgetTarget.value, "800");
+
+    const returnedRememberCheckbox = element(returnedDashboard, "#remember-data");
+    returnedRememberCheckbox.checked = false;
+    returnedRememberCheckbox.listeners.change();
+    assert.equal(storage.getItem("franzearl.expense-insights.saved-data.v1"), null);
+    assert.equal(storage.getItem("franzearl.expense-insights.saved-budgets.v1"), null);
+    returnedMonthFilter.value = "2026-01";
+    returnedMonthFilter.listeners.change();
+    assert.equal(returnedBudgetTarget.value, "3000");
 });
