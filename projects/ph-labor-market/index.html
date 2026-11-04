@@ -59,6 +59,27 @@
                     Loading public World Bank statistics…
                 </p>
                 <div id="labor-metrics" class="labor-metrics" aria-label="Latest available indicators"></div>
+                <div class="labor-data-actions">
+                    <p>Use the download to explore the same annual observations in a spreadsheet or notebook.</p>
+                    <button id="download-data" class="labor-download-button" type="button" disabled>
+                        Download data CSV
+                    </button>
+                </div>
+            </section>
+
+            <section class="labor-findings" aria-labelledby="labor-findings-title">
+                <div class="labor-section-heading">
+                    <p class="labor-eyebrow">A QUICK READ</p>
+                    <h2 id="labor-findings-title">What changed in the data?</h2>
+                </div>
+                <div id="labor-findings" class="labor-findings-grid">
+                    <p class="labor-status">Findings will appear when the source data loads.</p>
+                </div>
+                <p class="labor-analysis-caveat">
+                    These are descriptive comparisons, not evidence that one change caused another.
+                    Sector percentages are shares of employment, while unemployment percentages use
+                    the labor force as their denominator.
+                </p>
             </section>
 
             <section class="labor-charts" aria-label="Labor market trends">
@@ -91,7 +112,9 @@
             <footer class="labor-source-note">
                 <p>
                     Source: <a href="https://data.worldbank.org/country/philippines" target="_blank" rel="noreferrer">World Bank, World Development Indicators</a>.
-                    The series shown are estimates and may be revised. Charts use annual values; the latest available year is shown for each indicator.
+                    Charts use annual values; the latest available year is shown for each indicator.
+                    Unemployment, labor-force participation, and employment-to-population indicators are ILO modeled estimates.
+                    Employment-by-sector values are shares of total employment. Estimates can be revised.
                 </p>
                 <p id="labor-source-updated"></p>
             </footer>

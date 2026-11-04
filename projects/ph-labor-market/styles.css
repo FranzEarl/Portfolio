@@ -125,6 +125,44 @@
     color: #ff9a9a;
 }
 
+.labor-data-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.labor-data-actions p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.labor-download-button {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 7px 12px;
+    border: 1px solid rgba(146, 153, 168, 0.3);
+    border-radius: 6px;
+    color: var(--text-primary);
+    background: transparent;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.labor-download-button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent-hover);
+}
+
+.labor-download-button:disabled {
+    cursor: wait;
+    opacity: 0.5;
+}
+
 .labor-metrics {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -153,6 +191,51 @@
 .labor-metric-year {
     color: var(--text-secondary);
     font-size: 0.76rem;
+}
+
+.labor-findings {
+    margin-top: 28px;
+}
+
+.labor-section-heading {
+    margin-bottom: 12px;
+}
+
+.labor-section-heading h2 {
+    margin: 5px 0 0;
+    font-size: 1.35rem;
+}
+
+.labor-findings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.labor-finding-card {
+    padding: 18px;
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+}
+
+.labor-finding-card h3 {
+    margin: 8px 0;
+    font-size: 1rem;
+}
+
+.labor-finding-card > p:last-child {
+    margin-bottom: 0;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.65;
+}
+
+.labor-analysis-caveat {
+    margin: 10px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.5;
 }
 
 .labor-charts {
@@ -269,6 +352,10 @@
         grid-template-columns: 1fr;
     }
 
+    .labor-findings-grid {
+        grid-template-columns: 1fr;
+    }
+
     .labor-chart-card-wide {
         grid-column: auto;
     }
@@ -282,6 +369,11 @@
 
     .labor-panel-heading {
         align-items: center;
+    }
+
+    .labor-data-actions {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     .labor-data-panel,
