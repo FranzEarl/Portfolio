@@ -28,36 +28,34 @@
                 </p>
             </section>
 
-            <section class="program-overview" aria-label="About this project">
+            <section class="program-overview" aria-label="Expense Insights case study">
                 <article class="program-overview-card">
-                    <p class="program-overview-label">THE PROJECT</p>
-                    <h2>What I built</h2>
+                    <p class="program-overview-label">THE CHALLENGE</p>
+                    <h2>Make spending easier to inspect</h2>
                     <p>
-                        A browser-based expense dashboard that summarizes transactions
-                        by category and month, with totals, transaction counts, and
-                        average spending.
+                        A transaction list alone makes it difficult to spot how spending
+                        changes across months or which categories account for the most.
                     </p>
                 </article>
                 <article class="program-overview-card">
-                    <p class="program-overview-label">THE TOOLKIT</p>
-                    <h2>Tools used</h2>
+                    <p class="program-overview-label">THE APPROACH</p>
+                    <h2>Keep analysis local and practical</h2>
                     <p>
-                        Built with HTML, CSS, and JavaScript. It uses browser file APIs
-                        to read CSV data locally and creates charts directly in the page
-                        without a charting library.
+                        I built a browser-only dashboard with CSV review, editable
+                        transactions, month and category summaries, and optional
+                        device-local saving.
                     </p>
                 </article>
                 <article class="program-overview-card">
-                    <p class="program-overview-label">THE PRACTICE</p>
-                    <h2>What I practiced</h2>
+                    <p class="program-overview-label">KEY DECISION</p>
+                    <h2>No server or chart dependency</h2>
                     <p>
-                        The project let me practice CSV parsing, validating user data,
-                        aggregating values, formatting currency, and updating a dashboard
-                        while keeping imported files on the user's device.
+                        CSV data stays in the browser; built-in HTML and CSS render the
+                        visuals. Saving is opt-in so private financial data is not kept
+                        automatically.
                     </p>
                 </article>
             </section>
-
             <section class="dashboard-toolbar" aria-label="Expense data">
                 <div class="data-actions">
                     <input id="csv-file" type="file" accept=".csv,text/csv">
@@ -133,7 +131,7 @@
                 <p id="data-status" class="data-status" role="status" aria-live="polite"></p>
             </section>
 
-            <section class="summary-grid" aria-label="Expense summary">
+            <section id="dashboard-summary" class="summary-grid" aria-label="Expense summary">
                 <article class="summary-card">
                     <p class="summary-label">TOTAL SPENDING</p>
                     <p id="total-spending" class="summary-value">—</p>

@@ -23,6 +23,7 @@ The browser-based expense dashboard is in `projects/expense-insights/`. Open
 `index.html` directly or serve the repository with `python -m http.server` and
 visit `/projects/expense-insights/`. It starts with fictional sample data; CSV
 imports are processed locally in your browser and are not uploaded.
+Its page includes a short case study.
 CSV imports show a review preview and warn about repeated rows before replacing
 the current dashboard; cancel to keep the current data. Export the current
 transactions as a CSV in the same format for a local copy.
@@ -52,7 +53,8 @@ setting as imported data.
 
 The study dashboard is in `projects/study-performance/`. Open `index.html`
 directly or serve the repository with `python -m http.server` and visit
-`/projects/study-performance/`. It presents fictional grades, attendance, and
+`/projects/study-performance/`. Its page includes a short case study. It
+presents fictional grades, attendance, and
 study hours for demonstration; it does not connect to a school system. Download
 `sample-study-performance.csv` from the dashboard
 to see the data format: one course per row, with `course`, `grade`,
