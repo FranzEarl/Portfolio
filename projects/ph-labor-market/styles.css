@@ -1,0 +1,300 @@
+.labor-dashboard {
+    min-height: 100vh;
+    padding: 120px 40px 72px;
+}
+
+.labor-container {
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.labor-heading {
+    max-width: 780px;
+    margin-bottom: 30px;
+}
+
+.labor-eyebrow {
+    margin: 0;
+    color: var(--accent-hover);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+}
+
+.labor-heading h1 {
+    margin: 10px 0 12px;
+    font-size: clamp(2.15rem, 5vw, 3.4rem);
+    line-height: 1.12;
+}
+
+.labor-heading h1 span {
+    color: var(--accent-hover);
+}
+
+.labor-intro,
+.labor-context article > p:last-child,
+.labor-card-heading > p:last-child,
+.labor-source-note,
+.labor-status {
+    color: var(--text-secondary);
+}
+
+.labor-intro {
+    max-width: 720px;
+    line-height: 1.65;
+}
+
+.labor-context {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.labor-context article,
+.labor-data-panel,
+.labor-metric,
+.labor-chart-card {
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+}
+
+.labor-context article {
+    padding: 18px;
+}
+
+.labor-context h2 {
+    margin: 7px 0;
+    font-size: 1rem;
+}
+
+.labor-context article > p:last-child {
+    margin-bottom: 0;
+    font-size: 0.84rem;
+    line-height: 1.6;
+}
+
+.labor-data-panel {
+    padding: 20px;
+}
+
+.labor-panel-heading,
+.labor-card-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.labor-panel-heading h2,
+.labor-card-heading h2 {
+    margin: 5px 0 0;
+    font-size: 1.15rem;
+}
+
+.labor-refresh-button {
+    min-height: 40px;
+    padding: 8px 14px;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    color: var(--text-primary);
+    background: var(--accent);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.labor-refresh-button:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.labor-refresh-button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.labor-status {
+    min-height: 1.4em;
+    margin: 16px 0 12px;
+    font-size: 0.86rem;
+}
+
+.labor-status[data-error="true"] {
+    color: #ff9a9a;
+}
+
+.labor-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.labor-metric {
+    min-height: 114px;
+    padding: 15px;
+}
+
+.labor-metric-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.labor-metric-value {
+    display: block;
+    margin-top: 7px;
+    font-size: 1.65rem;
+    font-weight: 700;
+}
+
+.labor-metric-year {
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+}
+
+.labor-charts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.labor-chart-card {
+    min-width: 0;
+    padding: 20px;
+}
+
+.labor-chart-card-wide {
+    grid-column: 1 / -1;
+}
+
+.labor-card-heading {
+    display: block;
+}
+
+.labor-card-heading > p:last-child {
+    margin: 7px 0 0;
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+.labor-chart {
+    min-height: 260px;
+    margin-top: 12px;
+}
+
+.labor-chart svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.labor-chart-gridline {
+    stroke: rgba(146, 153, 168, 0.2);
+    stroke-width: 1;
+}
+
+.labor-chart-axis-label {
+    fill: var(--text-secondary);
+    font: 11px sans-serif;
+}
+
+.labor-chart-line {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.labor-chart-dot {
+    stroke: var(--surface);
+    stroke-width: 2;
+}
+
+.labor-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.labor-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.labor-legend-swatch {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.labor-source-note {
+    margin-top: 18px;
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+
+.labor-source-note a {
+    color: var(--accent-hover);
+}
+
+.labor-source-note p {
+    margin: 6px 0;
+}
+
+@media (max-width: 800px) {
+    .labor-dashboard {
+        padding: 105px 24px 56px;
+    }
+
+    .labor-context {
+        grid-template-columns: 1fr;
+    }
+
+    .labor-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .labor-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .labor-chart-card-wide {
+        grid-column: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .labor-dashboard {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .labor-panel-heading {
+        align-items: center;
+    }
+
+    .labor-data-panel,
+    .labor-chart-card {
+        padding: 16px;
+    }
+
+    .labor-metric {
+        min-height: 104px;
+        padding: 12px;
+    }
+
+    .labor-metric-value {
+        font-size: 1.45rem;
+    }
+}

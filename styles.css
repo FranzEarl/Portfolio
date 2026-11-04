@@ -552,6 +552,67 @@ section {
     text-align: left;
 }
 
+.labor-market-preview {
+    position: relative;
+    z-index: 1;
+    width: min(78%, 330px);
+    padding: 14px;
+    border: 1px solid rgba(146, 153, 168, 0.24);
+    border-radius: 8px;
+    background: rgba(23, 25, 31, 0.94);
+    box-shadow: 0 16px 35px rgba(0, 0, 0, 0.32);
+    color: var(--text-primary);
+    text-align: left;
+}
+
+.labor-preview-metric {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 13px;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+}
+
+.labor-preview-metric i {
+    width: 34px;
+    height: 8px;
+    border-radius: 99px;
+    background: #81c995;
+}
+
+.labor-preview-bars {
+    height: 44px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin-top: 9px;
+    border-bottom: 1px solid rgba(146, 153, 168, 0.3);
+}
+
+.labor-preview-bars i {
+    flex: 1;
+    height: 58%;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(180deg, #62a5f3, rgba(98, 165, 243, 0.32));
+}
+
+.labor-preview-bars i:nth-child(2) {
+    height: 76%;
+}
+
+.labor-preview-bars i:nth-child(3) {
+    height: 92%;
+}
+
+.labor-preview-years {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    color: var(--text-secondary);
+    font: 0.62rem Consolas, monospace;
+}
+
 .job-preview-row {
     display: grid;
     grid-template-columns: 72px 1fr;

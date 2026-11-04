@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore public World Bank labor-market indicators for the Philippines, including unemployment and employment by sector.">
+    <meta name="theme-color" content="#17191F">
+    <title>Philippines Labor Market Explorer | Franz Earl</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="../../index.html" class="logo">Franz Earl</a>
+            <a href="../../index.html#projects" class="back-link">← Back to Projects</a>
+        </nav>
+    </header>
+
+    <main class="labor-dashboard">
+        <div class="labor-container">
+            <section class="labor-heading" aria-labelledby="labor-title">
+                <p class="labor-eyebrow">PROJECT / PUBLIC LABOR STATISTICS</p>
+                <h1 id="labor-title">Philippines Labor Market <span>Explorer</span></h1>
+                <p class="labor-intro">
+                    Explore annual employment and unemployment indicators from the World Bank.
+                    The data loads directly from its public API; no account or API key is needed.
+                </p>
+            </section>
+
+            <section class="labor-context" aria-label="About these statistics">
+                <article>
+                    <p class="labor-eyebrow">THE SOURCE</p>
+                    <h2>Public country-level data</h2>
+                    <p>Indicators come from the World Bank's World Development Indicators API and can be refreshed any time.</p>
+                </article>
+                <article>
+                    <p class="labor-eyebrow">THE METHOD</p>
+                    <h2>Annual modeled estimates</h2>
+                    <p>Several measures are ILO modeled estimates, not monthly vacancy counts or a direct measure of hiring.</p>
+                </article>
+                <article>
+                    <p class="labor-eyebrow">THE LIMIT</p>
+                    <h2>Not skills demand</h2>
+                    <p>These indicators describe broad labor-market patterns and do not show which skills employers request.</p>
+                </article>
+            </section>
+
+            <section class="labor-data-panel" aria-labelledby="labor-data-title">
+                <div class="labor-panel-heading">
+                    <div>
+                        <p class="labor-eyebrow">PHILIPPINES / ANNUAL</p>
+                        <h2 id="labor-data-title">Labor market indicators</h2>
+                    </div>
+                    <button id="refresh-data" class="labor-refresh-button" type="button">Refresh data</button>
+                </div>
+                <p id="labor-data-status" class="labor-status" role="status" aria-live="polite">
+                    Loading public World Bank statistics…
+                </p>
+                <div id="labor-metrics" class="labor-metrics" aria-label="Latest available indicators"></div>
+            </section>
+
+            <section class="labor-charts" aria-label="Labor market trends">
+                <article class="labor-chart-card">
+                    <div class="labor-card-heading">
+                        <p class="labor-eyebrow">JOBLESSNESS</p>
+                        <h2>Unemployment rate</h2>
+                        <p>Total and youth unemployment, percent of each group's labor force.</p>
+                    </div>
+                    <div id="unemployment-chart" class="labor-chart"></div>
+                </article>
+                <article class="labor-chart-card">
+                    <div class="labor-card-heading">
+                        <p class="labor-eyebrow">WORKFORCE</p>
+                        <h2>Participation and employment</h2>
+                        <p>Labor-force participation and employment-to-population ratio, percent.</p>
+                    </div>
+                    <div id="participation-chart" class="labor-chart"></div>
+                </article>
+                <article class="labor-chart-card labor-chart-card-wide">
+                    <div class="labor-card-heading">
+                        <p class="labor-eyebrow">EMPLOYMENT COMPOSITION</p>
+                        <h2>Employment by sector</h2>
+                        <p>Share of total employment in agriculture, industry, and services.</p>
+                    </div>
+                    <div id="sector-chart" class="labor-chart"></div>
+                </article>
+            </section>
+
+            <footer class="labor-source-note">
+                <p>
+                    Source: <a href="https://data.worldbank.org/country/philippines" target="_blank" rel="noreferrer">World Bank, World Development Indicators</a>.
+                    The series shown are estimates and may be revised. Charts use annual values; the latest available year is shown for each indicator.
+                </p>
+                <p id="labor-source-updated"></p>
+            </footer>
+        </div>
+    </main>
+</body>
+</html>
