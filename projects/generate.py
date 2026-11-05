@@ -23,6 +23,7 @@ html = f"""<!DOCTYPE html>
     <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
 
     <header>
         <nav class="navbar">
@@ -31,7 +32,7 @@ html = f"""<!DOCTYPE html>
         </nav>
     </header>
 
-    <main>
+    <main id="main-content" tabindex="-1">
         <section class="programs-page">
             <div class="programs-container">
 
