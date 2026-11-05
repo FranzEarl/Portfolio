@@ -188,8 +188,29 @@ function normalizeDate(value) {
     return `${String(parts[0]).padStart(4, "0")}-${String(parts[1]).padStart(2, "0")}-${String(parts[2]).padStart(2, "0")}`;
 }
 
+function cleanOptionalValue(value) {
+    const text = String(value ?? "").trim();
+    const normalized = text.toLowerCase();
+    const missingValues = new Set([
+        "",
+        "n/a",
+        "n.a.",
+        "na",
+        "not available",
+        "not provided",
+        "not specified",
+        "unspecified",
+        "unknown",
+        "null",
+        "undefined",
+        "—",
+        "-"
+    ]);
+    return missingValues.has(normalized) ? "" : text;
+}
+
 function normalizeListValue(value) {
-    const text = value.trim();
+    const text = cleanOptionalValue(value);
     if (!text) return "";
 
     let values = [text];
@@ -205,8 +226,8 @@ function normalizeListValue(value) {
     }
 
     return values
-        .map((item) => item.trim())
-        .filter((item) => item && item.toLowerCase() !== "n/a")
+        .map(cleanOptionalValue)
+        .filter(Boolean)
         .join(", ");
 }
 
@@ -277,14 +298,14 @@ function parseJobListings(text) {
         parsed.push({
             title,
             description,
-            company: columns.company === -1 ? "" : (row[columns.company] || "").trim(),
-            location: columns.location === -1 ? "" : (row[columns.location] || "").trim(),
+            company: columns.company === -1 ? "" : cleanOptionalValue(row[columns.company]),
+            location: columns.location === -1 ? "" : cleanOptionalValue(row[columns.location]),
             date: columns.date === -1 ? "" : normalizeDate(row[columns.date] || ""),
             workType: columns.workType === -1 ? "" : normalizeListValue(row[columns.workType] || ""),
             employmentType: columns.employmentType === -1 ? "" : normalizeListValue(row[columns.employmentType] || ""),
-            salary: columns.salary === -1 ? "" : (row[columns.salary] || "").trim(),
+            salary: columns.salary === -1 ? "" : cleanOptionalValue(row[columns.salary]),
             seniority: columns.seniority === -1 ? "" : normalizeListValue(row[columns.seniority] || ""),
-            experienceYears: columns.experienceYears === -1 ? "" : (row[columns.experienceYears] || "").trim(),
+            experienceYears: columns.experienceYears === -1 ? "" : cleanOptionalValue(row[columns.experienceYears]),
             education: columns.education === -1 ? "" : normalizeListValue(row[columns.education] || ""),
             industry: columns.industry === -1 ? "" : normalizeListValue(row[columns.industry] || ""),
             requiredSkills: columns.requiredSkills === -1 ? [] : normalizeListValue(row[columns.requiredSkills] || "").split(/[;,]/).map((skill) => skill.trim()).filter(Boolean),
@@ -306,8 +327,31 @@ function detectSkills(job) {
         .map((skill) => skill.name);
 }
 
+function getFieldCoverageSummary(listings) {
+    if (listings.length === 0) return "";
+
+    const fields = [
+        ["description", (job) => job.description],
+        ["location", (job) => job.location],
+        ["date", (job) => job.date],
+        ["work arrangement", (job) => job.workType],
+        ["employment type", (job) => job.employmentType],
+        ["salary", (job) => job.salary],
+        ["seniority / experience", (job) => job.seniority || job.experienceYears],
+        ["education", (job) => job.education],
+        ["industry", (job) => job.industry]
+    ];
+    const summary = fields.map(([label, getValue]) => {
+        const available = listings.filter((job) => cleanOptionalValue(getValue(job))).length;
+        return `${label} ${Math.round((available / listings.length) * 100)}%`;
+    }).join(" · ");
+
+    return `Field coverage across ${listings.length.toLocaleString()} listings: ${summary}. Missing values were not supplied by the source.`;
+}
+
 function setStatus(message, isError = false) {
-    elements.status.textContent = message;
+    const coverage = getFieldCoverageSummary(jobs);
+    elements.status.textContent = coverage ? `${message}\n${coverage}` : message;
     elements.status.dataset.error = String(isError);
 }
 
@@ -483,6 +527,14 @@ function renderTimeline(filteredJobs) {
     });
 }
 
+function setOptionalCellValue(cell, value) {
+    const text = cleanOptionalValue(value);
+    cell.textContent = text || "Not provided";
+    if (!text) {
+        cell.className = "job-missing-value";
+    }
+}
+
 function renderListings(filteredJobs) {
     elements.rows.replaceChildren();
     const shown = filteredJobs.slice(0, visibleLimit);
@@ -524,15 +576,15 @@ function renderListings(filteredJobs) {
         }
 
         const location = document.createElement("td");
-        location.textContent = job.location || "—";
+        setOptionalCellValue(location, job.location);
         const workType = document.createElement("td");
-        workType.textContent = job.workType || "—";
+        setOptionalCellValue(workType, job.workType);
         const employmentType = document.createElement("td");
-        employmentType.textContent = job.employmentType || "—";
+        setOptionalCellValue(employmentType, job.employmentType);
         const salary = document.createElement("td");
-        salary.textContent = job.salary || "—";
+        setOptionalCellValue(salary, job.salary);
         const date = document.createElement("td");
-        date.textContent = job.date || "—";
+        setOptionalCellValue(date, job.date);
         const skillCell = document.createElement("td");
         const skillTags = document.createElement("div");
         skillTags.className = "job-skill-tags";
@@ -686,22 +738,22 @@ async function loadApiListings() {
             .filter((listing) => listing && listing.title)
             .map((listing) => ({
                 title: String(listing.title),
-                description: String(listing.description || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/gi, " "),
-                company: String(listing.company || ""),
-                location: String(listing.location || ""),
+                description: cleanOptionalValue(listing.description).replace(/<[^>]*>/g, " ").replace(/&nbsp;/gi, " "),
+                company: cleanOptionalValue(listing.company),
+                location: cleanOptionalValue(listing.location),
                 date: normalizeDate(String(listing.date || "")),
-                workType: String(listing.workType || ""),
-                employmentType: String(listing.employmentType || ""),
-                salary: String(listing.salary || ""),
-                seniority: String(listing.seniority || ""),
-                experienceYears: String(listing.experienceYears || ""),
-                education: String(listing.education || ""),
-                industry: String(listing.industry || ""),
-                requiredSkills: Array.isArray(listing.requiredSkills) ? listing.requiredSkills : [],
-                preferredSkills: Array.isArray(listing.preferredSkills) ? listing.preferredSkills : [],
+                workType: cleanOptionalValue(listing.workType),
+                employmentType: cleanOptionalValue(listing.employmentType),
+                salary: cleanOptionalValue(listing.salary),
+                seniority: cleanOptionalValue(listing.seniority),
+                experienceYears: cleanOptionalValue(listing.experienceYears),
+                education: cleanOptionalValue(listing.education),
+                industry: cleanOptionalValue(listing.industry),
+                requiredSkills: Array.isArray(listing.requiredSkills) ? listing.requiredSkills.map(cleanOptionalValue).filter(Boolean) : [],
+                preferredSkills: Array.isArray(listing.preferredSkills) ? listing.preferredSkills.map(cleanOptionalValue).filter(Boolean) : [],
                 sourceUrl: normalizeSourceUrl(String(listing.sourceUrl || ""), ""),
-                sourceName: String(listing.sourceName || ""),
-                skills: Array.isArray(listing.skills) ? listing.skills : []
+                sourceName: cleanOptionalValue(listing.sourceName),
+                skills: Array.isArray(listing.skills) ? listing.skills.map(cleanOptionalValue).filter(Boolean) : []
             }));
         if (apiJobs.length === 0) {
             throw new Error("The API response did not contain usable job titles.");
