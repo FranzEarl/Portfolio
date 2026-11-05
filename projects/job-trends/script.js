@@ -71,6 +71,10 @@ const elements = {
     search: document.querySelector("#job-search"),
     location: document.querySelector("#location-filter"),
     workTypeFilter: document.querySelector("#work-type-filter"),
+    postedAfter: document.querySelector("#posted-after"),
+    postedBefore: document.querySelector("#posted-before"),
+    resetFilters: document.querySelector("#reset-filters"),
+    downloadFiltered: document.querySelector("#download-filtered"),
     listingCount: document.querySelector("#listing-count"),
     skillCount: document.querySelector("#skill-count"),
     topSkill: document.querySelector("#top-skill"),
@@ -330,9 +334,13 @@ function getFilteredJobs() {
     const query = normalizeText(elements.search.value);
     const location = elements.location.value;
     const workType = elements.workTypeFilter.value;
+    const postedAfter = elements.postedAfter.value;
+    const postedBefore = elements.postedBefore.value;
     return jobs.filter((job) => {
         if (location && job.location !== location) return false;
         if (workType && job.workType !== workType) return false;
+        if (postedAfter && (!job.date || job.date < postedAfter)) return false;
+        if (postedBefore && (!job.date || job.date > postedBefore)) return false;
         if (!query) return true;
         const searchable = normalizeText(
             `${job.title} ${job.company} ${job.location} ${job.description} ${job.skills.join(" ")}`
@@ -526,8 +534,38 @@ function renderListings(filteredJobs) {
     });
 }
 
+function downloadFilteredCsv() {
+    const filteredJobs = getFilteredJobs();
+    const headers = ["title", "description", "company", "location", "date", "work_type", "source_url", "detected_skills"];
+    const csvCell = (value) => {
+        const raw = String(value ?? "");
+        const formulaPrefix = ["=", "+", "-", "@"].includes(raw.trimStart()[0]);
+        const safe = formulaPrefix ? `'${raw}` : raw;
+        return `"${safe.replace(/"/g, '""')}"`;
+    };
+    const lines = [
+        headers.map(csvCell).join(","),
+        ...filteredJobs.map((job) => [
+            job.title, job.description, job.company, job.location, job.date,
+            job.workType, job.sourceUrl, job.skills.join("; ")
+        ].map(csvCell).join(","))
+    ];
+    const url = URL.createObjectURL(new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "job-trends-filtered-listings.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
 function renderDashboard() {
     const filteredJobs = getFilteredJobs();
+    const hasFilters = Boolean(
+        elements.search.value || elements.location.value || elements.workTypeFilter.value
+        || elements.postedAfter.value || elements.postedBefore.value
+    );
+    elements.resetFilters.disabled = !jobs.length || !hasFilters;
+    elements.downloadFiltered.disabled = filteredJobs.length === 0;
     const skillSummary = renderSkillChart(filteredJobs);
     const skills = skillSummary.entries;
     renderCategoryChart(filteredJobs);
@@ -566,9 +604,15 @@ function displayParsedListings(result) {
     elements.search.value = "";
     elements.location.value = "";
     elements.workTypeFilter.value = "";
+    elements.postedAfter.value = "";
+    elements.postedBefore.value = "";
     elements.search.disabled = false;
     elements.location.disabled = false;
     elements.workTypeFilter.disabled = false;
+    elements.postedAfter.disabled = false;
+    elements.postedBefore.disabled = false;
+    elements.resetFilters.disabled = false;
+    elements.downloadFiltered.disabled = false;
     elements.clear.disabled = false;
     populateLocations();
     populateWorkTypes();
@@ -614,9 +658,15 @@ function clearData() {
     elements.search.value = "";
     elements.location.value = "";
     elements.workTypeFilter.value = "";
+    elements.postedAfter.value = "";
+    elements.postedBefore.value = "";
     elements.search.disabled = true;
     elements.location.disabled = true;
     elements.workTypeFilter.disabled = true;
+    elements.postedAfter.disabled = true;
+    elements.postedBefore.disabled = true;
+    elements.resetFilters.disabled = true;
+    elements.downloadFiltered.disabled = true;
     elements.clear.disabled = true;
     populateLocations();
     populateWorkTypes();
@@ -679,6 +729,28 @@ elements.workTypeFilter.addEventListener("change", () => {
     visibleLimit = PAGE_SIZE;
     renderDashboard();
 });
+
+elements.postedAfter.addEventListener("change", () => {
+    visibleLimit = PAGE_SIZE;
+    renderDashboard();
+});
+
+elements.postedBefore.addEventListener("change", () => {
+    visibleLimit = PAGE_SIZE;
+    renderDashboard();
+});
+
+elements.resetFilters.addEventListener("click", () => {
+    elements.search.value = "";
+    elements.location.value = "";
+    elements.workTypeFilter.value = "";
+    elements.postedAfter.value = "";
+    elements.postedBefore.value = "";
+    visibleLimit = PAGE_SIZE;
+    renderDashboard();
+});
+
+elements.downloadFiltered.addEventListener("click", downloadFilteredCsv);
 
 elements.clear.addEventListener("click", clearData);
 elements.showMore.addEventListener("click", () => {

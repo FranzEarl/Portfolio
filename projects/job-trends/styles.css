@@ -185,7 +185,7 @@
 
 .job-filters {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) repeat(2, minmax(180px, 1fr));
+    grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(130px, 1fr));
     gap: 12px;
     margin-top: 18px;
 }
@@ -214,6 +214,21 @@
 .job-filters input:disabled,
 .job-filters select:disabled {
     opacity: 0.6;
+}
+
+.job-filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: flex-end;
+    gap: 8px;
+    grid-column: 1 / -1;
+}
+
+.job-filter-note {
+    margin: 8px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
 }
 
 .job-summary {
@@ -443,6 +458,15 @@
 }
 
 @media (max-width: 768px) {
+    .job-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .job-filters label:first-child,
+    .job-filter-actions {
+        grid-column: 1 / -1;
+    }
+
     .job-trends-dashboard {
         padding: 110px 24px 56px;
     }
