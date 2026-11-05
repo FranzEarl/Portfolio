@@ -18,7 +18,7 @@ function jsonResponse(payload, status = 200, headers = {}) {
         status,
         headers: {
             "Content-Type": "application/json; charset=utf-8",
-            "Cache-Control": "public, max-age=86400",
+            "Cache-Control": `public, max-age=${CACHE_TTL_SECONDS}`,
             "X-Content-Type-Options": "nosniff",
             ...headers
         }
