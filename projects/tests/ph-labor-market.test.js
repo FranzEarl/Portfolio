@@ -45,6 +45,22 @@ test("rejects malformed or empty World Bank responses", () => {
     );
 });
 
+test("splits chart lines at missing observation years", () => {
+    const segments = vm.runInContext(`splitObservationGaps([
+        { year: 2020, value: 1 },
+        { year: 2021, value: 2 },
+        { year: 2023, value: 4 },
+        { year: 2025, value: 6 },
+        { year: 2026, value: 7 }
+    ])`, context);
+
+    assert.deepEqual(JSON.parse(JSON.stringify(segments)), [
+        [{ year: 2020, value: 1 }, { year: 2021, value: 2 }],
+        [{ year: 2023, value: 4 }],
+        [{ year: 2025, value: 6 }, { year: 2026, value: 7 }]
+    ]);
+});
+
 test("builds case-study comparisons from overlapping years and the post-2020 youth series", () => {
     const result = vm.runInContext(`buildCaseStudyInsights([
         { id: "SL.AGR.EMPL.ZS", observations: [{ year: 2000, value: 35 }, { year: 2025, value: 20 }] },
