@@ -58,7 +58,7 @@
                 </div>
                 <div class="job-data-actions">
                     <input id="job-csv-file" type="file" accept=".csv,text/csv">
-                    <label class="job-upload-button" for="job-csv-file">Import job listings CSV</label>
+                    <label class="job-upload-button" for="job-csv-file">Import job listings CSV</label>\n                    <button id="load-sample" class="job-secondary-button" type="button">Try sample data</button>
                     <button id="clear-data" class="job-secondary-button" type="button" disabled>
                         Clear data
                     </button>
@@ -67,10 +67,10 @@
                     Required columns: <code>title</code> and <code>description</code>.
                     Optional: <code>company</code>, <code>location</code>,
                     <code>date</code>, <code>work_type</code>, and <code>source_url</code>.
-                    The file is analyzed in this browser; it is never uploaded or saved.
+                    Your file is analyzed in this browser; it is never uploaded or saved. Sample data is fictional, not current vacancies.
                 </p>
                 <p id="job-data-status" class="job-data-status" role="status" aria-live="polite">
-                    Import a current listings CSV to start exploring.
+                    Try the fictional sample or import your own listings CSV to start exploring.
                 </p>
             </section>
 
