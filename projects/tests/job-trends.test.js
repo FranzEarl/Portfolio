@@ -167,8 +167,8 @@ test("imports Techmap CSV dates, work types, and source URLs from JSON-LD", asyn
     assert.equal(element(dashboard, "#listing-count").textContent, "1");
     assert.equal(row.children[1].textContent, "Manila");
     assert.equal(row.children[2].textContent, "FlexTime");
-    assert.equal(row.children[3].textContent, "2026-10-30");
-    assert.equal(row.children[5].children[0].href, "https://example.com/jobs/1");
+    assert.equal(row.children[5].textContent, "2026-10-30");
+    assert.equal(row.children[7].children[0].href, "https://example.com/jobs/1");
     assert.equal(element(dashboard, "#timeline-chart").children[0].children[2].textContent, "2026-10");
 });
 
@@ -196,7 +196,7 @@ test("does not turn imported titles into markup and ignores non-web source links
 
     const row = element(dashboard, "#job-listing-rows").children[0];
     assert.equal(row.children[0].children[0].textContent, "<img src=x onerror=alert(1)>");
-    assert.equal(row.children[5].textContent, "—");
+    assert.equal(row.children[7].textContent, "—");
 });
 
 test("skips rows without required text and clears imported data on request", async () => {
