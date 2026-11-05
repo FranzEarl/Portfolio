@@ -82,7 +82,7 @@
             <section class="job-filters" aria-label="Filter analyzed listings">
                 <label>
                     <span>Search listings</span>
-                    <input id="job-search" type="search" placeholder="Skill, title, or company" disabled>
+                    <input id="job-search" type="search" placeholder="Skill, title, company, or job detail" disabled>
                 </label>
                 <label>
                     <span>Location</span>
@@ -94,6 +94,12 @@
                     <span>Work arrangement</span>
                     <select id="work-type-filter" disabled>
                         <option value="">All arrangements</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Employment type</span>
+                    <select id="employment-type-filter" disabled>
+                        <option value="">All employment types</option>
                     </select>
                 </label>
                 <label>
@@ -110,7 +116,7 @@
                 </div>
             </section>
 
-            <p class="job-filter-note">Date filters include only listings with a recognized posting date. Download exports the current filtered listings.</p>
+            <p class="job-filter-note">Date filters include only listings with a recognized posting date. Arrangement and employment filters are available only when the source provides those fields. Download exports the current filtered listings.</p>
 
             <section class="job-summary" aria-label="Job listing summary">
                 <article class="job-stat">
