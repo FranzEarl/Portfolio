@@ -24,8 +24,8 @@
                 <p class="job-trends-eyebrow">PROJECT / LABOR MARKET EXPLORATION</p>
                 <h1 id="job-trends-title">Job Skills &amp; Hiring <span>Trends</span></h1>
                 <p class="job-trends-intro">
-                    Use current Philippine listings from the connected API, or import your own CSV
-                    to compare requested skills, locations, and posting activity. Try the fictional sample while the API is being connected.
+                    Explore current Philippine job listings or import your own CSV to compare skills,
+                    locations, and posting activity. Daily history begins when snapshot collection is enabled.
                 </p>
             </section>
 
@@ -43,7 +43,7 @@
                 <article>
                     <p class="job-trends-eyebrow">THE LIMIT</p>
                     <h2>Counts describe your file</h2>
-                    <p>Results are not a complete labor-market census. Source coverage and CSV quality affect every comparison.</p>
+                    <p>Results are not a complete labor-market census. Daily history starts when collection is enabled and does not backfill earlier postings.</p>
                 </article>
             </section>
 
@@ -201,10 +201,30 @@
                             <p class="job-trends-eyebrow">POSTING ACTIVITY</p>
                             <h2>Listings over time</h2>
                         </div>
-                        <span class="job-card-note">Listings with dates; reflects this file only</span>
+                        <span class="job-card-note">Reported posting dates in this result set</span>
                     </div>
                     <div id="timeline-chart" class="job-timeline-chart">
                         <p class="job-empty-state">Add a <code>date</code> column to see posting activity.</p>
+                    </div>
+                </article>
+                <article class="job-analysis-card job-snapshot-card">
+                    <div class="job-card-heading">
+                        <div>
+                            <p class="job-trends-eyebrow">DAILY SNAPSHOTS</p>
+                            <h2>Listings collected over time</h2>
+                        </div>
+                        <span class="job-card-note">One collection per day</span>
+                    </div>
+                    <div id="snapshot-history-chart" class="job-timeline-chart job-history-chart">
+                        <p class="job-empty-state">Daily snapshots will appear here after collection is enabled.</p>
+                    </div>
+                    <p id="snapshot-history-status" class="job-history-status" role="status" aria-live="polite">
+                        Snapshot history is not connected yet.
+                    </p>
+                    <div class="job-history-actions">
+                        <button id="download-history" class="job-secondary-button" type="button" disabled>
+                            Download snapshot history CSV
+                        </button>
                     </div>
                 </article>
             </section>
@@ -243,7 +263,7 @@
 
             <p class="job-analysis-note">
                 Skill counts combine structured technology fields from the API when available with recognized names and aliases in each title and description.
-                One listing can mention several skills, so category totals may overlap. API results are search matches, not a complete census of the Philippine job market.
+                One listing can mention several skills, so category totals may overlap. API listings are search matches, not a complete census. Daily history begins when collection is enabled and does not include earlier postings.
             </p>
         </div>
     </main>
