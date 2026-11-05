@@ -59,6 +59,18 @@
                     </article>
                 </section>
 
+                <section class="program-overview-card" aria-labelledby="try-program-title">
+                    <p class="program-overview-label">TRY IT HERE</p>
+                    <h2 id="try-program-title">Run a C program</h2>
+                    <p>Choose a program, enter its answers one per line, then run it. Programs execute in your browser; your input stays on this device. The clock shows a short snapshot, and the console games accept scripted key presses.</p>
+                    <form id="c-runner-form">
+                        <label for="c-runner-program">Program</label><select id="c-runner-program" name="program"></select>
+                        <label for="c-runner-input">Input (one answer or key per line)</label><textarea id="c-runner-input" rows="5" placeholder="Enter program input here"></textarea>
+                        <div class="runner-actions"><button type="submit">Run program</button><button type="button" id="c-runner-reset">Reset</button></div>
+                    </form>
+                    <p id="c-runner-status" role="status">Ready.</p><pre id="c-runner-output" aria-live="polite">Program output will appear here.</pre>
+                </section>
+
                 <div class="program-list-heading">
                     <div>
                         <p class="program-overview-label">SOURCE CODE</p>
@@ -96,4 +108,6 @@
     </main>
 
 </body>
+<script type="module" src="c-programs/runner.js"></script>
 </html>
+
