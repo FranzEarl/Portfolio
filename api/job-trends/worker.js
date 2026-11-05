@@ -54,19 +54,27 @@ function extractListings(payload) {
 }
 
 function inferWorkArrangement(title, description) {
-    const text = String(title || "") + " " + String(description || "");
-    const normalized = text.toLowerCase();
+    const titleText = String(title || "").toLowerCase();
+    const descriptionText = String(description || "").toLowerCase();
 
-    if (/\bhybrid\b/.test(normalized)) return "Hybrid";
+    const hybridTitle = /\bhybrid\b/.test(titleText)
+        && !/\bhybrid\s+(?:model|algorithm|cloud|application|architecture|system|approach)\b/.test(titleText);
+    const hybridDescription = /\bhybrid\s+(?:work|working|schedule|arrangement|workplace|position|role|setup)\b|\bwork(?:ing)? in a hybrid (?:setup|model|environment|arrangement)\b|\bhybrid[- ](?:remote|on[- ]?site)\b/.test(descriptionText);
+    if (hybridTitle || hybridDescription) return "Hybrid";
 
-    const remoteDenied = /\b(?:not|no|never)\s+(?:a\s+)?remote\b|\bremote\s+(?:work\s+)?(?:is\s+)?(?:not available|not offered|not permitted|not an option|unavailable)\b/.test(normalized);
-    if (!remoteDenied && /\b(?:remote|wfh|telecommut(?:e|ing)|home[- ]based|work[- ]from[- ]home)\b/.test(normalized)) {
-        return "Remote";
-    }
+    const allText = titleText + " " + descriptionText;
+    const remoteDenied = /\b(?:not|no|never)\s+(?:a\s+)?remote\b|\bremote\s+(?:work\s+)?(?:is\s+)?(?:not available|not offered|not permitted|not an option|unavailable)\b/.test(allText);
+    const remoteInTitle = /\bremote\b/.test(titleText) && !/\bremote sensing\b/.test(titleText);
+    const remoteInDescription = /\bwork(?:ing)? remotely\b|\bremote[- ](?:work|position|role|schedule|first|only)\b|\b(?:work[- ]from[- ]home|home[- ]based|wfh|telecommut(?:e|ing))\b/.test(descriptionText);
+    const remote = !remoteDenied && (remoteInTitle || remoteInDescription);
 
-    if (/\b(?:on[- ]?site|in[- ]office|office[- ]based|work from (?:the )?office|in person)\b/.test(normalized)) {
-        return "On-site";
-    }
+    const onSiteDenied = /\b(?:no|not|never)\s+(?:an?\s+)?(?:on[- ]?site|in[- ]office)\b|\b(?:on[- ]?site|in[- ]office)\s+(?:is\s+)?(?:not required|not needed|not necessary|not expected)\b/.test(allText);
+    const onSite = !onSiteDenied
+        && /\b(?:on[- ]?site|in[- ]office|office[- ]based|work from (?:the )?office|in[- ]person)\b/.test(allText);
+
+    if (remote && onSite) return "";
+    if (remote) return "Remote";
+    if (onSite) return "On-site";
     return "";
 }
 
