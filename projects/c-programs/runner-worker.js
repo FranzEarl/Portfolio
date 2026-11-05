@@ -5,7 +5,7 @@ class GuardedOpenFile extends OpenFile {
 }
 self.onmessage=async({data})=>{
  try{
-  const response=await fetch(`wasm/${encodeURIComponent(data.program)}.wasm`);
+  const response=await fetch(\`wasm/\${encodeURIComponent(data.program)}.wasm\`);
   if(!response.ok)throw Error('Could not load the program.');
   const bytes=await response.arrayBuffer();
   const input=new File(new TextEncoder().encode(data.input?data.input+(data.input.endsWith('\\n')?'':'\\n'):''));
@@ -17,5 +17,5 @@ self.onmessage=async({data})=>{
   try{wasi.start(instance)}catch(error){if(error instanceof StdinExhausted){self.postMessage({type:'done',message:'Stopped safely: the program asked for more input. Add another line and run again.'});return}if(!(error instanceof WASIProcExit))throw error}
   const rest=decoder.decode();if(rest)self.postMessage({type:'output',text:rest});
   self.postMessage({type:'done',message:'Finished.'});
- }catch(error){self.postMessage({type:'done',message:`Could not run program: ${error.message}`})}
+ }catch(error){self.postMessage({type:'done',message:\`Could not run program: \${error.message}\`})}
 };
