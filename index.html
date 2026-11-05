@@ -11,7 +11,25 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="portfolio-loader" id="portfolio-loader" role="status" aria-label="Loading portfolio">
+        <div class="portfolio-loader-content">
+            <p class="portfolio-loader-kicker">FRANZ EARL <span>/</span> PORTFOLIO</p>
+            <svg class="portfolio-loader-visual" viewBox="0 0 320 150" aria-hidden="true" focusable="false">
+                <path class="loader-grid-line" d="M20 30H300M20 75H300M20 120H300M65 15V135M160 15V135M255 15V135" />
+                <path class="loader-chart-line" d="M22 108L82 83L130 96L186 45L238 63L298 25" />
+                <path class="loader-network-line" d="M82 83L130 48L186 45M130 48L160 75M186 45L238 63" />
+                <circle class="loader-node" cx="82" cy="83" r="4" />
+                <circle class="loader-node" cx="130" cy="48" r="4" />
+                <circle class="loader-node loader-node-pulse" cx="186" cy="45" r="6" />
+                <circle class="loader-node" cx="238" cy="63" r="4" />
+                <circle class="loader-node" cx="298" cy="25" r="4" />
+            </svg>
+            <p class="portfolio-loader-title">Exploring data. Building ideas<span>.</span></p>
+            <div class="portfolio-loader-track" aria-hidden="true"><span></span></div>
+            <p class="portfolio-loader-status">Preparing the portfolio</p>
+        </div>
+    </div>
+        <a class="skip-link" href="#main-content">Skip to main content</a>
     <!-- Navigation Bar -->
     <header>
         <nav class="navbar">
