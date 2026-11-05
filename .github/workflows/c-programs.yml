@@ -14,19 +14,19 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
 
       - name: Set up GCC
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: true
-          install: mingw-w64-x86_64-gcc
+          install: mingw-w64-ucrt-x86_64-gcc
 
       - name: Compile all C programs
         shell: pwsh
@@ -48,3 +48,9 @@ jobs:
 
       - name: Run study dashboard tests
         run: node --test projects/tests/study-performance.test.js
+
+      - name: Run job trends tests
+        run: node --test projects/tests/job-trends.test.js
+
+      - name: Run Philippines labor market tests
+        run: node --test projects/tests/ph-labor-market.test.js
