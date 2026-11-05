@@ -492,7 +492,7 @@ function renderWorkTypeChart(filteredJobs) {
     const knownArrangementCount = filteredJobs.filter((job) => job.workType).length;
     renderBars(elements.workTypeChart, entries, knownArrangementCount,
         (count, total) => `${count} · ${Math.round((count / total) * 100)}%`,
-        "Add a work_type column to compare arrangements.");
+        "The source did not provide work arrangements for these listings.");
 }
 
 function renderTimeline(filteredJobs) {
