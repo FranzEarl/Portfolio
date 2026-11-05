@@ -70,11 +70,15 @@ const elements = {
     status: document.querySelector("#job-data-status"),
     search: document.querySelector("#job-search"),
     location: document.querySelector("#location-filter"),
+    workTypeFilter: document.querySelector("#work-type-filter"),
     listingCount: document.querySelector("#listing-count"),
     skillCount: document.querySelector("#skill-count"),
     topSkill: document.querySelector("#top-skill"),
     topSkillShare: document.querySelector("#top-skill-share"),
     locationCount: document.querySelector("#location-count"),
+    remoteShare: document.querySelector("#remote-share"),
+    roleChart: document.querySelector("#role-chart"),
+    workTypeChart: document.querySelector("#work-type-chart"),
     skillChart: document.querySelector("#skill-chart"),
     categoryChart: document.querySelector("#category-chart"),
     timelineChart: document.querySelector("#timeline-chart"),
@@ -325,8 +329,10 @@ function renderBars(container, entries, total, valueLabel, emptyMessage) {
 function getFilteredJobs() {
     const query = normalizeText(elements.search.value);
     const location = elements.location.value;
+    const workType = elements.workTypeFilter.value;
     return jobs.filter((job) => {
         if (location && job.location !== location) return false;
+        if (workType && job.workType !== workType) return false;
         if (!query) return true;
         const searchable = normalizeText(
             `${job.title} ${job.company} ${job.location} ${job.description} ${job.skills.join(" ")}`
@@ -375,6 +381,46 @@ function renderCategoryChart(filteredJobs) {
         (count, total) => `${count} · ${Math.round((count / total) * 100)}%`,
         "No skill groups found in these listings."
     );
+}
+
+function getRoleFamily(title) {
+    const normalized = normalizeText(title);
+    if (/\b(data|cloud|analytics|database) engineer\b|\betl\b/.test(normalized)) return "Data Engineering";
+    if (/\b(data|business intelligence|reporting|product|marketing|financial|operations) analyst\b|\banalytics\b/.test(normalized)) return "Analytics & BI";
+    if (/\b(data|machine learning|ml|ai) scientist\b|\bresearch\b/.test(normalized)) return "Data Science & Research";
+    return "Other roles";
+}
+
+function renderRoleChart(filteredJobs) {
+    const counts = new Map();
+    filteredJobs.forEach((job) => {
+        const family = getRoleFamily(job.title);
+        counts.set(family, (counts.get(family) || 0) + 1);
+    });
+    const entries = [...counts].map(([label, count]) => ({ label, count }))
+        .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label));
+    renderBars(elements.roleChart, entries, filteredJobs.length,
+        (count, total) => `${count} · ${Math.round((count / total) * 100)}%`,
+        "No role patterns in this view.");
+}
+
+function renderWorkTypeChart(filteredJobs) {
+    const counts = new Map();
+    filteredJobs.forEach((job) => {
+        const value = normalizeText(job.workType);
+        if (!value) return;
+        const label = value.includes("remote") ? "Remote"
+            : value.includes("hybrid") ? "Hybrid"
+                : value.includes("on site") || value.includes("onsite") || value.includes("office") ? "On-site"
+                    : "Other / unspecified";
+        counts.set(label, (counts.get(label) || 0) + 1);
+    });
+    const entries = [...counts].map(([label, count]) => ({ label, count }))
+        .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label));
+    const knownArrangementCount = filteredJobs.filter((job) => job.workType).length;
+    renderBars(elements.workTypeChart, entries, knownArrangementCount,
+        (count, total) => `${count} · ${Math.round((count / total) * 100)}%`,
+        "Add a work_type column to compare arrangements.");
 }
 
 function renderTimeline(filteredJobs) {
@@ -485,12 +531,22 @@ function renderDashboard() {
     const skillSummary = renderSkillChart(filteredJobs);
     const skills = skillSummary.entries;
     renderCategoryChart(filteredJobs);
+    renderRoleChart(filteredJobs);
+    renderWorkTypeChart(filteredJobs);
     renderTimeline(filteredJobs);
     elements.listingCount.textContent = filteredJobs.length.toLocaleString();
     elements.skillCount.textContent = String(skillSummary.count);
     elements.locationCount.textContent = new Set(
         filteredJobs.map((job) => job.location).filter(Boolean)
     ).size.toLocaleString();
+    const listingsWithArrangement = filteredJobs.filter((job) => job.workType);
+    const remoteOrHybrid = listingsWithArrangement.filter((job) => {
+        const arrangement = normalizeText(job.workType);
+        return arrangement.includes("remote") || arrangement.includes("hybrid");
+    }).length;
+    elements.remoteShare.textContent = listingsWithArrangement.length
+        ? `${Math.round((remoteOrHybrid / listingsWithArrangement.length) * 100)}%`
+        : "—";
 
     const topSkill = skills[0];
     if (topSkill) {
@@ -509,10 +565,13 @@ function displayParsedListings(result) {
     visibleLimit = PAGE_SIZE;
     elements.search.value = "";
     elements.location.value = "";
+    elements.workTypeFilter.value = "";
     elements.search.disabled = false;
     elements.location.disabled = false;
+    elements.workTypeFilter.disabled = false;
     elements.clear.disabled = false;
     populateLocations();
+    populateWorkTypes();
     renderDashboard();
 }
 
@@ -532,16 +591,35 @@ function populateLocations() {
         });
 }
 
+function populateWorkTypes() {
+    elements.workTypeFilter.replaceChildren();
+    const allTypes = document.createElement("option");
+    allTypes.value = "";
+    allTypes.textContent = "All arrangements";
+    elements.workTypeFilter.append(allTypes);
+    [...new Set(jobs.map((job) => job.workType).filter(Boolean))]
+        .sort((left, right) => left.localeCompare(right))
+        .forEach((workType) => {
+            const option = document.createElement("option");
+            option.value = workType;
+            option.textContent = workType;
+            elements.workTypeFilter.append(option);
+        });
+}
+
 function clearData() {
     jobs = [];
     visibleLimit = PAGE_SIZE;
     elements.file.value = "";
     elements.search.value = "";
     elements.location.value = "";
+    elements.workTypeFilter.value = "";
     elements.search.disabled = true;
     elements.location.disabled = true;
+    elements.workTypeFilter.disabled = true;
     elements.clear.disabled = true;
     populateLocations();
+    populateWorkTypes();
     renderDashboard();
     setStatus("Data cleared from this page. Your CSV was never saved.");
 }
@@ -593,6 +671,11 @@ elements.search.addEventListener("input", () => {
 });
 
 elements.location.addEventListener("change", () => {
+    visibleLimit = PAGE_SIZE;
+    renderDashboard();
+});
+
+elements.workTypeFilter.addEventListener("change", () => {
     visibleLimit = PAGE_SIZE;
     renderDashboard();
 });
