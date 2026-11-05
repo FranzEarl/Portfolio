@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Explore a fictional sample or analyze your own job listings with a private, browser-based CSV tool.">
+    <meta name="description" content="Explore current Philippine job listings from a jobs API, or privately analyze your own CSV listings.">
     <title>Job Skills &amp; Hiring Trends | Franz Earl</title>
     <link rel="stylesheet" href="../../styles.css">
     <link rel="stylesheet" href="styles.css">
+    <script src="api-config.js" defer></script>
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -23,8 +24,8 @@
                 <p class="job-trends-eyebrow">PROJECT / LABOR MARKET EXPLORATION</p>
                 <h1 id="job-trends-title">Job Skills &amp; Hiring <span>Trends</span></h1>
                 <p class="job-trends-intro">
-                    Start with the fictional sample listings or import a current CSV to
-                    compare requested skills, locations, and posting activity.
+                    Use current Philippine listings from the connected API, or import your own CSV
+                    to compare requested skills, locations, and posting activity. Try the fictional sample while the API is being connected.
                 </p>
             </section>
 
@@ -66,12 +67,15 @@
                 </div>
                 <p class="job-csv-help">
                     Required columns: <code>title</code> and <code>description</code>.
-                    Optional: <code>company</code>, <code>location</code>,
-                    <code>date</code>, <code>work_type</code>, and <code>source_url</code>.
-                    Your file is analyzed in this browser; it is never uploaded or saved. Sample data is fictional, not current vacancies.
+                    Optional: <code>company</code>, <code>location</code>, <code>date</code>,
+                    <code>work_type</code>, <code>employment_type</code>, <code>salary</code>,
+                    <code>seniority</code>, <code>experience_years</code>, <code>education</code>,
+                    <code>industry</code>, <code>required_skills</code>, <code>preferred_skills</code>,
+                    and <code>source_url</code>.
+                    Your CSV is analyzed in this browser; it is never uploaded or saved. When configured, the API supplies current listings. Sample data is fictional, not current vacancies.
                 </p>
                 <p id="job-data-status" class="job-data-status" role="status" aria-live="polite">
-                    Try the fictional sample or import your own listings CSV to start exploring.
+                    The API loads current Philippine listings when configured. Try the fictional sample or import your own CSV to explore the dashboard now.
                 </p>
             </section>
 
@@ -213,14 +217,16 @@
                             <tr>
                                 <th scope="col">Role</th>
                                 <th scope="col">Location</th>
-                                <th scope="col">Work type</th>
+                                <th scope="col">Arrangement</th>
+                                <th scope="col">Employment</th>
+                                <th scope="col">Salary</th>
                                 <th scope="col">Posted</th>
                                 <th scope="col">Detected skills</th>
-                                <th scope="col"><span class="visually-hidden">Source</span></th>
+                                <th scope="col">Source</th>
                             </tr>
                         </thead>
                         <tbody id="job-listing-rows">
-                            <tr><td class="job-table-empty" colspan="6">Import a listings CSV to review its postings.</td></tr>
+                            <tr><td class="job-table-empty" colspan="8">Import a listings CSV to review its postings.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -230,9 +236,8 @@
             </section>
 
             <p class="job-analysis-note">
-                Skill counts are based on recognized names and aliases in each title and description.
-                One listing can mention several skills, so category totals may overlap. Your results
-                represent only the listings in the imported file, not the entire Philippine job market.
+                Skill counts combine structured technology fields from the API when available with recognized names and aliases in each title and description.
+                One listing can mention several skills, so category totals may overlap. API results are search matches, not a complete census of the Philippine job market.
             </p>
         </div>
     </main>

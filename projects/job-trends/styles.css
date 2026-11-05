@@ -403,6 +403,13 @@
     color: var(--text-secondary);
 }
 
+.job-role-meta {
+    display: block;
+    margin-top: 3px;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+}
+
 .job-skill-tags {
     display: flex;
     min-width: 150px;

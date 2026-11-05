@@ -1,6 +1,9 @@
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_LISTINGS = 10000;
 const PAGE_SIZE = 12;
+const JOB_API_URL = typeof globalThis.JOB_TRENDS_API_URL === "string"
+    ? globalThis.JOB_TRENDS_API_URL.trim()
+    : "";
 
 const skillGroups = [
     {
@@ -94,6 +97,7 @@ const elements = {
 
 let jobs = [];
 let visibleLimit = PAGE_SIZE;
+let activeDataRequest = 0;
 
 function normalizeText(value) {
     return String(value || "")
@@ -244,6 +248,14 @@ function parseJobListings(text) {
         location: findColumn(headers, "location", "job_location", "city"),
         date: findColumn(headers, "date", "posted_date", "posting_date", "datecreated", "dateposted"),
         workType: findColumn(headers, "work_type", "worktype", "work_arrangement", "workplace", "workplace_type"),
+        employmentType: findColumn(headers, "employment_type", "job_employment_type", "employment"),
+        salary: findColumn(headers, "salary", "salary_range", "job_salary_string"),
+        seniority: findColumn(headers, "seniority", "seniority_level", "experience_level"),
+        experienceYears: findColumn(headers, "experience_years", "required_experience_years"),
+        education: findColumn(headers, "education", "education_required", "degree"),
+        industry: findColumn(headers, "industry"),
+        requiredSkills: findColumn(headers, "required_skills", "required_technologies"),
+        preferredSkills: findColumn(headers, "preferred_skills", "preferred_technologies"),
         sourceUrl: findColumn(headers, "source_url", "url", "job_url", "link"),
         jsonLd: findColumn(headers, "jsonld")
     };
@@ -269,6 +281,14 @@ function parseJobListings(text) {
             location: columns.location === -1 ? "" : (row[columns.location] || "").trim(),
             date: columns.date === -1 ? "" : normalizeDate(row[columns.date] || ""),
             workType: columns.workType === -1 ? "" : normalizeListValue(row[columns.workType] || ""),
+            employmentType: columns.employmentType === -1 ? "" : normalizeListValue(row[columns.employmentType] || ""),
+            salary: columns.salary === -1 ? "" : (row[columns.salary] || "").trim(),
+            seniority: columns.seniority === -1 ? "" : normalizeListValue(row[columns.seniority] || ""),
+            experienceYears: columns.experienceYears === -1 ? "" : (row[columns.experienceYears] || "").trim(),
+            education: columns.education === -1 ? "" : normalizeListValue(row[columns.education] || ""),
+            industry: columns.industry === -1 ? "" : normalizeListValue(row[columns.industry] || ""),
+            requiredSkills: columns.requiredSkills === -1 ? [] : normalizeListValue(row[columns.requiredSkills] || "").split(/[;,]/).map((skill) => skill.trim()).filter(Boolean),
+            preferredSkills: columns.preferredSkills === -1 ? [] : normalizeListValue(row[columns.preferredSkills] || "").split(/[;,]/).map((skill) => skill.trim()).filter(Boolean),
             sourceUrl: normalizeSourceUrl(rawUrl, jsonLdValue)
         });
     });
@@ -475,7 +495,7 @@ function renderListings(filteredJobs) {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
         cell.className = "job-table-empty";
-        cell.colSpan = 6;
+        cell.colSpan = 8;
         cell.textContent = jobs.length ? "No listings match these filters." : "Import a listings CSV to review its postings.";
         row.append(cell);
         elements.rows.append(row);
@@ -495,11 +515,22 @@ function renderListings(filteredJobs) {
             company.textContent = job.company;
             roleCell.append(company);
         }
+        const roleDetails = [job.seniority, job.experienceYears ? `${job.experienceYears}+ years` : ""].filter(Boolean);
+        if (roleDetails.length) {
+            const meta = document.createElement("span");
+            meta.className = "job-role-meta";
+            meta.textContent = roleDetails.join(" · ");
+            roleCell.append(meta);
+        }
 
         const location = document.createElement("td");
         location.textContent = job.location || "—";
         const workType = document.createElement("td");
         workType.textContent = job.workType || "—";
+        const employmentType = document.createElement("td");
+        employmentType.textContent = job.employmentType || "—";
+        const salary = document.createElement("td");
+        salary.textContent = job.salary || "—";
         const date = document.createElement("td");
         date.textContent = job.date || "—";
         const skillCell = document.createElement("td");
@@ -524,19 +555,24 @@ function renderListings(filteredJobs) {
             link.href = job.sourceUrl;
             link.target = "_blank";
             link.rel = "noreferrer";
-            link.textContent = "Open";
+            link.textContent = job.sourceName || "Open";
             source.append(link);
         } else {
             source.textContent = "—";
         }
-        row.append(roleCell, location, workType, date, skillCell, source);
+        row.append(roleCell, location, workType, employmentType, salary, date, skillCell, source);
         elements.rows.append(row);
     });
 }
 
 function downloadFilteredCsv() {
     const filteredJobs = getFilteredJobs();
-    const headers = ["title", "description", "company", "location", "date", "work_type", "source_url", "detected_skills"];
+    const headers = [
+        "title", "description", "company", "location", "date", "work_type",
+        "employment_type", "salary", "seniority", "experience_years", "education",
+        "industry", "required_skills", "preferred_skills", "source_url",
+        "source_publisher", "detected_skills"
+    ];
     const csvCell = (value) => {
         const raw = String(value ?? "");
         const formulaPrefix = ["=", "+", "-", "@"].includes(raw.trimStart()[0]);
@@ -547,7 +583,10 @@ function downloadFilteredCsv() {
         headers.map(csvCell).join(","),
         ...filteredJobs.map((job) => [
             job.title, job.description, job.company, job.location, job.date,
-            job.workType, job.sourceUrl, job.skills.join("; ")
+            job.workType, job.employmentType, job.salary, job.seniority,
+            job.experienceYears, job.education, job.industry,
+            (job.requiredSkills || []).join("; "), (job.preferredSkills || []).join("; "),
+            job.sourceUrl, job.sourceName, job.skills.join("; ")
         ].map(csvCell).join(","))
     ];
     const url = URL.createObjectURL(new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8" }));
@@ -599,7 +638,17 @@ function renderDashboard() {
 }
 
 function displayParsedListings(result) {
-    jobs = result.jobs.map((job) => ({ ...job, skills: detectSkills(job) }));
+    jobs = result.jobs.map((job) => {
+        const suppliedSkills = [
+            ...(Array.isArray(job.skills) ? job.skills : []),
+            ...(Array.isArray(job.requiredSkills) ? job.requiredSkills : []),
+            ...(Array.isArray(job.preferredSkills) ? job.preferredSkills : [])
+        ].map((skill) => String(skill).trim()).filter(Boolean);
+        return {
+            ...job,
+            skills: [...new Set([...detectSkills(job), ...suppliedSkills])]
+        };
+    });
     visibleLimit = PAGE_SIZE;
     elements.search.value = "";
     elements.location.value = "";
@@ -617,6 +666,57 @@ function displayParsedListings(result) {
     populateLocations();
     populateWorkTypes();
     renderDashboard();
+}
+
+async function loadApiListings() {
+    const requestId = ++activeDataRequest;
+    setStatus("Loading current Philippine job listings from the API…");
+    try {
+        const response = await fetch(JOB_API_URL, { headers: { Accept: "application/json" } });
+        if (!response.ok) {
+            throw new Error("The live listings service is temporarily unavailable.");
+        }
+
+        const payload = await response.json();
+        if (requestId !== activeDataRequest) return;
+        if (!Array.isArray(payload.jobs) || payload.jobs.length === 0) {
+            throw new Error("The API returned no current listings. Try the fictional sample or import a CSV.");
+        }
+        const apiJobs = payload.jobs
+            .filter((listing) => listing && listing.title)
+            .map((listing) => ({
+                title: String(listing.title),
+                description: String(listing.description || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/gi, " "),
+                company: String(listing.company || ""),
+                location: String(listing.location || ""),
+                date: normalizeDate(String(listing.date || "")),
+                workType: String(listing.workType || ""),
+                employmentType: String(listing.employmentType || ""),
+                salary: String(listing.salary || ""),
+                seniority: String(listing.seniority || ""),
+                experienceYears: String(listing.experienceYears || ""),
+                education: String(listing.education || ""),
+                industry: String(listing.industry || ""),
+                requiredSkills: Array.isArray(listing.requiredSkills) ? listing.requiredSkills : [],
+                preferredSkills: Array.isArray(listing.preferredSkills) ? listing.preferredSkills : [],
+                sourceUrl: normalizeSourceUrl(String(listing.sourceUrl || ""), ""),
+                sourceName: String(listing.sourceName || ""),
+                skills: Array.isArray(listing.skills) ? listing.skills : []
+            }));
+        if (apiJobs.length === 0) {
+            throw new Error("The API response did not contain usable job titles.");
+        }
+
+        displayParsedListings({ jobs: apiJobs, skipped: 0 });
+        const provider = payload.provider ? ` from ${payload.provider}` : "";
+        const refreshed = payload.fetchedAt ? ` Updated ${new Date(payload.fetchedAt).toLocaleString()}.` : "";
+        const partial = payload.warning ? " Some search groups could not be refreshed." : "";
+        setStatus(`Loaded ${jobs.length.toLocaleString()} current job listings${provider}.${refreshed}${partial}`);
+    } catch (error) {
+        if (requestId === activeDataRequest) {
+            setStatus(`Could not load live listings. Try the fictional sample or import your own CSV. ${error.message}`, true);
+        }
+    }
 }
 
 function populateLocations() {
@@ -652,6 +752,7 @@ function populateWorkTypes() {
 }
 
 function clearData() {
+    activeDataRequest += 1;
     jobs = [];
     visibleLimit = PAGE_SIZE;
     elements.file.value = "";
@@ -671,12 +772,13 @@ function clearData() {
     populateLocations();
     populateWorkTypes();
     renderDashboard();
-    setStatus("Data cleared from this page. Your CSV was never saved.");
+    setStatus("Data cleared from this page. Imported data was not saved.");
 }
 
 elements.file.addEventListener("change", async (event) => {
     const file = event.target.files[0];
     if (!file) return;
+    const requestId = ++activeDataRequest;
     if (file.size > MAX_FILE_SIZE) {
         setStatus("The CSV is larger than 5 MB. Split it into smaller files and try again.", true);
         elements.file.value = "";
@@ -684,19 +786,22 @@ elements.file.addEventListener("change", async (event) => {
     }
 
     try {
-        const result = parseJobListings(await file.text());
+        const fileText = await file.text();
+        if (requestId !== activeDataRequest) return;
+        const result = parseJobListings(fileText);
         displayParsedListings(result);
         const skippedNote = result.skipped
             ? ` ${result.skipped} row${result.skipped === 1 ? " was" : "s were"} skipped because title or description was missing.`
             : "";
         setStatus(`${jobs.length.toLocaleString()} listings analyzed from ${file.name}. Data stays in this browser.${skippedNote}`);
     } catch (error) {
-        setStatus(error.message, true);
+        if (requestId === activeDataRequest) setStatus(error.message, true);
     }
 });
 
 if (elements.sample) {
     elements.sample.addEventListener("click", async () => {
+        const requestId = ++activeDataRequest;
         elements.sample.disabled = true;
         setStatus("Loading fictional sample listings…");
         try {
@@ -704,11 +809,13 @@ if (elements.sample) {
             if (!response.ok) {
                 throw new Error("The sample file could not be loaded. You can still import your own CSV.");
             }
-            const result = parseJobListings(await response.text());
+            const sampleText = await response.text();
+            if (requestId !== activeDataRequest) return;
+            const result = parseJobListings(sampleText);
             displayParsedListings(result);
             setStatus(`Loaded ${jobs.length.toLocaleString()} fictional sample listings. They are illustrative, not current vacancies.`);
         } catch (error) {
-            setStatus(error.message, true);
+            if (requestId === activeDataRequest) setStatus(error.message, true);
         } finally {
             elements.sample.disabled = false;
         }
@@ -757,3 +864,9 @@ elements.showMore.addEventListener("click", () => {
     visibleLimit += PAGE_SIZE;
     renderDashboard();
 });
+
+if (JOB_API_URL) {
+    void loadApiListings();
+} else {
+    setStatus("The live listings API is not connected yet. Try the fictional sample or import your own CSV.");
+}
