@@ -4,14 +4,14 @@ The portfolio is hosted as a static GitHub Pages site. The JSearch API key must 
 
 ## Provider and coverage
 
-The Worker searches five data-role groups in the Philippines using OpenWeb Ninja JSearch, then removes duplicate postings. It returns each listing's title, full description, employer, location, posting date, work arrangement, application link, publisher, and structured required/preferred technologies when available. The dashboard falls back to matching known skills in the title and description.
+The Worker searches five data-role groups in the Philippines using OpenWeb Ninja JSearch, requests postings from the past month, and removes duplicate results. It keeps title, full description, employer, location, date, work arrangement, employment type, salary, seniority, experience, education, industry, publisher, apply link, and required/preferred technologies when those fields are present. The dashboard combines structured skills with keyword matches from the description.
 
-These are current search results, not a complete census of the Philippine job market. JSearch's free plan currently has a hard limit of 200 requests per month. The Worker caches its combined response for 24 hours at each Cloudflare edge location; cold locations can make additional provider calls.
+Some postings omit optional fields such as salary or seniority. These are current search matches, not a complete census of the Philippine job market. This feed does not provide stored historical snapshots, so year-over-year trends would need a separate collection step. JSearch's free plan currently has a hard limit of 200 requests per month. The Worker caches its combined response for 24 hours at each Cloudflare edge location; cold locations can make additional provider calls.
 
 ## Connect the API
 
 1. Create an OpenWeb Ninja account and copy a JSearch API key. The provider currently offers a free plan without a credit card.
-2. Install Wrangler or run it through `npx`, then authenticate with your Cloudflare account.
+2. Install Wrangler or run it through `npx`, then authenticate with your Cloudflare account using `npx wrangler login`.
 3. From this folder, add the provider key as a Worker secret and deploy:
 
    ```sh
