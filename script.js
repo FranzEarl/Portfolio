@@ -143,6 +143,36 @@ if (projectCarousel) {
     });
 }
 
+const projectFilterButtons = [...document.querySelectorAll("[data-project-filter]")];
+const portfolioProjectCards = [...document.querySelectorAll("#all-projects-grid [data-project-category]")];
+const projectFilterStatus = document.querySelector("#project-filter-status");
+
+if (projectFilterButtons.length && portfolioProjectCards.length && projectFilterStatus) {
+    const totalProjects = portfolioProjectCards.length;
+
+    projectFilterButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const category = button.dataset.projectFilter;
+            let visibleProjects = 0;
+            portfolioProjectCards.forEach((card) => {
+                const isVisible = category === "all" || card.dataset.projectCategory === category;
+                card.hidden = !isVisible;
+                if (isVisible) visibleProjects += 1;
+            });
+            projectFilterButtons.forEach((filterButton) => {
+                filterButton.setAttribute(
+                    "aria-pressed",
+                    String(filterButton === button)
+                );
+            });
+            const label = button.textContent.trim().toLowerCase();
+            projectFilterStatus.textContent = category === "all"
+                ? `Showing all ${totalProjects} projects.`
+                : `Showing ${visibleProjects} ${label.toLowerCase()}.`;
+        });
+    });
+}
+
 if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     const revealTargets = document.querySelectorAll(
         ".section-heading, .about-text, .detail-card, .project-card, .skill-card, .contact-content"
