@@ -284,8 +284,22 @@
     padding: 20px;
 }
 
-.job-timeline-card {
+.job-timeline-card,
+.job-snapshot-card {
     grid-column: 1 / -1;
+}
+
+.job-history-status {
+    margin: 10px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.job-history-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
 }
 
 .job-card-note {
