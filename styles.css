@@ -153,28 +153,7 @@ section {
     scroll-margin-top: 75px;
 }
 
-.skip-link {
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    z-index: 101;
-    padding: 9px 14px;
-    border: 1px solid var(--accent-hover);
-    border-radius: 6px;
-    color: #fff;
-    background: var(--accent);
-    font-weight: 600;
-    text-decoration: none;
-    transform: translateY(calc(-100% - 16px));
-}
 
-.skip-link:focus-visible {
-    transform: translateY(0);
-}
-
-#main-content {
-    scroll-margin-top: 85px;
-}
 
 /* ---------- Hero Section ---------- */
 
