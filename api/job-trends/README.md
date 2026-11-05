@@ -4,11 +4,11 @@ The portfolio is hosted as a static GitHub Pages site. The JSearch API key stays
 
 ## Feed and snapshot behavior
 
-The Worker searches five data-role groups in the Philippines with OpenWeb Ninja JSearch, requests postings from the past month, and removes duplicates. It preserves provider fields when present, including work arrangement, employment type, salary, seniority, experience, education, industry, and required/preferred technologies. The dashboard combines structured skills with keyword matches from listing text.
+The Worker searches five data-role groups in the Philippines with OpenWeb Ninja JSearch, requests postings from the past month, and removes duplicates. It preserves provider fields when present, including work arrangement, employment type, salary, seniority, experience, education, industry, and required/preferred technologies. The dashboard combines structured skills with keyword matches from listing text. When the provider omits work arrangement, the Worker classifies only clear “remote,” “hybrid,” or “on-site” wording in the title or description. Those values are marked as inferred; ambiguous wording stays blank.
 
 A daily Cloudflare Cron Trigger collects a snapshot at 00:00 UTC (08:00 in the Philippines). Five search requests per day use about 150 JSearch requests per 30-day month, within the provider's 200-request monthly plan if usage remains near that level. The daily snapshot is served to dashboard visitors; if a scheduled collection is missed or the database has no snapshot yet, the first dashboard request can collect one.
 
-Snapshots begin only after D1 is configured and deployed; earlier listings cannot be backfilled. The Worker keeps 90 days of daily history. The dashboard shows the latest 30 days and offers a CSV download of snapshot listing records for up to 30 days. Its separate “Download filtered CSV” action still exports the current filtered view. API fields can be blank when the provider does not supply them. Listings are search matches, not a complete census of the Philippine job market.
+Snapshots begin only after D1 is configured and deployed; earlier listings cannot be backfilled. The Worker keeps 90 days of daily history. The dashboard shows the latest 30 days and offers a CSV download of snapshot listing records for up to 30 days. Its separate “Download filtered CSV” action still exports the current filtered view. API fields can be blank when the provider does not supply them. Work arrangement is inferred only from explicit listing text and is marked in the dashboard and CSV. Listings are search matches, not a complete census of the Philippine job market.
 
 ## Connect the API and snapshot storage
 

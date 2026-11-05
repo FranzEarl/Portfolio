@@ -339,7 +339,6 @@ function getFieldCoverageSummary(listings) {
         ["description", (job) => job.description],
         ["location", (job) => job.location],
         ["date", (job) => job.date],
-        ["work arrangement", (job) => job.workType],
         ["employment type", (job) => job.employmentType],
         ["salary", (job) => job.salary],
         ["seniority / experience", (job) => job.seniority || job.experienceYears],
@@ -350,8 +349,11 @@ function getFieldCoverageSummary(listings) {
         const available = listings.filter((job) => cleanOptionalValue(getValue(job))).length;
         return `${label} ${Math.round((available / listings.length) * 100)}%`;
     }).join(" · ");
+    const knownArrangements = listings.filter((job) => cleanOptionalValue(job.workType)).length;
+    const inferredArrangements = listings.filter((job) => job.workTypeInferred).length;
+    const arrangementSummary = `work arrangement ${Math.round((knownArrangements / listings.length) * 100)}% known (${inferredArrangements} inferred)`;
 
-    return `Field coverage across ${listings.length.toLocaleString()} listings: ${summary}. Missing values were not supplied by the source.`;
+    return `Field coverage across ${listings.length.toLocaleString()} listings: ${summary} · ${arrangementSummary}. Other blanks mean the provider or CSV did not include the field.`;
 }
 
 function setStatus(message, isError = false) {
@@ -709,7 +711,13 @@ function renderListings(filteredJobs) {
         const location = document.createElement("td");
         setOptionalCellValue(location, job.location);
         const workType = document.createElement("td");
-        setOptionalCellValue(workType, job.workType);
+        const workTypeLabel = job.workType
+            ? `${job.workType}${job.workTypeInferred ? " (inferred)" : ""}`
+            : "";
+        setOptionalCellValue(workType, workTypeLabel);
+        if (job.workTypeInferred) {
+            workType.title = "Inferred from explicit wording in the job title or description.";
+        }
         const employmentType = document.createElement("td");
         setOptionalCellValue(employmentType, job.employmentType);
         const salary = document.createElement("td");
@@ -752,7 +760,7 @@ function downloadFilteredCsv() {
     const filteredJobs = getFilteredJobs();
     const headers = [
         "title", "description", "company", "location", "date", "work_type",
-        "employment_type", "salary", "seniority", "experience_years", "education",
+        "work_type_inferred", "employment_type", "salary", "seniority", "experience_years", "education",
         "industry", "required_skills", "preferred_skills", "source_url",
         "source_publisher", "detected_skills"
     ];
@@ -766,7 +774,7 @@ function downloadFilteredCsv() {
         headers.map(csvCell).join(","),
         ...filteredJobs.map((job) => [
             job.title, job.description, job.company, job.location, job.date,
-            job.workType, job.employmentType, job.salary, job.seniority,
+            job.workType, Boolean(job.workTypeInferred), job.employmentType, job.salary, job.seniority,
             job.experienceYears, job.education, job.industry,
             (job.requiredSkills || []).join("; "), (job.preferredSkills || []).join("; "),
             job.sourceUrl, job.sourceName, job.skills.join("; ")
@@ -877,6 +885,7 @@ async function loadApiListings() {
                 location: cleanOptionalValue(listing.location),
                 date: normalizeDate(String(listing.date || "")),
                 workType: cleanOptionalValue(listing.workType),
+                workTypeInferred: listing.workTypeInferred === true,
                 employmentType: cleanOptionalValue(listing.employmentType),
                 salary: cleanOptionalValue(listing.salary),
                 seniority: cleanOptionalValue(listing.seniority),

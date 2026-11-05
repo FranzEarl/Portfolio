@@ -302,6 +302,13 @@
     margin-top: 10px;
 }
 
+.job-arrangement-note {
+    margin: 12px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
 .job-card-note {
     color: var(--text-secondary);
     font-size: 0.76rem;
