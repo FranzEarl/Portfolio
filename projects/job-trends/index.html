@@ -92,7 +92,21 @@
                         <option value="">All arrangements</option>
                     </select>
                 </label>
+                <label>
+                    <span>Posted on or after</span>
+                    <input id="posted-after" type="date" disabled>
+                </label>
+                <label>
+                    <span>Posted on or before</span>
+                    <input id="posted-before" type="date" disabled>
+                </label>
+                <div class="job-filter-actions">
+                    <button id="reset-filters" class="job-secondary-button" type="button" disabled>Reset filters</button>
+                    <button id="download-filtered" class="job-secondary-button" type="button" disabled>Download filtered CSV</button>
+                </div>
             </section>
+
+            <p class="job-filter-note">Date filters include only listings with a recognized posting date. Download exports the current filtered listings.</p>
 
             <section class="job-summary" aria-label="Job listing summary">
                 <article class="job-stat">
