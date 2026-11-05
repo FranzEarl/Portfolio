@@ -70,18 +70,11 @@ reload. Run its import, export, storage, and rendering regression tests with
 
 ## Job Skills & Hiring Trends Explorer
 
-The job-postings analyzer is in `projects/job-trends/`. It analyzes listings
-from a CSV you provide and extracts normalized data skills from each title and
-description. The file is processed in your browser and is not uploaded or saved.
-Download `job-postings-template.csv` from the dashboard for the supported
-columns. `title` (or `job_title`) and `description` (or `job_description`) are
-required; `company`, `location`/`city`, `date`/`posted_date`/`dateCreated`,
-`work_type`/`workType`, and `source_url` are optional. Techmap CSV exports are
-supported directly, including ISO timestamp dates, JSON-array work types, and
-source URLs nested in `jsonLD`. The skill taxonomy and CSV fields are
-independent of any job board or country so an approved feed can be added later
-without changing the analysis model. Run its CSV parsing, analysis, filtering,
-and safety tests with `node --test projects/tests/job-trends.test.js`.
+The job-postings analyzer is in `projects/job-trends/`. It loads current Philippine listings from a Cloudflare Worker when configured; visitors can also use fictional sample listings or import a CSV. CSV files are analyzed locally in the browser and are not uploaded or saved. The dashboard compares requested skills, categories, roles, work arrangements, locations, and posting dates. Optional source fields can be blank when the provider does not supply them.
+
+Download `job-postings-template.csv` for the supported CSV columns. `title` (or `job_title`) and `description` (or `job_description`) are required; `company`, `location`/`city`, `date`/`posted_date`/`dateCreated`, `work_type`/`workType`, and `source_url` are optional. Techmap CSV exports are supported directly, including ISO timestamp dates, JSON-array work types, and source URLs nested in `jsonLD`. Visitors can export either the currently filtered listings or the daily snapshot history as CSV.
+
+The Cloudflare Worker can save daily snapshots to D1, retain 90 days, and expose the latest month of history as a CSV download. Collection starts after D1 setup and deployment; it does not backfill earlier listings. See [the API setup guide](api/job-trends/README.md) for provider, database, schedule, and deployment instructions. Run its CSV parsing, analysis, filtering, and safety tests with `node --test projects/tests/job-trends.test.js`.
 
 ## Philippines Labor Market Explorer
 

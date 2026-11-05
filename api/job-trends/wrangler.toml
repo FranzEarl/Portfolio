@@ -2,5 +2,8 @@ name = "portfolio-job-trends-feed"
 main = "worker.js"
 compatibility_date = "2026-11-05"
 
+[triggers]
+crons = ["0 0 * * *"]
+
 [observability]
 enabled = true

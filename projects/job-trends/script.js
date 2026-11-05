@@ -93,12 +93,16 @@ const elements = {
     skillChartNote: document.querySelector("#skill-chart-note"),
     resultCount: document.querySelector("#job-results-count"),
     rows: document.querySelector("#job-listing-rows"),
-    showMore: document.querySelector("#show-more-jobs")
+    showMore: document.querySelector("#show-more-jobs"),
+    snapshotHistoryChart: document.getElementById?.("snapshot-history-chart"),
+    snapshotHistoryStatus: document.getElementById?.("snapshot-history-status"),
+    downloadHistory: document.getElementById?.("download-history")
 };
 
 let jobs = [];
 let visibleLimit = PAGE_SIZE;
 let activeDataRequest = 0;
+let snapshotHistory = [];
 
 function normalizeText(value) {
     return String(value || "")
@@ -549,6 +553,114 @@ function setOptionalCellValue(cell, value) {
     }
 }
 
+
+function buildHistoryEndpoint(path) {
+    try {
+        const endpoint = new URL(JOB_API_URL);
+        endpoint.pathname = endpoint.pathname.replace(/\/jobs\/?$/, path);
+        endpoint.search = "";
+        endpoint.hash = "";
+        return endpoint;
+    } catch {
+        return null;
+    }
+}
+
+function renderSnapshotHistory() {
+    const container = elements.snapshotHistoryChart;
+    if (!container) return;
+    container.replaceChildren();
+    if (snapshotHistory.length === 0) {
+        clearChart(container, "Daily history will appear after the first snapshot is collected.");
+        return;
+    }
+
+    const recent = snapshotHistory.slice(-30);
+    const maximum = Math.max(1, ...recent.map((snapshot) => Number(snapshot.listingCount) || 0));
+    recent.forEach((snapshot) => {
+        const count = Number(snapshot.listingCount) || 0;
+        const bar = document.createElement("div");
+        bar.className = "job-timeline-bar";
+        bar.title = count + " listings captured on " + snapshot.snapshotDate;
+        bar.setAttribute("aria-label", bar.title);
+
+        const value = document.createElement("span");
+        value.textContent = String(count);
+        const fill = document.createElement("i");
+        fill.style.height = Math.max((count / maximum) * 100, 2) + "%";
+        fill.setAttribute("aria-hidden", "true");
+        const label = document.createElement("span");
+        label.textContent = snapshot.snapshotDate.slice(5);
+        bar.append(value, fill, label);
+        container.append(bar);
+    });
+}
+
+async function loadSnapshotHistory() {
+    if (!JOB_API_URL || !elements.snapshotHistoryChart || !elements.snapshotHistoryStatus) return;
+    const endpoint = buildHistoryEndpoint("/history");
+    if (!endpoint) return;
+    endpoint.searchParams.set("days", "90");
+    elements.snapshotHistoryStatus.textContent = "Loading daily snapshot history…";
+
+    try {
+        const response = await fetch(endpoint, { headers: { Accept: "application/json" } });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload.error || "Snapshot history is temporarily unavailable.");
+        }
+        snapshotHistory = Array.isArray(payload.snapshots) ? payload.snapshots : [];
+        renderSnapshotHistory();
+        if (snapshotHistory.length === 0) {
+            elements.snapshotHistoryStatus.textContent = "No snapshots are saved yet. The first one is created when the feed runs.";
+        } else if (snapshotHistory.length === 1) {
+            elements.snapshotHistoryStatus.textContent =
+                "1 daily snapshot saved. A trend comparison will appear after the next daily collection.";
+        } else {
+            const first = snapshotHistory[0].snapshotDate;
+            const last = snapshotHistory[snapshotHistory.length - 1].snapshotDate;
+            elements.snapshotHistoryStatus.textContent =
+                "Showing the latest " + Math.min(snapshotHistory.length, 30) + " of "
+                + snapshotHistory.length + " daily snapshots (" + first + " to " + last + ").";
+        }
+        if (elements.downloadHistory) {
+            elements.downloadHistory.disabled = snapshotHistory.length === 0;
+        }
+    } catch (error) {
+        elements.snapshotHistoryStatus.textContent = error.message;
+        if (elements.downloadHistory) elements.downloadHistory.disabled = true;
+    }
+}
+
+async function downloadSnapshotHistoryCsv() {
+    if (!elements.downloadHistory || snapshotHistory.length === 0) return;
+    const endpoint = buildHistoryEndpoint("/history.csv");
+    if (!endpoint) return;
+    endpoint.searchParams.set("days", "30");
+    elements.downloadHistory.disabled = true;
+    elements.downloadHistory.textContent = "Preparing history CSV…";
+    try {
+        const response = await fetch(endpoint, { headers: { Accept: "text/csv" } });
+        if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            throw new Error(payload.error || "Snapshot history could not be exported.");
+        }
+        const blob = await response.blob();
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = "job-trends-snapshot-history.csv";
+        link.click();
+        URL.revokeObjectURL(downloadUrl);
+        elements.snapshotHistoryStatus.textContent = "Downloaded the latest 30 days of listing snapshots.";
+    } catch (error) {
+        elements.snapshotHistoryStatus.textContent = error.message;
+    } finally {
+        elements.downloadHistory.textContent = "Download snapshot history CSV";
+        elements.downloadHistory.disabled = snapshotHistory.length === 0;
+    }
+}
+
 function renderListings(filteredJobs) {
     elements.rows.replaceChildren();
     const shown = filteredJobs.slice(0, visibleLimit);
@@ -962,6 +1074,7 @@ elements.resetFilters.addEventListener("click", () => {
 });
 
 elements.downloadFiltered.addEventListener("click", downloadFilteredCsv);
+elements.downloadHistory?.addEventListener("click", downloadSnapshotHistoryCsv);
 
 elements.clear.addEventListener("click", clearData);
 elements.showMore.addEventListener("click", () => {
@@ -971,6 +1084,7 @@ elements.showMore.addEventListener("click", () => {
 
 if (JOB_API_URL) {
     void loadApiListings();
+    void loadSnapshotHistory();
 } else {
     setStatus("The live listings API is not connected yet. Try the fictional sample or import your own CSV.");
 }
