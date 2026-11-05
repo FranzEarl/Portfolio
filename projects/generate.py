@@ -73,41 +73,6 @@ html = f"""<!DOCTYPE html>
                     </article>
                 </section>
 
-                <section class="program-runner" aria-labelledby="try-program-title">
-                    <div class="terminal-chrome" aria-hidden="true"><span class="terminal-dots"><i></i><i></i><i></i></span><span>portfolio / c-programs</span></div>
-                    <div class="runner-heading">
-                        <p class="program-overview-label">RUN IN YOUR BROWSER</p>
-                        <h2 id="try-program-title">C program terminal</h2>
-                        <p>Choose a program, enter its answers in order, and run it. Programs run locally in your browser. Input ends safely if a program asks for more than you provided.</p>
-                    </div>
-                    <div class="runner-layout">
-                        <form id="c-runner-form">
-                            <div class="runner-field">
-                                <label for="c-runner-program">Program</label>
-                                <select id="c-runner-program" name="program"></select>
-                            </div>
-                            <div class="runner-field">
-                                <label for="c-runner-input">Input</label>
-                                <textarea id="c-runner-input" rows="7" placeholder="One answer per line&#10;Example: 12, then 8, then +"></textarea>
-                                <span class="runner-hint">Use one line for each response the program asks for.</span>
-                            </div>
-                            <div class="runner-actions">
-                                <button type="submit">Run <span aria-hidden="true">▶</span></button>
-                                <button type="button" id="c-runner-stop" disabled>Stop</button>
-                                <button type="button" id="c-runner-reset">Clear</button>
-                                <button type="button" id="c-runner-example">Load calculator example</button>
-                            </div>
-                        </form>
-                        <section class="runner-console" aria-label="Program terminal output">
-                            <div class="runner-console-heading"><span>TERMINAL</span><span id="c-runner-status" role="status">Ready</span></div>
-                            <pre id="c-runner-output" aria-live="polite"><span class="terminal-prompt">$</span> Choose a program and run it.</pre>
-                        </section>
-                    </div>
-                    <p class="runner-safety">Runs stop automatically if input runs out, output grows too large, or a program runs too long.</p>
-                </section>
-                                    </div>
-                                </section>
-
                 <div class="program-list-heading">
                     <div>
                         <p class="program-overview-label">SOURCE CODE</p>
@@ -125,7 +90,6 @@ html = f"""<!DOCTYPE html>
         </section>
     </main>
 
-<script type="module" src="c-programs/runner.js"></script>
 </body>
 </html>
 """
@@ -134,4 +98,3 @@ output = Path(__file__).parent / "c-programs.html"
 output.write_text(html, encoding="utf-8")
 
 print(f"Homepage updated! Found {len(files)} C programs.")
-
