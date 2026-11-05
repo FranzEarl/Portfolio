@@ -102,8 +102,8 @@ html = f"""<!DOCTYPE html>
         </section>
     </main>
 
-</body>
 <script type="module" src="c-programs/runner.js"></script>
+</body>
 </html>
 """
 
