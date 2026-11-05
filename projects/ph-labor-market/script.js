@@ -86,6 +86,22 @@ function findObservation(indicator, year) {
     return indicator.observations.find((observation) => observation.year === year);
 }
 
+function splitObservationGaps(observations) {
+    const segments = [];
+    let segment = [];
+
+    observations.forEach((observation, index) => {
+        if (index > 0 && observation.year !== observations[index - 1].year + 1) {
+            segments.push(segment);
+            segment = [];
+        }
+        segment.push(observation);
+    });
+
+    if (segment.length > 0) segments.push(segment);
+    return segments;
+}
+
 function buildCaseStudyInsights(series) {
     const agriculture = series.find((item) => item.id === "SL.AGR.EMPL.ZS");
     const industry = series.find((item) => item.id === "SL.IND.EMPL.ZS");
@@ -251,13 +267,26 @@ function renderChart(container, series) {
 
     series.forEach((item, index) => {
         const color = COLORS[index % COLORS.length];
-        const points = item.observations.map((point) => `${x(point.year)},${y(point.value)}`);
-        const path = createSvgElement("polyline", {
-            points: points.join(" "),
-            class: "labor-chart-line",
-            stroke: color
+        const segments = splitObservationGaps(item.observations);
+        segments.forEach((segment) => {
+            if (segment.length > 1) {
+                const points = segment.map((point) => `${x(point.year)},${y(point.value)}`);
+                svg.append(createSvgElement("polyline", {
+                    points: points.join(" "),
+                    class: "labor-chart-line",
+                    stroke: color
+                }));
+            } else {
+                const [point] = segment;
+                svg.append(createSvgElement("circle", {
+                    cx: x(point.year),
+                    cy: y(point.value),
+                    r: 2.5,
+                    fill: color,
+                    class: "labor-chart-dot"
+                }));
+            }
         });
-        svg.append(path);
 
         const latest = item.observations[item.observations.length - 1];
         const dot = createSvgElement("circle", {
