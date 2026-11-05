@@ -86,6 +86,12 @@
                         <option value="">All locations</option>
                     </select>
                 </label>
+                <label>
+                    <span>Work arrangement</span>
+                    <select id="work-type-filter" disabled>
+                        <option value="">All arrangements</option>
+                    </select>
+                </label>
             </section>
 
             <section class="job-summary" aria-label="Job listing summary">
@@ -108,6 +114,11 @@
                     <p>LOCATIONS</p>
                     <strong id="location-count">0</strong>
                     <span>represented in current view</span>
+                </article>
+                <article class="job-stat">
+                    <p>REMOTE / HYBRID</p>
+                    <strong id="remote-share">—</strong>
+                    <span>of listings with known arrangement</span>
                 </article>
             </section>
 
@@ -136,13 +147,37 @@
                         <p class="job-empty-state">Category patterns will appear after import.</p>
                     </div>
                 </article>
+                <article class="job-analysis-card">
+                    <div class="job-card-heading">
+                        <div>
+                            <p class="job-trends-eyebrow">ROLE MIX</p>
+                            <h2>Roles in this dataset</h2>
+                        </div>
+                        <span class="job-card-note">By title</span>
+                    </div>
+                    <div id="role-chart" class="job-bar-chart">
+                        <p class="job-empty-state">Role patterns will appear after import.</p>
+                    </div>
+                </article>
+                <article class="job-analysis-card">
+                    <div class="job-card-heading">
+                        <div>
+                            <p class="job-trends-eyebrow">WORK ARRANGEMENT</p>
+                            <h2>Remote, hybrid, and on-site</h2>
+                        </div>
+                        <span class="job-card-note">Share of listings</span>
+                    </div>
+                    <div id="work-type-chart" class="job-bar-chart">
+                        <p class="job-empty-state">Add a <code>work_type</code> column to compare arrangements.</p>
+                    </div>
+                </article>
                 <article class="job-analysis-card job-timeline-card">
                     <div class="job-card-heading">
                         <div>
                             <p class="job-trends-eyebrow">POSTING ACTIVITY</p>
                             <h2>Listings over time</h2>
                         </div>
-                        <span class="job-card-note">By month</span>
+                        <span class="job-card-note">Listings with dates; reflects this file only</span>
                     </div>
                     <div id="timeline-chart" class="job-timeline-chart">
                         <p class="job-empty-state">Add a <code>date</code> column to see posting activity.</p>
