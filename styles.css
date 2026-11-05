@@ -1331,3 +1331,17 @@ section {
 #c-runner-status { color: #81c995; font: 600 0.75rem/1.4 Arial, sans-serif; letter-spacing: 0; }
 #c-runner-output { min-height: 265px; max-height: 480px; margin: 0; padding: 16px; overflow: auto; color: #d5dfec; background: transparent; white-space: pre-wrap; overflow-wrap: anywhere; font: 0.84rem/1.65 Consolas, monospace; }
 @media (max-width: 760px) { .runner-layout { grid-template-columns: 1fr; } .runner-console { min-height: 250px; } #c-runner-output { min-height: 210px; } }
+
+.terminal-chrome { display:flex; align-items:center; gap:14px; margin:-10px 0 28px; padding-bottom:14px; border-bottom:1px solid rgba(146,153,168,.18); color:#8d98aa; font: .78rem Consolas,monospace; }
+.terminal-dots { display:flex; gap:6px; }
+.terminal-dots i { width:9px; height:9px; border-radius:50%; background:#ff6b6b; }
+.terminal-dots i:nth-child(2) { background:#f5c451; }
+.terminal-dots i:nth-child(3) { background:#62c58a; }
+.runner-actions { flex-wrap:wrap; }
+.runner-actions button:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+#c-runner-example { color:#a9c9f1; border-color:rgba(101,165,243,.3); background:rgba(57,132,214,.08); }
+.runner-safety { margin-top:17px; color:#8d98aa; font-size:.78rem; }
+.runner-console-heading { text-transform:uppercase; }
+#c-runner-output { tab-size:4; }
+.terminal-prompt { color:#81c995; font-weight:700; }
+@media (max-width:760px) { .program-runner { padding:20px 16px; } .runner-actions button { flex:1 1 auto; } #c-runner-example { flex-basis:100%; } }
