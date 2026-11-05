@@ -8,7 +8,7 @@ self.onmessage=async({data})=>{
   const response=await fetch(\`wasm/\${encodeURIComponent(data.program)}.wasm\`);
   if(!response.ok)throw Error('Could not load the program.');
   const bytes=await response.arrayBuffer();
-  const input=new File(new TextEncoder().encode(data.input?data.input+(data.input.endsWith('\\n')?'':'\\n'):''));
+  const input=new File(new TextEncoder().encode(data.input?data.input+(data.input.endsWith('\n')?'':'\n'):''));
   const decoder=new TextDecoder();
   const stream=buffer=>{const text=decoder.decode(buffer,{stream:true});if(text)self.postMessage({type:'output',text})};
   const wasi=new WASI(['program'],[],[new GuardedOpenFile(input),new ConsoleStdout(stream),new ConsoleStdout(stream)]);
