@@ -64,7 +64,8 @@ const allSkills = skillGroups.flatMap((group) =>
 );
 
 const elements = {
-    file: document.querySelector("#job-csv-file"),\n    sample: document.getElementById?.("load-sample"),
+    file: document.querySelector("#job-csv-file"),
+    sample: document.getElementById?.("load-sample"),
     clear: document.querySelector("#clear-data"),
     status: document.querySelector("#job-data-status"),
     search: document.querySelector("#job-search"),
