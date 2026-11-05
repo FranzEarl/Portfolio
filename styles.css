@@ -479,6 +479,42 @@ section {
     font: 0.75rem Consolas, monospace;
 }
 
+.project-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 8px;
+}
+
+.project-filter {
+    min-height: 38px;
+    padding: 8px 13px;
+    border: 1px solid rgba(146, 153, 168, 0.3);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    background: transparent;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.project-filter[aria-pressed="true"] {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    background: rgba(57, 132, 214, 0.16);
+}
+
+.project-filter-status {
+    min-height: 1.4em;
+    margin: 0 0 14px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+#all-projects-grid .project-card[hidden] {
+    display: none;
+}
+
 .project-card {
     overflow: hidden;
     background: var(--surface);
