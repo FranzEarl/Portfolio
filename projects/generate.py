@@ -23,6 +23,7 @@ html = f"""<!DOCTYPE html>
     <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
 
     <header>
         <nav class="navbar">
@@ -31,7 +32,7 @@ html = f"""<!DOCTYPE html>
         </nav>
     </header>
 
-    <main>
+    <main id="main-content" tabindex="-1">
         <section class="programs-page">
             <div class="programs-container">
 
@@ -49,9 +50,7 @@ html = f"""<!DOCTYPE html>
                         <p class="program-overview-label">THE PROJECT</p>
                         <h2>What I built</h2>
                         <p>
-                            This collection includes calculators, date and number tools,
-                            text utilities, simple trackers, and terminal games such as
-                            Hangman, Tic-Tac-Toe, and Rock Paper Scissors.
+                            This collection includes calculators, password utilities, a contact book, a to-do list, a quiz game, a Sudoku solver, date and number tools, text utilities, and terminal games. The shift-based password examples are learning exercises, not secure encryption.
                         </p>
                     </article>
                     <article class="program-overview-card">

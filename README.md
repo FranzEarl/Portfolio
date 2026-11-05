@@ -91,9 +91,15 @@ analysis, export, and response-validation tests with
 ## C Programs
 
 The C source files are in `projects/c-programs/`, with a browsable listing at
-`projects/c-programs.html`. To refresh that listing after adding or removing a
-program, run `python projects/generate.py`. To regenerate it automatically
-while editing the C files, run `python projects/watch.py`.
+`projects/c-programs.html`. The collection currently includes 27 programs:
+calculators and date tools, password utilities, a contact book, a to-do list,
+a quiz game, a Sudoku solver, text tools, and terminal games. The Caesar-shift
+password examples are learning exercises and are not secure encryption. The quiz
+game reads its questions from the adjacent `quiz_questions.txt` file.
+
+To refresh the listing after adding or removing a program, run
+`python projects/generate.py`. To regenerate it automatically while editing
+the C files, run `python projects/watch.py`.
 
 The input-handling regression tests require Node.js and GCC. Run them with
 `node --test projects/tests/c-programs.test.js`.
