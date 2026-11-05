@@ -539,7 +539,8 @@ function downloadFilteredCsv() {
     const headers = ["title", "description", "company", "location", "date", "work_type", "source_url", "detected_skills"];
     const csvCell = (value) => {
         const raw = String(value ?? "");
-        const safe = /^[=+\\-@]/.test(raw.trimStart()) ? `'${raw}` : raw;
+        const formulaPrefix = ["=", "+", "-", "@"].includes(raw.trimStart()[0]);
+        const safe = formulaPrefix ? `'${raw}` : raw;
         return `"${safe.replace(/"/g, '""')}"`;
     };
     const lines = [
