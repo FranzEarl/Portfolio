@@ -7,3 +7,9 @@ crons = ["0 0 * * *"]
 
 [observability]
 enabled = true
+
+[[d1_databases]]
+binding = "JOB_TRENDS_DB"
+database_name = "portfolio-job-trends"
+database_id = "f82aee5c-8e42-44b2-9419-58d4c23e9729"
+migrations_dir = "migrations"
