@@ -53,6 +53,31 @@ function extractListings(payload) {
     return [];
 }
 
+function inferWorkArrangement(title, description) {
+    const text = String(title || "") + " " + String(description || "");
+    const normalized = text.toLowerCase();
+
+    if (/\bhybrid\b/.test(normalized)) return "Hybrid";
+
+    const remoteDenied = /\b(?:not|no|never)\s+(?:a\s+)?remote\b|\bremote\s+(?:work\s+)?(?:is\s+)?(?:not available|not offered|not permitted|not an option|unavailable)\b/.test(normalized);
+    if (!remoteDenied && /\b(?:remote|wfh|telecommut(?:e|ing)|home[- ]based|work[- ]from[- ]home)\b/.test(normalized)) {
+        return "Remote";
+    }
+
+    if (/\b(?:on[- ]?site|in[- ]office|office[- ]based|work from (?:the )?office|in person)\b/.test(normalized)) {
+        return "On-site";
+    }
+    return "";
+}
+
+function withInferredWorkArrangement(listing) {
+    const supplied = String(listing.workType || "").trim();
+    if (supplied) return { ...listing, workType: supplied, workTypeInferred: false };
+
+    const inferred = inferWorkArrangement(listing.title, listing.description);
+    return { ...listing, workType: inferred, workTypeInferred: Boolean(inferred) };
+}
+
 function toListing(record) {
     const title = String(record.job_title || "").trim();
     if (!title) return null;
@@ -170,6 +195,11 @@ function parseJsonArray(value) {
 }
 
 function fromDatabase(row) {
+    const suppliedWorkType = row.work_type || "";
+    const inferredWorkType = suppliedWorkType
+        ? ""
+        : inferWorkArrangement(row.title, row.description);
+
     return {
         id: row.job_id,
         title: row.title,
@@ -177,7 +207,8 @@ function fromDatabase(row) {
         company: row.company || "",
         location: row.location || "",
         date: row.posted_date || "",
-        workType: row.work_type || "",
+        workType: suppliedWorkType || inferredWorkType,
+        workTypeInferred: Boolean(inferredWorkType),
         employmentType: row.employment_type || "",
         salary: row.salary || "",
         seniority: row.seniority || "",
@@ -326,18 +357,24 @@ async function readSnapshotCsv(database, days) {
 
     const headers = [
         "snapshot_date", "job_id", "title", "description", "company", "location",
-        "date", "work_type", "employment_type", "salary", "seniority",
+        "date", "work_type", "work_type_inferred", "employment_type", "salary", "seniority",
         "experience_years", "education", "industry", "required_skills",
         "preferred_skills", "source_url", "source_publisher", "detected_skills"
     ];
-    const rows = (result.results || []).map((row) => [
-        row.snapshot_date, row.job_id, row.title, row.description, row.company, row.location,
-        row.date, row.work_type, row.employment_type, row.salary, row.seniority,
-        row.experience_years, row.education, row.industry,
-        parseJsonArray(row.required_skills).join("; "),
-        parseJsonArray(row.preferred_skills).join("; "),
-        row.source_url, row.source_publisher, parseJsonArray(row.detected_skills).join("; ")
-    ]);
+    const rows = (result.results || []).map((row) => {
+        const inferredWorkType = row.work_type
+            ? ""
+            : inferWorkArrangement(row.title, row.description);
+        return [
+            row.snapshot_date, row.job_id, row.title, row.description, row.company, row.location,
+            row.date, row.work_type || inferredWorkType, Boolean(inferredWorkType),
+            row.employment_type, row.salary, row.seniority,
+            row.experience_years, row.education, row.industry,
+            parseJsonArray(row.required_skills).join("; "),
+            parseJsonArray(row.preferred_skills).join("; "),
+            row.source_url, row.source_publisher, parseJsonArray(row.detected_skills).join("; ")
+        ];
+    });
     return [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
 }
 
@@ -397,7 +434,7 @@ export default {
             }
         }
 
-        const cacheKey = new Request(new URL("/jobs?cache=history-v1", url.origin), { method: "GET" });
+        const cacheKey = new Request(new URL("/jobs?cache=history-v2", url.origin), { method: "GET" });
         const cached = await caches.default.match(cacheKey);
         if (cached) {
             const hitHeaders = new Headers(cached.headers);
@@ -475,7 +512,7 @@ export default {
             fetchedAt,
             snapshotDate: snapshot?.snapshotDate || "",
             queries: SEARCH_QUERIES.length,
-            jobs: collected.jobs,
+            jobs: collected.jobs.map(withInferredWorkArrangement),
             warning: warningParts.join(" ")
         };
         const response = jsonResponse(payload, 200, { "X-Job-Feed-Cache": "MISS" });
