@@ -1,0 +1,5 @@
+Which language is this quiz game written in?|C|Python|Java|Ruby|1
+Which function prints formatted output in C?|scanf|printf|fopen|strlen|2
+Which header declares the string functions strlen and strcpy?|<stdio.h>|<stdlib.h>|<string.h>|<time.h>|3
+What does a C program's main function usually return on success?|0|1|-1|EOF|1
+Which operator gives the remainder after division in C?|/|%|*|&|2
