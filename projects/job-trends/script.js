@@ -74,6 +74,7 @@ const elements = {
     search: document.querySelector("#job-search"),
     location: document.querySelector("#location-filter"),
     workTypeFilter: document.querySelector("#work-type-filter"),
+    employmentTypeFilter: document.getElementById?.("employment-type-filter"),
     postedAfter: document.querySelector("#posted-after"),
     postedBefore: document.querySelector("#posted-before"),
     resetFilters: document.querySelector("#reset-filters"),
@@ -398,17 +399,30 @@ function getFilteredJobs() {
     const query = normalizeText(elements.search.value);
     const location = elements.location.value;
     const workType = elements.workTypeFilter.value;
+    const employmentType = elements.employmentTypeFilter?.value || "";
     const postedAfter = elements.postedAfter.value;
     const postedBefore = elements.postedBefore.value;
     return jobs.filter((job) => {
         if (location && job.location !== location) return false;
         if (workType && job.workType !== workType) return false;
+        if (employmentType && job.employmentType !== employmentType) return false;
         if (postedAfter && (!job.date || job.date < postedAfter)) return false;
         if (postedBefore && (!job.date || job.date > postedBefore)) return false;
         if (!query) return true;
-        const searchable = normalizeText(
-            `${job.title} ${job.company} ${job.location} ${job.description} ${job.skills.join(" ")}`
-        );
+        const searchable = normalizeText([
+            job.title,
+            job.company,
+            job.location,
+            job.description,
+            job.workType,
+            job.employmentType,
+            job.salary,
+            job.seniority,
+            job.experienceYears,
+            job.education,
+            job.industry,
+            ...job.skills
+        ].join(" "));
         return searchable.includes(query);
     });
 }
@@ -567,7 +581,12 @@ function renderListings(filteredJobs) {
             company.textContent = job.company;
             roleCell.append(company);
         }
-        const roleDetails = [job.seniority, job.experienceYears ? `${job.experienceYears}+ years` : ""].filter(Boolean);
+        const roleDetails = [
+            job.seniority ? `Level: ${job.seniority}` : "",
+            job.experienceYears ? `Experience: ${job.experienceYears}` : "",
+            job.education ? `Education: ${job.education}` : "",
+            job.industry ? `Industry: ${job.industry}` : ""
+        ].filter(Boolean);
         if (roleDetails.length) {
             const meta = document.createElement("span");
             meta.className = "job-role-meta";
@@ -653,7 +672,7 @@ function renderDashboard() {
     const filteredJobs = getFilteredJobs();
     const hasFilters = Boolean(
         elements.search.value || elements.location.value || elements.workTypeFilter.value
-        || elements.postedAfter.value || elements.postedBefore.value
+        || elements.employmentTypeFilter?.value || elements.postedAfter.value || elements.postedBefore.value
     );
     elements.resetFilters.disabled = !jobs.length || !hasFilters;
     elements.downloadFiltered.disabled = filteredJobs.length === 0;
@@ -705,11 +724,13 @@ function displayParsedListings(result) {
     elements.search.value = "";
     elements.location.value = "";
     elements.workTypeFilter.value = "";
+    if (elements.employmentTypeFilter) elements.employmentTypeFilter.value = "";
     elements.postedAfter.value = "";
     elements.postedBefore.value = "";
     elements.search.disabled = false;
     elements.location.disabled = false;
     elements.workTypeFilter.disabled = false;
+    if (elements.employmentTypeFilter) elements.employmentTypeFilter.disabled = false;
     elements.postedAfter.disabled = false;
     elements.postedBefore.disabled = false;
     elements.resetFilters.disabled = false;
@@ -717,6 +738,7 @@ function displayParsedListings(result) {
     elements.clear.disabled = false;
     populateLocations();
     populateWorkTypes();
+    populateEmploymentTypes();
     renderDashboard();
 }
 
@@ -793,14 +815,33 @@ function populateWorkTypes() {
     allTypes.value = "";
     allTypes.textContent = "All arrangements";
     elements.workTypeFilter.append(allTypes);
-    [...new Set(jobs.map((job) => job.workType).filter(Boolean))]
-        .sort((left, right) => left.localeCompare(right))
-        .forEach((workType) => {
-            const option = document.createElement("option");
-            option.value = workType;
-            option.textContent = workType;
-            elements.workTypeFilter.append(option);
-        });
+    const workTypes = [...new Set(jobs.map((job) => cleanOptionalValue(job.workType)).filter(Boolean))]
+        .sort((left, right) => left.localeCompare(right));
+    elements.workTypeFilter.disabled = workTypes.length === 0;
+    workTypes.forEach((workType) => {
+        const option = document.createElement("option");
+        option.value = workType;
+        option.textContent = workType;
+        elements.workTypeFilter.append(option);
+    });
+}
+
+function populateEmploymentTypes() {
+    if (!elements.employmentTypeFilter) return;
+    elements.employmentTypeFilter.replaceChildren();
+    const allTypes = document.createElement("option");
+    allTypes.value = "";
+    allTypes.textContent = "All employment types";
+    elements.employmentTypeFilter.append(allTypes);
+    const employmentTypes = [...new Set(jobs.map((job) => cleanOptionalValue(job.employmentType)).filter(Boolean))]
+        .sort((left, right) => left.localeCompare(right));
+    elements.employmentTypeFilter.disabled = employmentTypes.length === 0;
+    employmentTypes.forEach((employmentType) => {
+        const option = document.createElement("option");
+        option.value = employmentType;
+        option.textContent = employmentType;
+        elements.employmentTypeFilter.append(option);
+    });
 }
 
 function clearData() {
@@ -811,6 +852,10 @@ function clearData() {
     elements.search.value = "";
     elements.location.value = "";
     elements.workTypeFilter.value = "";
+    if (elements.employmentTypeFilter) {
+        elements.employmentTypeFilter.value = "";
+        elements.employmentTypeFilter.disabled = true;
+    }
     elements.postedAfter.value = "";
     elements.postedBefore.value = "";
     elements.search.disabled = true;
@@ -823,6 +868,7 @@ function clearData() {
     elements.clear.disabled = true;
     populateLocations();
     populateWorkTypes();
+    populateEmploymentTypes();
     renderDashboard();
     setStatus("Data cleared from this page. Imported data was not saved.");
 }
@@ -885,6 +931,11 @@ elements.location.addEventListener("change", () => {
 });
 
 elements.workTypeFilter.addEventListener("change", () => {
+    visibleLimit = PAGE_SIZE;
+    renderDashboard();
+});
+
+elements.employmentTypeFilter?.addEventListener("change", () => {
     visibleLimit = PAGE_SIZE;
     renderDashboard();
 });
