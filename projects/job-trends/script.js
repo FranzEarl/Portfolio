@@ -954,6 +954,7 @@ elements.resetFilters.addEventListener("click", () => {
     elements.search.value = "";
     elements.location.value = "";
     elements.workTypeFilter.value = "";
+    if (elements.employmentTypeFilter) elements.employmentTypeFilter.value = "";
     elements.postedAfter.value = "";
     elements.postedBefore.value = "";
     visibleLimit = PAGE_SIZE;
