@@ -222,10 +222,12 @@ function renderChart(container, series) {
     const yRange = yMax - yMin || 1;
     const x = (year) => margin.left + ((year - years[0]) / (years[years.length - 1] - years[0] || 1)) * plotWidth;
     const y = (value) => margin.top + ((yMax - value) / yRange) * plotHeight;
+    const tableId = `${container.id}-data`;
     const svg = createSvgElement("svg", {
         viewBox: `0 0 ${width} ${height}`,
         role: "img",
-        "aria-label": series.map((item) => item.chartLabel).join(", ")
+        "aria-label": series.map((item) => item.chartLabel).join(", "),
+        "aria-describedby": tableId
     });
 
     const title = createSvgElement("title");
@@ -314,7 +316,39 @@ function renderChart(container, series) {
         entry.append(swatch, label);
         legend.append(entry);
     });
-    container.replaceChildren(svg, legend);
+    const dataTable = document.createElement("table");
+    dataTable.id = tableId;
+    dataTable.className = "labor-chart-data";
+    const caption = document.createElement("caption");
+    caption.textContent = `Annual data for ${series.map((item) => item.chartLabel).join(", ")}`;
+    dataTable.append(caption);
+    const head = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    ["Year", ...series.map((item) => item.chartLabel)].forEach((label) => {
+        const cell = document.createElement("th");
+        cell.scope = "col";
+        cell.textContent = label;
+        headerRow.append(cell);
+    });
+    head.append(headerRow);
+    dataTable.append(head);
+    const body = document.createElement("tbody");
+    years.forEach((year) => {
+        const row = document.createElement("tr");
+        const yearCell = document.createElement("th");
+        yearCell.scope = "row";
+        yearCell.textContent = String(year);
+        row.append(yearCell);
+        series.forEach((item) => {
+            const cell = document.createElement("td");
+            const observation = findObservation(item, year);
+            cell.textContent = observation ? `${observation.value.toFixed(1)}%` : "No data";
+            row.append(cell);
+        });
+        body.append(row);
+    });
+    dataTable.append(body);
+    container.replaceChildren(svg, legend, dataTable);
 }
 
 function renderMetrics(series) {
@@ -390,11 +424,11 @@ async function loadData() {
     const refresh = document.querySelector("#refresh-data");
     const download = document.querySelector("#download-data");
     const sourceUpdated = document.querySelector("#labor-source-updated");
+    const hasLoadedData = Boolean(loadedSeries);
     refresh.disabled = true;
     download.disabled = true;
     status.dataset.error = "false";
     status.textContent = "Loading public World Bank statistics…";
-    sourceUpdated.textContent = "";
 
     try {
         const series = await Promise.all(INDICATORS.map(async (indicator) => {
@@ -408,12 +442,12 @@ async function loadData() {
             return parseIndicatorPayload(await response.json(), indicator);
         }));
 
-        loadedSeries = series;
         renderMetrics(series);
         renderCaseStudy(series);
         renderChart(document.querySelector("#unemployment-chart"), series.filter((item) => item.group === "unemployment"));
         renderChart(document.querySelector("#participation-chart"), series.filter((item) => item.group === "participation"));
         renderChart(document.querySelector("#sector-chart"), series.filter((item) => item.group === "sector"));
+        loadedSeries = series;
 
         const latestYear = Math.max(...series.map((item) => item.observations[item.observations.length - 1].year));
         const updateDates = series.map((item) => item.lastUpdated).filter(Boolean).sort();
@@ -423,9 +457,13 @@ async function loadData() {
         download.disabled = false;
     } catch (error) {
         status.dataset.error = "true";
-        status.textContent = `Could not load the labor statistics. ${error.message} Check your connection and try again.`;
+        const detail = error instanceof Error ? error.message : String(error);
+        status.textContent = hasLoadedData
+            ? `Refresh failed; showing the previously loaded data. ${detail} Check your connection and try again.`
+            : `Could not load the labor statistics. ${detail} Check your connection and try again.`;
     } finally {
         refresh.disabled = false;
+        download.disabled = !loadedSeries;
     }
 }
 
