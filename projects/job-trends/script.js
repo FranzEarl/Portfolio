@@ -65,6 +65,7 @@ const allSkills = skillGroups.flatMap((group) =>
 
 const elements = {
     file: document.querySelector("#job-csv-file"),
+    sample: document.getElementById?.("load-sample"),
     clear: document.querySelector("#clear-data"),
     status: document.querySelector("#job-data-status"),
     search: document.querySelector("#job-search"),
@@ -503,6 +504,18 @@ function renderDashboard() {
     renderListings(filteredJobs);
 }
 
+function displayParsedListings(result) {
+    jobs = result.jobs.map((job) => ({ ...job, skills: detectSkills(job) }));
+    visibleLimit = PAGE_SIZE;
+    elements.search.value = "";
+    elements.location.value = "";
+    elements.search.disabled = false;
+    elements.location.disabled = false;
+    elements.clear.disabled = false;
+    populateLocations();
+    renderDashboard();
+}
+
 function populateLocations() {
     elements.location.replaceChildren();
     const allLocations = document.createElement("option");
@@ -544,15 +557,7 @@ elements.file.addEventListener("change", async (event) => {
 
     try {
         const result = parseJobListings(await file.text());
-        jobs = result.jobs.map((job) => ({ ...job, skills: detectSkills(job) }));
-        visibleLimit = PAGE_SIZE;
-        elements.search.value = "";
-        elements.location.value = "";
-        elements.search.disabled = false;
-        elements.location.disabled = false;
-        elements.clear.disabled = false;
-        populateLocations();
-        renderDashboard();
+        displayParsedListings(result);
         const skippedNote = result.skipped
             ? ` ${result.skipped} row${result.skipped === 1 ? " was" : "s were"} skipped because title or description was missing.`
             : "";
@@ -561,6 +566,26 @@ elements.file.addEventListener("change", async (event) => {
         setStatus(error.message, true);
     }
 });
+
+if (elements.sample) {
+    elements.sample.addEventListener("click", async () => {
+        elements.sample.disabled = true;
+        setStatus("Loading fictional sample listings…");
+        try {
+            const response = await fetch("sample-job-postings.csv");
+            if (!response.ok) {
+                throw new Error("The sample file could not be loaded. You can still import your own CSV.");
+            }
+            const result = parseJobListings(await response.text());
+            displayParsedListings(result);
+            setStatus(`Loaded ${jobs.length.toLocaleString()} fictional sample listings. They are illustrative, not current vacancies.`);
+        } catch (error) {
+            setStatus(error.message, true);
+        } finally {
+            elements.sample.disabled = false;
+        }
+    });
+}
 
 elements.search.addEventListener("input", () => {
     visibleLimit = PAGE_SIZE;

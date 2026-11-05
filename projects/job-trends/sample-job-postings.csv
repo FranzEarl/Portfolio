@@ -1,0 +1,13 @@
+title,description,company,location,date,work_type,source_url
+Data Analyst,"Build weekly reports with SQL, Excel, and Power BI. Share findings with product teams.",Sample Studio,Manila,2025-01-09,Hybrid,
+Business Intelligence Analyst,"Create Tableau dashboards and write SQL queries for operations teams.",Example Works,Cebu,2025-01-18,Remote,
+Data Scientist,"Train machine learning models with Python and evaluate results using statistics.",Fictional Labs,Davao,2025-02-03,Hybrid,
+Analytics Engineer,"Maintain dbt models in BigQuery and document data pipelines.",Demo Analytics,Manila,2025-02-15,Remote,
+Product Analyst,"Use A/B testing, Google Analytics, and SQL to understand user behavior.",Sample Studio,Cebu,2025-03-02,On-site,
+Data Engineer,"Build Apache Spark and Airflow workflows on AWS for reliable data processing.",Example Works,Manila,2025-03-21,Hybrid,
+Reporting Analyst,"Automate Excel reports and build Power BI dashboards for finance teams.",Fictional Labs,Davao,2025-04-06,On-site,
+Machine Learning Engineer,"Deploy Python and deep learning services with Docker on Azure.",Demo Analytics,Manila,2025-04-19,Remote,
+Research Analyst,"Use R programming and statistical analysis to summarize survey results.",Sample Studio,Cebu,2025-05-04,Hybrid,
+Database Analyst,"Tune PostgreSQL queries and maintain Snowflake reporting tables.",Example Works,Manila,2025-05-17,Remote,
+Data Visualization Specialist,"Design Tableau dashboards and explain trends to nontechnical teams.",Fictional Labs,Davao,2025-06-01,On-site,
+Cloud Data Engineer,"Develop ETL workflows with Apache Airflow, Python, and Google Cloud.",Demo Analytics,Cebu,2025-06-14,Hybrid,
