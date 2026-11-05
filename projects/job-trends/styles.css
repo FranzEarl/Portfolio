@@ -177,6 +177,15 @@
     margin-top: 12px;
     color: var(--text-secondary);
     font-size: 0.84rem;
+    line-height: 1.55;
+    white-space: pre-line;
+}
+
+.job-missing-value {
+    color: var(--text-secondary);
+    font-size: 0.72rem !important;
+    font-style: italic;
+    white-space: nowrap;
 }
 
 .job-data-status[data-error="true"] {
