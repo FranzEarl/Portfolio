@@ -90,13 +90,9 @@ analysis, export, and response-validation tests with
 
 ## C Programs
 
-The C source files are in `projects/c-programs/`, with a browsable listing at
-`projects/c-programs.html`. To refresh that listing after adding or removing a
-program, run `python projects/generate.py`. To regenerate it automatically
-while editing the C files, run `python projects/watch.py`.
+The portfolio includes 27 C programs in `projects/c-programs/`, with a browsable listing at `projects/c-programs.html`. The collection includes password utilities, a contact book, a task list, a quiz game, a Sudoku solver, calculators, and terminal games. The shift-based password examples are learning exercises, not secure encryption. The quiz game reads `quiz_questions.txt` from its working directory; that data file is included beside its source.
 
-The input-handling regression tests require Node.js and GCC. Run them with
-`node --test projects/tests/c-programs.test.js`.
+The listing is generated from the C source files. Run `python projects/generate.py` after adding or removing a program, or run `python projects/watch.py` to regenerate it automatically while editing. The input-handling regression tests require Node.js and GCC. Run them with `node --test projects/tests/c-programs.test.js`.
 
 ## About
 
