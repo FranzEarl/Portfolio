@@ -23,13 +23,19 @@ if (hero && networkCanvas) {
     function createNodes() {
         const area = width * height;
         const nodeCount = Math.max(24, Math.min(82, Math.round(area / 14500)));
-
+    
         nodes = Array.from({ length: nodeCount }, () => ({
             x: Math.random() * width,
             y: Math.random() * height,
             vx: (Math.random() - 0.5) * 0.22,
             vy: (Math.random() - 0.5) * 0.22,
-            radius: Math.random() * 1.35 + 1.1
+            radius: Math.random() * 1.5 + 1.8,
+    
+            // Random glow properties.
+            glowStart: 0,
+            glowDuration: 1200,
+            glowStrength: 0,
+            nextGlowTime: performance.now() + 3000 + Math.random() * 9000
         }));
     }
 
@@ -122,10 +128,33 @@ if (hero && networkCanvas) {
                 }
             }
 
+            // Random node glow.
+            const now = performance.now();
+
+            if (now >= node.nextGlowTime) {
+                node.glowStart = now;
+                node.glowDuration = 1200 + Math.random() * 800;
+                node.glowStrength = 0.4 + Math.random() * 0.3;
+
+                node.nextGlowTime =
+                    now + node.glowDuration + 5000 + Math.random() * 7000;
+            }
+
+            const progress = (now - node.glowStart) / node.glowDuration;
+
+            const glow = progress >= 0 && progress <= 1
+                ? Math.sin(progress * Math.PI) * node.glowStrength
+                : 0;
+
+            // Draw node.
             context.beginPath();
             context.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-            context.fillStyle = "rgba(130, 185, 245, 0.72)";
+            context.fillStyle = `rgba(130, 185, 245, ${0.72 + glow * 0.5})`;
+            context.shadowColor = "rgba(101, 165, 243, 0.8)";
+            context.shadowBlur = glow * 24;
             context.fill();
+
+            context.shadowBlur = 0;
         }
     }
 
@@ -211,12 +240,19 @@ if (projectsSection && projectsCanvas) {
     function createProjectNodes() {
         const area = projectWidth * projectHeight;
         const count = Math.max(28, Math.min(105, Math.round(area / 12500)));
+    
         projectNodes = Array.from({ length: count }, () => ({
             x: Math.random() * projectWidth,
             y: Math.random() * projectHeight,
             vx: (Math.random() - 0.5) * 0.2,
             vy: (Math.random() - 0.5) * 0.2,
-            radius: Math.random() * 1.35 + 1.05
+            radius: Math.random() * 1.5 + 1.8,
+    
+            // Random glow properties.
+            glowStart: 0,
+            glowDuration: 1200,
+            glowStrength: 0,
+            nextGlowTime: performance.now() + 3000 + Math.random() * 9000
         }));
     }
 
@@ -354,10 +390,33 @@ if (projectsSection && projectsCanvas) {
                 }
             }
 
+            // Random node glow.
+            const now = performance.now();
+
+            if (now >= node.nextGlowTime) {
+                node.glowStart = now;
+                node.glowDuration = 1200 + Math.random() * 800;
+                node.glowStrength = 0.4 + Math.random() * 0.3;
+
+                node.nextGlowTime =
+                    now + node.glowDuration + 5000 + Math.random() * 7000;
+            }
+
+            const progress = (now - node.glowStart) / node.glowDuration;
+
+            const glow = progress >= 0 && progress <= 1
+                ? Math.sin(progress * Math.PI) * node.glowStrength
+                : 0;
+
+            // Draw node.
             projectsContext.beginPath();
             projectsContext.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-            projectsContext.fillStyle = "rgba(130, 185, 245, 0.72)";
+            projectsContext.fillStyle = `rgba(130, 185, 245, ${0.72 + glow * 0.5})`;
+            projectsContext.shadowColor = "rgba(101, 165, 243, 0.8)";
+            projectsContext.shadowBlur = glow * 24;
             projectsContext.fill();
+
+            projectsContext.shadowBlur = 0;
         }
 
         // Every visible project connects to nearby background nodes. Hover/focus
@@ -630,33 +689,74 @@ if (projectCarousel) {
 // Project filters
 // ------------------------------------------------------------
 
+// ------------------------------------------------------------
+// Project filters
+// ------------------------------------------------------------
+
 const projectFilterButtons = [...document.querySelectorAll("[data-project-filter]")];
 const portfolioProjectCards = [...document.querySelectorAll("#all-projects-grid [data-project-category]")];
 const projectFilterStatus = document.querySelector("#project-filter-status");
 
 if (projectFilterButtons.length && portfolioProjectCards.length && projectFilterStatus) {
     const totalProjects = portfolioProjectCards.length;
+    const filterDuration = 250;
+    let filterTimeout;
+
+    function filterProjects(category, button) {
+        window.clearTimeout(filterTimeout);
+
+        let visibleProjects = 0;
+
+        portfolioProjectCards.forEach((card) => {
+            const shouldShow =
+                category === "all"
+                || card.dataset.projectCategory === category;
+
+            if (shouldShow) {
+                card.hidden = false;
+
+                card.hidden = false;
+
+                card.style.setProperty(
+                    "--filter-delay",
+                    `${portfolioProjectCards.indexOf(card) * 45}ms`
+                );
+
+                requestAnimationFrame(() => {
+                    card.classList.remove("filter-hidden");
+                });
+
+                visibleProjects += 1;
+            } else {
+                card.classList.add("filter-hidden");
+            }
+        });
+
+        projectFilterButtons.forEach((filterButton) => {
+            filterButton.setAttribute(
+                "aria-pressed",
+                String(filterButton === button)
+            );
+        });
+
+        const label = button.textContent.trim().toLowerCase();
+
+        projectFilterStatus.textContent = category === "all"
+            ? `Showing all ${totalProjects} projects.`
+            : `Showing ${visibleProjects} ${label}.`;
+
+        filterTimeout = window.setTimeout(() => {
+            portfolioProjectCards.forEach((card) => {
+                if (card.classList.contains("filter-hidden")) {
+                    card.hidden = true;
+                }
+            });
+        }, filterDuration);
+    }
 
     projectFilterButtons.forEach((button) => {
         button.addEventListener("click", () => {
-            const category = button.dataset.projectFilter;
-            let visibleProjects = 0;
-
-            portfolioProjectCards.forEach((card) => {
-                const isVisible = category === "all" || card.dataset.projectCategory === category;
-                card.hidden = !isVisible;
-                if (isVisible) visibleProjects += 1;
-            });
-
-            projectFilterButtons.forEach((filterButton) => {
-                filterButton.setAttribute("aria-pressed", String(filterButton === button));
-            });
-
-            const label = button.textContent.trim().toLowerCase();
-            projectFilterStatus.textContent = category === "all"
-                ? `Showing all ${totalProjects} projects.`
-                : `Showing ${visibleProjects} ${label}.`;
-
+            filterProjects(button.dataset.projectFilter, button);
         });
     });
 }
@@ -673,11 +773,11 @@ if (
         ".section-heading, .about-text, .detail-card, .project-card, .skill-card, .contact-content"
     );
 
-    const revealObserver = new IntersectionObserver((entries, currentObserver) => {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
                 entry.target.classList.add("is-visible");
-                currentObserver.unobserve(entry.target);
+                observer.unobserve(entry.target);
             }
         });
     }, {
@@ -687,7 +787,11 @@ if (
 
     revealTargets.forEach((element, index) => {
         element.classList.add("reveal-on-scroll");
-        element.style.setProperty("--reveal-delay", `${(index % 4) * 70}ms`);
+        element.style.setProperty(
+            "--reveal-delay",
+            `${(index % 4) * 80}ms`
+        );
+
         revealObserver.observe(element);
     });
 }
