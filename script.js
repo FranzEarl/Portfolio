@@ -311,46 +311,94 @@ if (projectsSection && projectsCanvas) {
     function getCardAnchor(card, node) {
         const cardBounds = card.getBoundingClientRect();
         const center = getCardCenter(card);
+    
         const dx = node.x - center.x;
         const dy = node.y - center.y;
+    
         const scale = Math.min(
             Math.abs(dx) > 0 ? (cardBounds.width * 0.42) / Math.abs(dx) : Infinity,
             Math.abs(dy) > 0 ? (cardBounds.height * 0.42) / Math.abs(dy) : Infinity
         );
-        return { x: center.x + dx * scale, y: center.y + dy * scale };
+    
+        return {
+            x: center.x + dx * scale,
+            y: center.y + dy * scale
+        };
     }
-
+    
     function drawCardToNodeLinks(card, isActive) {
         if (!card || card.hidden) return;
+
         const center = getCardCenter(card);
+
         const nearbyNodes = projectNodes
-            .map((node) => ({ node, distance: Math.hypot(node.x - center.x, node.y - center.y) }))
+            .map((node) => ({
+                node,
+                distance: Math.hypot(
+                    node.x - center.x,
+                    node.y - center.y
+                )
+            }))
             .sort((a, b) => a.distance - b.distance);
 
-        // A restrained, consistent number of connections keeps the card in focus.
-        const connectedNodes = isActive
-            ? nearbyNodes.slice(0, Math.min(3, nearbyNodes.length))
-            : nearbyNodes.filter((entry) => entry.distance < 245).slice(0, 2);
+            const cardBounds = card.getBoundingClientRect();
+
+            const outsideNodes = nearbyNodes.filter(({ node }) => {
+                const dx = Math.abs(node.x - center.x);
+                const dy = Math.abs(node.y - center.y);
+            
+                const outsideX = dx > cardBounds.width / 2 + 18;
+                const outsideY = dy > cardBounds.height / 2 + 18;
+            
+                return outsideX || outsideY;
+            });
+            
+            const connectedNodes = isActive
+                ? outsideNodes.slice(0, 8)
+                : outsideNodes.filter((entry) => entry.distance < 245).slice(0, 2);
+
         const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 850);
 
-        connectedNodes.forEach(({ node, distance }) => {
+        connectedNodes.forEach(({ node }) => {
             const anchor = getCardAnchor(card, node);
-            const opacity = isActive ? 0.27 + pulse * 0.10 : 0.12;
+
+            const opacity = isActive
+                ? 0.42 + pulse * 0.16
+                : 0.12;
+
             projectsContext.beginPath();
             projectsContext.moveTo(anchor.x, anchor.y);
             projectsContext.lineTo(node.x, node.y);
-            projectsContext.strokeStyle = `rgba(${projectNodeColor}, ${opacity})`;
-            projectsContext.lineWidth = isActive ? 1.05 : 0.7;
-            projectsContext.shadowColor = isActive ? "rgba(57, 132, 214, 0.45)" : "transparent";
-            projectsContext.shadowBlur = isActive ? 3 + pulse * 2 : 0;
+
+            projectsContext.strokeStyle =
+                `rgba(${projectNodeColor}, ${opacity})`;
+
+            projectsContext.lineWidth = isActive ? 1.5 : 0.7;
+            projectsContext.shadowColor = isActive
+                ? "rgba(57, 132, 214, 0.65)"
+                : "transparent";
+
+            projectsContext.shadowBlur = isActive
+                ? 5 + pulse * 3
+                : 0;
+
             projectsContext.stroke();
             projectsContext.shadowBlur = 0;
 
             if (isActive) {
                 projectsContext.beginPath();
-                projectsContext.arc(node.x, node.y, node.radius + 1.7 + pulse * 0.7, 0, Math.PI * 2);
-                projectsContext.strokeStyle = `rgba(135, 195, 255, ${0.34 + pulse * 0.16})`;
-                projectsContext.lineWidth = 0.85;
+                projectsContext.arc(
+                    node.x,
+                    node.y,
+                    node.radius + 2 + pulse,
+                    0,
+                    Math.PI * 2
+                );
+
+                projectsContext.strokeStyle =
+                    `rgba(135, 195, 255, ${0.45 + pulse * 0.2})`;
+
+                projectsContext.lineWidth = 1.1;
                 projectsContext.stroke();
             }
         });
@@ -447,7 +495,8 @@ if (projectsSection && projectsCanvas) {
     }
 
     projectsSection.addEventListener("pointermove", (event) => {
-        const bounds = projectsSection.getBoundingClientRect();
+        const bounds = projectsCanvas.getBoundingClientRect();
+
         projectsPointer.x = event.clientX - bounds.left;
         projectsPointer.y = event.clientY - bounds.top;
     });
@@ -496,7 +545,11 @@ if (projectsSection && projectsCanvas) {
         });
     });
 
-    window.addEventListener("resize", resizeProjectsCanvas);
+    const projectsResizeObserver = new ResizeObserver(() => {
+        resizeProjectsCanvas();
+    });
+    
+    projectsResizeObserver.observe(projectsSection);
     document.addEventListener("visibilitychange", () => {
         projectsPageVisible = !document.hidden;
         animateProjectsNetwork();
@@ -689,10 +742,6 @@ if (projectCarousel) {
 // Project filters
 // ------------------------------------------------------------
 
-// ------------------------------------------------------------
-// Project filters
-// ------------------------------------------------------------
-
 const projectFilterButtons = [...document.querySelectorAll("[data-project-filter]")];
 const portfolioProjectCards = [...document.querySelectorAll("#all-projects-grid [data-project-category]")];
 const projectFilterStatus = document.querySelector("#project-filter-status");
@@ -713,7 +762,6 @@ if (projectFilterButtons.length && portfolioProjectCards.length && projectFilter
                 || card.dataset.projectCategory === category;
 
             if (shouldShow) {
-                card.hidden = false;
 
                 card.hidden = false;
 
@@ -800,32 +848,54 @@ if (
 // Portfolio loader
 // ------------------------------------------------------------
 
+
 const portfolioLoader = document.querySelector("#portfolio-loader");
 
 if (portfolioLoader) {
     const startedAt = performance.now();
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const minimumDisplayTime = prefersReducedMotion ? 0 : 5000;
+
+    const prefersReducedMotion =
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const minimumDisplayTime = prefersReducedMotion ? 0 : 3000;
+    const maximumDisplayTime = 8000;
+
+    let loaderDismissed = false;
 
     const dismissPortfolioLoader = () => {
-        if (portfolioLoader.classList.contains("is-hidden")) return;
+        if (loaderDismissed) return;
 
+        loaderDismissed = true;
         portfolioLoader.classList.add("is-hidden");
-        window.setTimeout(() => portfolioLoader.remove(), 380);
+
+        window.setTimeout(() => {
+            portfolioLoader.remove();
+        }, 380);
     };
 
     const finishPortfolioLoading = () => {
         const elapsedTime = performance.now() - startedAt;
-        const remainingTime = Math.max(0, minimumDisplayTime - elapsedTime);
+        const remainingTime = Math.max(
+            0,
+            minimumDisplayTime - elapsedTime
+        );
+
         window.setTimeout(dismissPortfolioLoader, remainingTime);
     };
 
+    // Normal loading completion.
     if (document.readyState === "complete") {
         finishPortfolioLoading();
     } else {
-        window.addEventListener("load", finishPortfolioLoading, { once: true });
+        window.addEventListener("load", finishPortfolioLoading, {
+            once: true
+        });
     }
+
+    // Fallback in case the load event never fires.
+    window.setTimeout(dismissPortfolioLoader, maximumDisplayTime);
 }
+
 
 // ------------------------------------------------------------
 // Custom Cursor
