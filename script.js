@@ -211,8 +211,6 @@ if (hero && networkCanvas) {
     animate();
 }
 
-
-
 // ------------------------------------------------------------
 // Projects network background and project-to-background-node interaction
 // ------------------------------------------------------------
@@ -468,7 +466,6 @@ if (projectsSection && projectsCanvas) {
         }
 
         // Every visible project connects to nearby background nodes. Hover/focus
-        // strengthens only that card's links; projects never connect to each other.
         projectCards.forEach((card) => {
             if (!card.hidden) drawCardToNodeLinks(card, card === activeProjectTarget);
         });
@@ -567,7 +564,6 @@ if (projectsSection && projectsCanvas) {
     resizeProjectsCanvas();
     animateProjectsNetwork();
 }
-
 
 // Navigation
 // ------------------------------------------------------------
