@@ -50,7 +50,7 @@ bool isKeyword(char* str)
             "short",    "signed",   "sizeof",   "static",
             "struct",   "switch",   "typedef",  "union",
             "unsigned", "void",     "volatile", "while" };
-    for (int i = 0;
+    for (size_t i = 0;
          i < sizeof(keywords) / sizeof(keywords[0]); i++) {
         if (strcmp(str, keywords[i]) == 0) {
             return true;
@@ -76,7 +76,6 @@ bool isInteger(char* str)
 // position
 char* getSubstring(char* str, int start, int end)
 {
-    int length = strlen(str);
     int subLength = end - start + 1;
     char* subStr
         = (char*)malloc((subLength + 1) * sizeof(char));
@@ -103,8 +102,8 @@ int lexicalAnalyzer(char* input)
             right++;
             left = right;
         }
-        else if (isDelimiter(input[right]) && left != right
-                 || (right == len && left != right)) {
+        else if ((isDelimiter(input[right]) && left != right)
+         || (right == len && left != right)) {
             char* subStr
                 = getSubstring(input, left, right - 1);
 
