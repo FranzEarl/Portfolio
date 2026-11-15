@@ -45,32 +45,29 @@ void add_student()
 void find_rl()
 {
     int x;
-    printf("Enter the Roll Number"
-           " of the student\n");
+    int found = 0;
+
+    printf("Enter the Roll Number of the student\n");
     scanf("%d", &x);
-    for (int j = 1; j <= i; j++) {
-        if (x == st[i].roll) {
-            printf(
-                "The Students Details are\n");
-            printf(
-                "The First name is %s\n",
-                st[i].fname);
-            printf(
-                "The Last name is %s\n",
-                st[i].lname);
-            printf(
-                "The CGPA is %f\n",
-                st[i].cgpa);
-            printf(
-                "Enter the course ID"
-                " of each course\n");
+
+    for (int j = 0; j < i; j++) {
+        if (x == st[j].roll) {
+            printf("The Students Details are\n");
+            printf("The First name is %s\n", st[j].fname);
+            printf("The Last name is %s\n", st[j].lname);
+            printf("The CGPA is %f\n", st[j].cgpa);
+
+            for (int k = 0; k < 5; k++) {
+                printf("The course ID is %d\n", st[j].cid[k]);
+            }
+
+            found = 1;
+            break;
         }
-        for (int j = 0; j < 5; j++) {
-            printf(
-                "The course ID are %d\n",
-                st[i].cid[j]);
-        }
-        break;
+    }
+
+    if (!found) {
+        printf("Student not found\n");
     }
 }
 
@@ -79,41 +76,29 @@ void find_rl()
 void find_fn()
 {
     char a[50];
-    printf("Enter the First Name"
-           " of the student\n");
-    scanf("%s", a);
-    int c = 0;
+    int found = 0;
 
-    for (int j = 1; j <= i; j++) {
+    printf("Enter the First Name of the student\n");
+    scanf("%49s", a);
+
+    for (int j = 0; j < i; j++) {
         if (!strcmp(st[j].fname, a)) {
+            printf("The Students Details are\n");
+            printf("The First name is %s\n", st[j].fname);
+            printf("The Last name is %s\n", st[j].lname);
+            printf("The Roll Number is %d\n", st[j].roll);
+            printf("The CGPA is %f\n", st[j].cgpa);
 
-            printf(
-                "The Students Details are\n");
-            printf(
-                "The First name is %s\n",
-                st[i].fname);
-            printf(
-                "The Last name is %s\n",
-                st[i].lname);
-            printf(
-                "The Roll Number is %d\n ",
-                st[i].roll);
-            printf(
-                "The CGPA is %f\n",
-                st[i].cgpa);
-            printf(
-                "Enter the course ID of each course\n");
-
-            for (int j = 0; j < 5; j++) {
-                printf(
-                    "The course ID are %d\n",
-                    st[i].cid[j]);
+            for (int k = 0; k < 5; k++) {
+                printf("The course ID is %d\n", st[j].cid[k]);
             }
-            c = 1;
+
+            found = 1;
         }
-        else
-            printf(
-                "The First Name not Found\n");
+    }
+
+    if (!found) {
+        printf("The First Name was not Found\n");
     }
 }
 
@@ -123,37 +108,28 @@ void find_fn()
 void find_c()
 {
     int id;
-    printf("Enter the course ID \n");
-    scanf("%d", &id);
-    int c = 0;
+    int found = 0;
 
-    for (int j = 1; j <= i; j++) {
+    printf("Enter the course ID\n");
+    scanf("%d", &id);
+
+    for (int j = 0; j < i; j++) {
         for (int d = 0; d < 5; d++) {
             if (id == st[j].cid[d]) {
+                printf("The Students Details are\n");
+                printf("The First name is %s\n", st[j].fname);
+                printf("The Last name is %s\n", st[j].lname);
+                printf("The Roll Number is %d\n", st[j].roll);
+                printf("The CGPA is %f\n", st[j].cgpa);
 
-                printf(
-                    "The Students Details are\n");
-                printf(
-                    "The First name is %s\n",
-                    st[i].fname);
-                printf(
-                    "The Last name is %s\n",
-                    st[i].lname);
-                printf(
-                    "The Roll Number is %d\n ",
-                    st[i].roll);
-                printf(
-                    "The CGPA is %f\n",
-                    st[i].cgpa);
-
-                c = 1;
-
+                found = 1;
                 break;
             }
-            else
-                printf(
-                    "The First Name not Found\n");
         }
+    }
+
+    if (!found) {
+        printf("No students found for that course ID\n");
     }
 }
 
@@ -176,19 +152,29 @@ void tot_s()
 void del_s()
 {
     int a;
-    printf("Enter the Roll Number"
-           " which you want "
-           "to delete\n");
+    int found = 0;
+
+    printf("Enter the Roll Number which you want to delete\n");
     scanf("%d", &a);
-    for (int j = 1; j <= i; j++) {
+
+    for (int j = 0; j < i; j++) {
         if (a == st[j].roll) {
-            for (int k = j; k < 49; k++)
+            for (int k = j; k < i - 1; k++) {
                 st[k] = st[k + 1];
+            }
+
             i--;
+            found = 1;
+            break;
         }
     }
-    printf("The Roll Number"
-           " is removed Successfully\n");
+
+    if (found) {
+        printf("The Roll Number is removed Successfully\n");
+    }
+    else {
+        printf("Student not found\n");
+    }
 }
 
 // Function to update a students data
@@ -242,11 +228,12 @@ void up_s()
 }
 
 // Driver code
-void main()
+int main()
 
 {
-    int choice, count;
-    while (i = 1) {
+    int choice;
+
+    while (1) {
         printf("The Task that you "
                "want to perform\n");
         printf("1. Add the Student Details\n");
@@ -289,8 +276,7 @@ void main()
             up_s();
             break;
         case 8:
-            exit(0);
-            break;
+            return 0;
         }
     }
 }
