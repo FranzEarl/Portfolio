@@ -17,8 +17,6 @@ int main()
     // Create a instance
     struct library lib[100];
 
-    char ar_nm[30], bk_nm[30];
-
     // Keep the track of the number of
     // of books available in the library
     int i, input, count;
