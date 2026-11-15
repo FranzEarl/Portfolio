@@ -169,7 +169,6 @@ int main()
     int n = 5; // Number of hospitals
 
     int choice;
-    char city[50];
 
     do {
         printf("\n\n\n*********** Hospital Management "
