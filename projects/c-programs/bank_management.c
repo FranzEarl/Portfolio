@@ -4,10 +4,10 @@
 #include <string.h>
 #include <windows.h>
 
-void checkbalance(char*);
+void checkbalance(char *);
 void transfermoney(void);
-void display(char*);
-void person(char*);
+void display(char *);
+void person(char *);
 void login(void);
 void loginsu(void);
 void account(void);
@@ -15,21 +15,16 @@ void accountcreated(void);
 void afterlogin(void);
 void logout(void);
 
-// Declaring gotoxy
-// function for setting
-// cursor position
+// Set the console cursor position.
 void gotoxy(int x, int y)
 {
     COORD c;
-    c.X = x;
-    c.Y = y;
-
-    SetConsoleCursorPosition(
-        GetStdHandle(STD_OUTPUT_HANDLE), c);
+    c.X = (SHORT)x;
+    c.Y = (SHORT)y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
 }
 
-// Creating a structure to store
-// data of the user
+// Store the user's account information.
 struct pass {
     char username[50];
     int date, month, year;
@@ -43,8 +38,7 @@ struct pass {
     char typeaccount[20];
 };
 
-// Structure to keep track
-// of amount transfer
+// Store money-transfer information.
 struct money {
     char usernameto[50];
     char userpersonfrom[50];
@@ -55,34 +49,25 @@ struct userpass {
     char password[50];
 };
 
-// Driver Code
-int main()
+int main(void)
 {
-    int i, a, b, choice;
-    int passwordlength;
+    int choice;
 
     gotoxy(20, 3);
-
-    // Creating a Main
-    // menu for the user
     printf("WELCOME TO BANK ACCOUNT SYSTEM\n\n");
     gotoxy(18, 5);
-
     printf("**********************************");
     gotoxy(25, 7);
-
     printf("DEVELOPER-Naman kumar");
 
     gotoxy(20, 10);
     printf("1.... CREATE A BANK ACCOUNT");
-
     gotoxy(20, 12);
     printf("2.... ALREADY A USER? SIGN IN");
     gotoxy(20, 14);
     printf("3.... EXIT\n\n");
 
     printf("\n\nENTER YOUR CHOICE..");
-
     scanf("%d", &choice);
 
     switch (choice) {
@@ -99,50 +84,46 @@ int main()
 
     case 3:
         exit(0);
-        break;
 
+    default:
         getch();
+        break;
     }
+
+    return 0;
 }
 
-// Function to create accounts
-// of users
+// Create a user account.
 void account(void)
 {
-    char password[20];
-    int passwordlength, i, seek = 0;
+    char password[51];
+    int i;
     char ch;
-    FILE *fp, *fu;
+    FILE *fp;
     struct pass u1;
-    struct userpass p1;
 
-    struct userpass u2;
-
-    // Opening file to
-    // write data of a user
     fp = fopen("username.txt", "ab");
 
-    // Inputs
     system("cls");
     printf("\n\n!!!!!CREATE ACCOUNT!!!!!");
 
     printf("\n\nFIRST NAME..");
-    scanf("%s", &u1.fname);
+    scanf("%19s", u1.fname);
 
     printf("\n\n\nLAST NAME..");
-    scanf("%s", &u1.lname);
+    scanf("%19s", u1.lname);
 
     printf("\n\nFATHER's NAME..");
-    scanf("%s", &u1.fathname);
+    scanf("%19s", u1.fathname);
 
     printf("\n\nMOTHER's NAME..");
-    scanf("%s", &u1.mothname);
+    scanf("%19s", u1.mothname);
 
     printf("\n\nADDRESS..");
-    scanf("%s", &u1.address);
+    scanf("%49s", u1.address);
 
     printf("\n\nACCOUNT TYPE");
-    scanf("%s", &u1.typeaccount);
+    scanf("%19s", u1.typeaccount);
 
     printf("\n\nDATE OF BIRTH..");
     printf("\nDATE-");
@@ -153,144 +134,121 @@ void account(void)
     scanf("%d", &u1.year);
 
     printf("\n\nADHAR NUMBER");
-    scanf("%s", u1.adharnum);
+    scanf("%19s", u1.adharnum);
 
     printf("\n\nPHONE NUMBER");
-    scanf("%s", u1.pnumber);
+    scanf("%14s", u1.pnumber);
 
     printf("\n\nUSERNAME.. ");
-    scanf("%s", &u1.username);
+    scanf("%49s", u1.username);
 
     printf("\n\nPASSWORD..");
 
-    // Taking password in the form of
-    // stars
+    // Read the password and display asterisks instead of its characters.
     for (i = 0; i < 50; i++) {
-        ch = getch();
-        if (ch != 13) {
-            password[i] = ch;
-            ch = '*';
-            printf("%c", ch);
-        }
-        else
+        ch = (char)getch();
+        if (ch == 13) {
             break;
+        }
+
+        password[i] = ch;
+        printf("*");
     }
+    password[i] = '\0';
+    (void)password; // Password collection is retained; authentication is unchanged.
 
-    // Writing to the file
-    fwrite(&u1, sizeof(u1),
-           1, fp);
-
-    // Closing file
+    fwrite(&u1, sizeof(u1), 1, fp);
     fclose(fp);
 
-    // Calling another function
-    // after successful creation
-    // of account
     accountcreated();
 }
 
-// Successful account creation
+// Display the account-creation confirmation.
 void accountcreated(void)
 {
     int i;
-    char ch;
+
     system("cls");
-    printf(
-        "PLEASE WAIT....\n\nYOUR DATA IS PROCESSING....");
+    printf("PLEASE WAIT....\n\nYOUR DATA IS PROCESSING....");
+
     for (i = 0; i < 200000000; i++) {
         i++;
         i--;
     }
 
     gotoxy(30, 10);
-
     printf("ACCOUNT CREATED SUCCESSFULLY....");
     gotoxy(0, 20);
-
     printf("Press enter to login");
 
     getch();
     login();
 }
 
-// Login function to check
-// the username of the user
+// Check the entered username against the saved account records.
 void login(void)
 {
-    system("cls");
-
     char username[50];
-    char password[50];
-
-    int i, j, k;
+    char password[51];
+    int i;
     char ch;
-    FILE *fp, *fu;
+    FILE *fp;
     struct pass u1;
-    struct userpass u2;
 
-    // Opening file of
-    // user data
-    fp = fopen("username.txt",
-               "rb");
+    system("cls");
+    fp = fopen("username.txt", "rb");
 
     if (fp == NULL) {
         printf("ERROR IN OPENING FILE");
+        return;
     }
+
     gotoxy(34, 2);
     printf(" ACCOUNT LOGIN ");
     gotoxy(7, 5);
     printf("***********************************************"
            "********************************");
-
     gotoxy(35, 10);
     printf("==== LOG IN ====");
 
-    // Take input
     gotoxy(35, 12);
     printf("USERNAME.. ");
-    scanf("%s", &username);
+    scanf("%49s", username);
 
     gotoxy(35, 14);
     printf("PASSWORD..");
 
-    // Input the password
     for (i = 0; i < 50; i++) {
-        ch = getch();
-        if (ch != 13) {
-            password[i] = ch;
-            ch = '*';
-            printf("%c", ch);
+        ch = (char)getch();
+        if (ch == 13) {
+            break;
         }
 
-        else
-            break;
+        password[i] = ch;
+        printf("*");
     }
+    password[i] = '\0';
+    (void)password; // Password collection is retained; authentication is unchanged.
 
-    // Checking if username
-    // exists in the file or not
-    while (fread(&u1, sizeof(u1),
-                 1, fp)) {
-        if (strcmp(username,
-                   u1.username)
-            == 0) {
+    while (fread(&u1, sizeof(u1), 1, fp)) {
+        if (strcmp(username, u1.username) == 0) {
             loginsu();
             display(username);
+            break;
         }
     }
 
-    // Closing the file
     fclose(fp);
 }
 
-// Redirect after
-// successful login
+// Display the successful-login message.
 void loginsu(void)
 {
     int i;
-    FILE* fp;
-    struct pass u1;
+
     system("cls");
     printf("Fetching account details.....\n");
+
     for (i = 0; i < 20000; i++) {
         i++;
         i--;
@@ -300,32 +258,28 @@ void loginsu(void)
     printf("LOGIN SUCCESSFUL....");
     gotoxy(0, 20);
     printf("Press enter to continue");
-
     getch();
 }
 
-// Display function to show the
-// data of the user on screen
+// Display the selected user's account information and menu.
 void display(char username1[])
 {
-    system("cls");
-    FILE* fp;
-    int choice, i;
-    fp = fopen("username.txt", "rb");
+    FILE *fp;
+    int choice;
     struct pass u1;
+
+    system("cls");
+    fp = fopen("username.txt", "rb");
 
     if (fp == NULL) {
         printf("error in opening file");
+        return;
     }
 
-    while (fread(&u1, sizeof(u1),
-                 1, fp)) {
-        if (strcmp(username1,
-                   u1.username)
-            == 0) {
+    while (fread(&u1, sizeof(u1), 1, fp)) {
+        if (strcmp(username1, u1.username) == 0) {
             gotoxy(30, 1);
-            printf("WELCOME, %s %s",
-                   u1.fname, u1.lname);
+            printf("WELCOME, %s %s", u1.fname, u1.lname);
             gotoxy(28, 2);
             printf("..........................");
             gotoxy(55, 6);
@@ -333,45 +287,27 @@ void display(char username1[])
             gotoxy(55, 8);
             printf("***************************");
             gotoxy(55, 10);
-            printf("NAME..%s %s", u1.fname,
-                   u1.lname);
-
+            printf("NAME..%s %s", u1.fname, u1.lname);
             gotoxy(55, 12);
-            printf("FATHER's NAME..%s %s",
-                   u1.fathname,
-                   u1.lname);
-
+            printf("FATHER's NAME..%s %s", u1.fathname, u1.lname);
             gotoxy(55, 14);
-            printf("MOTHER's NAME..%s",
-                   u1.mothname);
-
+            printf("MOTHER's NAME..%s", u1.mothname);
             gotoxy(55, 16);
-            printf("ADHAR CARD NUMBER..%s",
-                   u1.adharnum);
-
+            printf("ADHAR CARD NUMBER..%s", u1.adharnum);
             gotoxy(55, 18);
-            printf("MOBILE NUMBER..%s",
-                   u1.pnumber);
-
+            printf("MOBILE NUMBER..%s", u1.pnumber);
             gotoxy(55, 20);
-            printf("DATE OF BIRTH.. %d-%d-%d",
-                   u1.date, u1.month, u1.year);
-
+            printf("DATE OF BIRTH.. %d-%d-%d", u1.date, u1.month, u1.year);
             gotoxy(55, 22);
             printf("ADDRESS..%s", u1.address);
-
             gotoxy(55, 24);
-            printf("ACCOUNT TYPE..%s",
-                   u1.typeaccount);
+            printf("ACCOUNT TYPE..%s", u1.typeaccount);
         }
     }
 
     fclose(fp);
 
     gotoxy(0, 6);
-
-    // Menu to perform different
-    // actions by user
     printf(" HOME ");
     gotoxy(0, 7);
     printf("******");
@@ -403,13 +339,13 @@ void display(char username1[])
 
     case 4:
         exit(0);
+
+    default:
         break;
     }
 }
 
-// Function to transfer
-// money from one user to
-// another
+// Record a transfer from one username to another.
 void transfermoney(void)
 {
     int i, j;
@@ -418,16 +354,9 @@ void transfermoney(void)
     struct money m1;
     char usernamet[20];
     char usernamep[20];
+
     system("cls");
-
-    // Opening file in read mode to
-    // read user's username
     fp = fopen("username.txt", "rb");
-
-    // Creating a another file
-    // to write amount along with
-    // username to which amount
-    // is going to be transferred
     fm = fopen("mon.txt", "ab");
 
     gotoxy(33, 4);
@@ -437,47 +366,31 @@ void transfermoney(void)
 
     gotoxy(33, 11);
     printf("FROM (your username).. ");
-    scanf("%s", &usernamet);
+    scanf("%19s", usernamet);
 
     gotoxy(33, 13);
     printf(" TO (username of person)..");
-    scanf("%s", &usernamep);
+    scanf("%19s", usernamep);
 
-    // Checking for username if it
-    // is present in file or not
-    while (fread(&u1, sizeof(u1),
-                 1, fp))
-
-    {
-        if (strcmp(usernamep,
-                   u1.username)
-            == 0) {
-            strcpy(m1.usernameto,
-                   u1.username);
-            strcpy(m1.userpersonfrom,
-                   usernamet);
+    while (fread(&u1, sizeof(u1), 1, fp)) {
+        if (strcmp(usernamep, u1.username) == 0) {
+            strcpy(m1.usernameto, u1.username);
+            strcpy(m1.userpersonfrom, usernamet);
         }
     }
+
     gotoxy(33, 16);
-
-    // Taking amount input
     printf("ENTER THE AMOUNT TO BE TRANSFERRED..");
-    scanf("%d", &m1.money1);
+    scanf("%ld", &m1.money1);
 
-    // Writing to the file
-    fwrite(&m1, sizeof(m1),
-           1, fm);
+    fwrite(&m1, sizeof(m1), 1, fm);
 
     gotoxy(0, 26);
-    printf(
-        "--------------------------------------------------"
-        "--------------------------------------------");
-
+    printf("--------------------------------------------------"
+           "--------------------------------------------");
     gotoxy(0, 28);
-    printf(
-        "--------------------------------------------------"
-        "--------------------------------------------");
-
+    printf("--------------------------------------------------"
+           "--------------------------------------------");
     gotoxy(0, 29);
     printf("transferring amount, Please wait..");
 
@@ -494,31 +407,25 @@ void transfermoney(void)
     printf("AMOUNT SUCCESSFULLY TRANSFERRED....");
     getch();
 
-    // Close the files
     fclose(fp);
     fclose(fm);
 
-    // Function to return
-    // to the home screen
     display(usernamet);
 }
 
-// Function to check balance
-// in users account
+// Display the transactions associated with a username and their total.
 void checkbalance(char username2[])
 {
-    system("cls");
-    FILE* fm;
+    FILE *fm;
     struct money m1;
-    char ch;
-    int i = 1, summoney = 0;
-
-    // Opening amount file record
-    fm = fopen("mon.txt", "rb");
-
+    int i = 1;
+    long int summoney = 0;
     int k = 5, l = 10;
     int m = 30, n = 10;
     int u = 60, v = 10;
+
+    system("cls");
+    fm = fopen("mon.txt", "rb");
 
     gotoxy(30, 2);
     printf("==== BALANCE DASHBOARD ====");
@@ -531,46 +438,34 @@ void checkbalance(char username2[])
     gotoxy(u, v);
     printf("AMOUNT");
 
-    // Reading username to
-    // fetch the correct record
-    while (fread(&m1, sizeof(m1),
-                 1, fm)) {
-        if (strcmp(username2,
-                   m1.usernameto)
-            == 0) {
+    while (fread(&m1, sizeof(m1), 1, fm)) {
+        if (strcmp(username2, m1.usernameto) == 0) {
             gotoxy(k, ++l);
             printf("%d", i);
             i++;
             gotoxy(m, ++n);
             printf("%s", m1.userpersonfrom);
-
             gotoxy(u, ++v);
-            printf("%d", m1.money1);
-            // Adding and
-            // finding total money
-            summoney = summoney + m1.money1;
+            printf("%ld", m1.money1);
+            summoney += m1.money1;
         }
     }
 
     gotoxy(80, 10);
     printf("TOTAL AMOUNT");
-
     gotoxy(80, 12);
-    printf("%d", summoney);
+    printf("%ld", summoney);
 
     getch();
-
-    // Closing file after
-    // reading it
     fclose(fm);
     display(username2);
 }
 
-// Logout function to bring
-// user to the login screen
+// Return the user to the login screen.
 void logout(void)
 {
     int i, j;
+
     system("cls");
     printf("please wait, logging out");
 
@@ -584,9 +479,7 @@ void logout(void)
 
     gotoxy(30, 10);
     printf("Sign out successfully..\n");
-
     gotoxy(0, 20);
     printf("press any key to continue..");
-
     getch();
 }
