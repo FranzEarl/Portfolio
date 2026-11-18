@@ -59,7 +59,7 @@ study hours for demonstration; it does not connect to a school system. Download
 `sample-study-performance.csv` from the dashboard
 to see the data format: one course per row, with `course`, `grade`,
 `attendance`, and `study_hours` columns. Grade and attendance are percentages;
-study hours are totals over four weeks. Import a CSV to update the dashboard
+Study hours are totals over four weeks. Import a CSV to update the dashboard
 with any number of courses; the file is read in the browser and not uploaded.
 Export the currently displayed courses as a CSV to save a local copy. Data is
 not stored automatically unless you opt in with "Remember data on this device";
